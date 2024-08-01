@@ -6,7 +6,7 @@ services:
             - -c
             - |
                 python manage.py collectstatic --noinput
-                gunicorn employeemanagement.wsgi:application -b 0.0.0.0:8000
+                gunicorn studentManagement.wsgi:application -b 0.0.0.0:8000
 
         volumes:
             - .:/app
