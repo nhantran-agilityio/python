@@ -19,3 +19,8 @@ class Student(BaseModel):
     birthday = models.DateField()
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
+    courses = models.ManyToManyField(
+        'courses.Course', on_delete=models.CASCADE, related_name="student")
+
+    def __str__(self):
+        return self.name
