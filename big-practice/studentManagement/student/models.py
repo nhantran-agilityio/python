@@ -1,14 +1,20 @@
 from django.db import models
-from core.models import BaseModel, ExtendedEnum
+from enum import Enum
 from django.db.models.functions import Now, ExtractYear, ExtractMonth
+from courses.models import Course
+from report.models import Report
 
 
-class Gender(ExtendedEnum):
+class Gender(Enum):
     """
     Enum class representing different gender for student
     """
     MALE = "male"
     FE_MALE = "fe-male"
+
+    @classmethod
+    def choices(cls):
+        return [(key.value, key.name) for key in cls]
 
 
 class StudentManager(models.Manager):
@@ -52,7 +58,7 @@ class StudentManager(models.Manager):
         return int(average_age)
 
 
-class Student(BaseModel):
+class Student(models.Model):
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.CharField(max_length=50)
@@ -61,10 +67,11 @@ class Student(BaseModel):
     birthday = models.DateField()
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    courses = models.ManyToManyField(
-        'courses.Course', on_delete=models.CASCADE, related_name="student")
-    report = models.OneToOneField('Report', on_delete=models.CASCADE,
+    report = models.OneToOneField(Report, on_delete=models.CASCADE,
                                   related_name='student')
+    courses = models.ManyToManyField(Course, through='Enrollment',
+                                     related_name='student')
+
     objects = StudentManager()
 
     # Custom property
@@ -80,3 +87,15 @@ class Student(BaseModel):
 
     def __str__(self):
         return self.full_name
+
+
+class Enrollment(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    enrollment_date = models.DateField()
+
+    class Meta:
+        unique_together = ('student', 'course')
+
+    def __str__(self):
+        return f"{self.student} enrolled in {self.course}"

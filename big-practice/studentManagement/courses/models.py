@@ -1,8 +1,7 @@
 from django.db import models
-from core.models import BaseModel
 
 
-class Course(BaseModel):
+class Course(models.Model):
     name = models.CharField(max_length=50)
     duration = models.DurationField()
     description = models.CharField(max_length=150)
