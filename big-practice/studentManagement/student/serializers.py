@@ -15,5 +15,6 @@ class StudentSerializer(serializers.ModelSerializer):
             "gender",
             "email",
             "avatar",
-            "address"
+            "address",
+            "is_active"
         ]

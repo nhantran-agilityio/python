@@ -5,4 +5,4 @@ from .models import Report
 class ReportSerializer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = Report
-        fields = ["grades", "description", "student", "course"]
+        fields = ["point", "description", "student", "course"]

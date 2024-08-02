@@ -3,7 +3,7 @@ from core.models import BaseModel
 
 
 class Report(BaseModel):
-    grades = models.CharField(max_length=50)
+    point = models.CharField(max_length=50)
     description = models.CharField(max_length=150)
 
     student = models.OneToOneField('student.Student', on_delete=models.CASCADE,
@@ -12,4 +12,4 @@ class Report(BaseModel):
                                   related_name='report')
 
     def __str__(self):
-        return self.grades
+        return self.point
