@@ -13,24 +13,3 @@ repos:
         name: "flake8"
         types: [python]
         args: []
-  -   repo: https://github.com/pre-commit/mirrors-pylint
-      rev: v3.0.0a5
-      hooks:
-        - id: pylint
-          name: pylint
-          entry: pylint --load-plugins=pylint_django --django-settings-module=app.settings
-          language: python
-          types: [python]
-          args: ['--rcfile=.pylintrc']
-          additional_dependencies:
-            - pylint-django
-            - django
-            - djangorestframework
-            - djangorestframework-simplejwt
-            - django-split-settings
-            - django_filter
-            - drf_yasg
-            - psycopg2-binary
-            - factory-boy
-            - Faker
-            - drf-nested-routers
