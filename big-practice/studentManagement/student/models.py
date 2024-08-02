@@ -24,3 +24,15 @@ class Student(BaseModel):
 
     def __str__(self):
         return self.name
+
+    # Custom property
+    @property
+    def full_name(self) -> str:
+        """
+        Return the full_name by combine value of first_name and last_name
+
+        Returns:
+            str: Full student name
+        """
+        return f"{self.first_name} {self.last_name}"
+
