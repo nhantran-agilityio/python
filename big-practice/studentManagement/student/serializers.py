@@ -17,5 +17,4 @@ class StudentSerializer(serializers.ModelSerializer):
             "avatar",
             "address",
             "is_active"
-            "course"
         ]
