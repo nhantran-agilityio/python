@@ -37,7 +37,7 @@ class StudentManager(models.Manager):
         """
         return self.filter(is_active=True)
 
-    def Student_avg_age(self):
+    def student_avg_age(self):
         """
         Get average age of Student.
 
@@ -68,7 +68,7 @@ class Student(models.Model):
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
     report = models.OneToOneField(Report, on_delete=models.CASCADE,
-                                  related_name='student')
+                                  related_name='student', null=True)
     courses = models.ManyToManyField(Course, through='Enrollment',
                                      related_name='student')
 
