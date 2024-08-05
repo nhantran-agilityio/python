@@ -1,8 +1,6 @@
 from django.db import models
 from enum import Enum
 from django.db.models.functions import Now, ExtractYear, ExtractMonth
-from courses.models import Course
-from report.models import Report
 
 
 class Gender(Enum):
@@ -67,10 +65,8 @@ class Student(models.Model):
     birthday = models.DateField()
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
     is_active = models.BooleanField(default=True)
-    report = models.OneToOneField(Report, on_delete=models.CASCADE,
-                                  related_name='student', null=True)
-    courses = models.ManyToManyField(Course, through='Enrollment',
-                                     related_name='student')
+    courses = models.ManyToManyField('courses.Course', related_name='student',
+                                     blank=True)
 
     objects = StudentManager()
 
@@ -87,15 +83,3 @@ class Student(models.Model):
 
     def __str__(self):
         return self.full_name
-
-
-class Enrollment(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    enrollment_date = models.DateField()
-
-    class Meta:
-        unique_together = ('student', 'course')
-
-    def __str__(self):
-        return f"{self.student} enrolled in {self.course}"
