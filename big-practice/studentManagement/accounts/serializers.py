@@ -6,6 +6,7 @@ from rest_framework.serializers import (
     EmailField,
     ValidationError,
 )
+from django.contrib.auth import authenticate
 
 from .models import User
 
@@ -59,3 +60,23 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.save()
 
         return user
+
+
+class LoginSerializer(serializers.Serializer):
+    """
+    Serializer for user login.
+    """
+    username = serializers.CharField()
+    password = serializers.CharField()
+
+    class Meta:
+        model = User
+        fields = ['email', 'password', 'full_name', 'access_token',
+                  'refresh_token']
+
+    def validate(self, data):
+        user = authenticate(username=data['username'],
+                            password=data['password'])
+        if user is None:
+            raise serializers.ValidationError("Invalid credentials")
+        return data
