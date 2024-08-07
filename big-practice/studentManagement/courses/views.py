@@ -5,7 +5,7 @@ from .models import Course
 
 
 class CourseViewSet(viewsets.ModelViewSet):
-    queryset = Student.objects.all()
+    queryset = Course.objects.all()
     serializer_class = CourseSerializer
     # permission_classes = [permissions.IsAuthenticated]
 
