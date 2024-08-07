@@ -11,12 +11,6 @@ from django.contrib.auth import authenticate
 from .models import User
 
 
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = User
-        fields = ('id', 'username', 'email')
-
-
 class RegisterSerializer(serializers.ModelSerializer):
     """
     Serializer for user register with password and confirm_password validate.
@@ -71,8 +65,7 @@ class LoginSerializer(serializers.Serializer):
 
     class Meta:
         model = User
-        fields = ['email', 'password', 'full_name', 'access_token',
-                  'refresh_token']
+        fields = ['email', 'password']
 
     def validate(self, data):
         user = authenticate(username=data['username'],
