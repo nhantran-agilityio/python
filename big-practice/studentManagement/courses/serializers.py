@@ -2,7 +2,7 @@ from rest_framework import serializers
 from .models import Course
 
 
-class CourseSerializer(serializers.HyperlinkedModelSerializer):
+class CourseSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
         fields = ["name", "description", "duration", "thumbnail"]
