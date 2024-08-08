@@ -1,5 +1,4 @@
 from rest_framework import status, generics
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
