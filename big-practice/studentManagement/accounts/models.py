@@ -24,13 +24,6 @@ class User(AbstractUser, models.Model):
             Otherwise, we can only access the API.",
     )
 
-    @property
-    def full_name(self):
-        """
-        Returns the full name of the user.
-        """
-        return f"{self.first_name} {self.last_name}"
-
     def __str__(self) -> str:
         """
         Returns the string representation of the User instance.
