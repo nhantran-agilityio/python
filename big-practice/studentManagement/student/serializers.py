@@ -21,6 +21,7 @@ class StudentSerializer(serializers.ModelSerializer):
             "address",
             "is_active",
             "courses",
+            "full_name"
         ]
 
     def create(self, validated_data):

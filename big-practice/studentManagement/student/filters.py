@@ -1,9 +1,11 @@
 import django_filters
+from django.db.models import Q
 from django_filters import rest_framework as filters
 from .models import Student
 
 
 class StudentFilter(django_filters.FilterSet):
+    full_name = filters.CharFilter(method="filter_by_name")
     first_name = django_filters.CharFilter(lookup_expr='icontains',
                                            label='First Name')
     last_name = django_filters.CharFilter(lookup_expr='icontains',
@@ -16,9 +18,17 @@ class StudentFilter(django_filters.FilterSet):
                                               lookup_expr='lte',
                                               label='Birth Date To')
     course_id = filters.CharFilter(field_name='courses__id',
-                                    lookup_expr='icontains')
+                                   lookup_expr='icontains')
 
     class Meta:
         model = Student
-        fields = ['course_id', 'first_name', 'last_name', 'email',
+        fields = ['full_name', 'course_id', 'first_name', 'last_name', 'email',
                   'birth_date_from', 'birth_date_to']
+
+    def filter_by_name(self, queryset, _, value):
+        """
+        Custom query to filter student by first or last name.
+        """
+        return queryset.filter(
+            Q(first_name__icontains=value) | Q(last_name__icontains=value)
+        )

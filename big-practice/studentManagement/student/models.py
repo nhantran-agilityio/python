@@ -1,6 +1,9 @@
 from django.db import models
 from enum import Enum
 from django.db.models.functions import Now, ExtractYear, ExtractMonth
+from datetime import date
+from django.utils import timezone
+from datetime import timedelta
 
 
 class Gender(Enum):
@@ -16,15 +19,20 @@ class Gender(Enum):
 
 
 class StudentManager(models.Manager):
-    def students_over_point_5(self):
-        """
-        Get Students point large than 5.
+    # def students_over_point_5(self):
+    #     """
+    #     Get Students point large than 5.
 
-        Returns:
-            QuerySet: QuerySet containing Students point larger than 5
-        """
+    #     Returns:
+    #         QuerySet: QuerySet containing Students point larger than 5
+    #     """
 
-        return self.filter(student__report__point__gt=5).distinct()
+    #     return self.filter(student__report__point__gt=5).distinct()
+
+    def student_over_20(self):
+        today = timezone.now().date()
+        twenty_years_ago = today - timedelta(days=20*365.25)  # Approximate 20 years ago
+        return self.filter(birthday__lte=twenty_years_ago)
 
     def active_Students(self):
         """
@@ -80,6 +88,12 @@ class Student(models.Model):
             str: Full student name
         """
         return f"{self.first_name} {self.last_name}"
+
+    def get_age(self):
+        today = date.today()
+        age = today.year - self.birthday.year - ((today.month, today.day) < (
+            self.birthday.month, self.birthday.day))
+        return age
 
     def __str__(self):
         return self.full_name
