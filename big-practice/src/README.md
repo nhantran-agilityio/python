@@ -16,6 +16,7 @@ Build the simple Student Management app created with Python, Django, REST framew
 - [Code Structure](#code-structure)
 - [How To Run](#how-to-run)
 - [Unit Testing](#unit-testing)
+- [Coverage Reprot](#coverage-report)
 
 ## Technical Stack
 - **Python 3.12**: Python programming language
@@ -122,5 +123,30 @@ python manage.py runserver 8000
 5. Browsable APIs
 
 - Go to [http://0.0.0.0:8000/swagger/](http://0.0.0.0:8000/swagger/) to view all APIs.
+- Go to Admin: [http://0.0.0.0:8000/admin/](http://0.0.0.0:8000/admin/)
+   - Username/password: Admin/Abcd@1234
 
 ## Unit Testing
+- coverage run manage.py test
+- coverage report
+- coverage html
+
+## Coverage Report
+```
+Name                                 Stmts   Miss Branch BrPart  Cover
+----------------------------------------------------------------------
+accounts/models.py                       7      0      0      0   100%
+accounts/views.py                       22      0      2      0   100%
+courses/models.py                        8      0      0      0   100%
+courses/views.py                         9      0      0      0   100%
+report/models.py                        11      0      0      0   100%
+report/views.py                         10      0      0      0   100%
+student/filters.py                      21      0      2      0   100%
+student/models.py                       43      0      6      0   100%
+student/views.py                        14      0      0      0   100%
+studentManagement/settings/base.py      23      0      0      0   100%
+studentManagement/settings/dev.py        1      0      0      0   100%
+studentManagement/settings/test.py       1      0      0      0   100%
+----------------------------------------------------------------------
+TOTAL                                  170      0     10      0   100%
+```

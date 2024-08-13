@@ -42,3 +42,9 @@ class TestStudentFilter(TestCase):
         filter = StudentFilter({'full_name': 'Fred'})
         queryset = filter.qs
         self.assertEqual(queryset.count(), 0)
+
+    def test_filter_by_fullname(self):
+        filter = StudentFilter({'full_name': 'John Doe'})
+        queryset = filter.qs
+        self.assertEqual(queryset.count(), 1)
+        self.assertEqual(queryset.first(), self.student1)
