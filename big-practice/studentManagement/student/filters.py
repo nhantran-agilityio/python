@@ -27,8 +27,13 @@ class StudentFilter(django_filters.FilterSet):
 
     def filter_by_name(self, queryset, _, value):
         """
-        Custom query to filter student by first or last name.
+        Custom query to filter student by first name, last name, or full name.
         """
-        return queryset.filter(
-            Q(first_name__icontains=value) | Q(last_name__icontains=value)
-        )
+        names = value.split()
+        if len(names) == 2:
+            first_name, last_name = names
+            return queryset.filter(Q(first_name__icontains=first_name,
+                                     last_name__icontains=last_name))
+        else:
+            return queryset.filter(Q(first_name__icontains=value) |
+                                   Q(last_name__icontains=value))
