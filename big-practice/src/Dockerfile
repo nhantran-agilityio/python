@@ -17,12 +17,6 @@ COPY . .
 # Install Gunicorn
 RUN pip install gunicorn
 
-# Install NGINX
-RUN apt-get update && apt-get install -y nginx
-
-# Copy the NGINX configuration file
-COPY nginx.conf /etc/nginx/nginx.conf
-
 # Collect static files (adjust according to your needs)
 RUN python manage.py collectstatic --noinput
 
