@@ -2,9 +2,10 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import AllowAny
+
 from .serializers import RegisterSerializer, LoginSerializer
 from .models import User
-from rest_framework.permissions import AllowAny
 
 
 class RegisterView(generics.CreateAPIView):
@@ -35,12 +36,12 @@ class LoginView(generics.GenericAPIView):
             username = serializer.validated_data['username']
             password = serializer.validated_data['password']
             user = authenticate(username=username, password=password)
-            if user is not None:
-                refresh = RefreshToken.for_user(user)
-                return Response({
-                    'refresh': str(refresh),
-                    'access': str(refresh.access_token),
-                })
-            return Response({'error': 'Invalid credentials'},
-                            status=status.HTTP_401_UNAUTHORIZED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            refresh = RefreshToken.for_user(user)
+            return Response({
+                'refresh': str(refresh),
+                'access': str(refresh.access_token),
+            })
+        else:
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
+
