@@ -12,3 +12,4 @@ class CustomPagination(PageNumberPagination):
 class ReportViewSet(viewsets.ModelViewSet):
     queryset = Report.objects.all()
     serializer_class = ReportSerializer
+    pagination_class = CustomPagination
