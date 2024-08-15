@@ -25,7 +25,8 @@ Build the simple Student Management app created with Python, Django, REST framew
 - **SQlite**: SQLite is an in-process library that implements a self-contained, serverless, zero-configuration, transactional SQL database engine
 
 ## Database model
-  - [DB diagram](https://dbdiagram.io/d/Student-Management-66aa31698b4bb5230edb1111)
+  - DB diagram
+  - [![db.png](https://i.postimg.cc/wjTS859G/db.png)](https://postimg.cc/jLm8y7wH)
 
 ## Code structure
     ├── src/
