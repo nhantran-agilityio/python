@@ -19,16 +19,6 @@ class Gender(Enum):
 
 
 class StudentManager(models.Manager):
-    # def students_over_point_5(self):
-    #     """
-    #     Get Students point large than 5.
-
-    #     Returns:
-    #         QuerySet: QuerySet containing Students point larger than 5
-    #     """
-
-    #     return self.filter(student__report__point__gt=5).distinct()
-
     def student_over_20(self):
         today = timezone.now().date()
         twenty_years_ago = today - timedelta(days=20*365.25)  # Approximate 20 years ago
