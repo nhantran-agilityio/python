@@ -96,6 +96,18 @@ cd python-training/
 git checkout feat/django-big-practice
 ```
 
+## Admin Interface
+**Admin can view all resources and have full permission on them.**
+- Can CRUD, View all course, report, student, user
+- Can search student by first name, last name and email
+- Can filter student by course
+
+[![admin-site.png](https://i.postimg.cc/P502LZwS/admin-site.png)](https://postimg.cc/68Ldg8zZ)
+**APIs**
+[![api.png](https://i.postimg.cc/hhFKtnmC/api.png)](https://postimg.cc/0KCTVLcm)
+
+
+
 **Run with virtualenv at local environment**
 
 1. Create a virtual environment:
