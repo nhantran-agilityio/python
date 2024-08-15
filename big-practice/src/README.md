@@ -105,6 +105,21 @@ git checkout feat/django-big-practice
 
 [![admin-site.png](https://i.postimg.cc/P502LZwS/admin-site.png)](https://postimg.cc/68Ldg8zZ)
 **APIs**
+- Authentication
+    - Login
+    - Sign Up
+- Create, update and delete object Student, Course, Report
+- Filtering
+    - View detail information of an student/course
+    - Listing students
+    - Order by first name
+    - Search students by name or email
+    - Search students by their birth range from date to date
+- Listing Course
+    - All information of student by course
+    - Total number of student by course
+    - Apply pagination for all listing APIs
+
 [![api.png](https://i.postimg.cc/hhFKtnmC/api.png)](https://postimg.cc/0KCTVLcm)
 
 
