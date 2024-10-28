@@ -1,0 +1,13 @@
+[
+    {
+        "model": "report.report",
+        "pk": 1,
+        "fields": {
+            "point": 10,
+            "description": "Good",
+            "created_at": "2024-08-13T10:01:37.280Z",
+            "student": 1,
+            "course": 1
+        }
+    }
+]

@@ -6,7 +6,8 @@ from student.models import Student
 class StudentModelTest(TestCase):
     def setUp(self):
         today = date.today()
-
+        fixtures = ['student.json']
+        print("studentMock", fixtures)
         self.student = Student.objects.create(
             first_name='Nhan',
             last_name='Tran',

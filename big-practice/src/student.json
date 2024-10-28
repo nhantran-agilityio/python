@@ -1,0 +1,32 @@
+[
+    {
+        "model": "student.student",
+        "pk": 1,
+        "fields": {
+            "first_name": "Nhan",
+            "last_name": "Tran",
+            "email": "nhan.tran+01@gmail.com",
+            "address": "300 N Los Angeles St, Los Angeles, CA, US, 90012",
+            "gender": "male",
+            "birthday": "1996-07-07",
+            "avatar": "",
+            "is_active": true,
+            "courses": [1]
+        }
+    },
+    {
+        "model": "student.student",
+        "pk": 2,
+        "fields": {
+            "first_name": "Nhan 2",
+            "last_name": "Tran",
+            "email": "andreea+435345@bluecart.com",
+            "address": "1234 Main Street",
+            "gender": "male",
+            "birthday": "1996-07-07",
+            "avatar": "",
+            "is_active": true,
+            "courses": [2]
+        }
+    }
+]

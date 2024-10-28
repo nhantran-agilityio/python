@@ -1,0 +1,22 @@
+[
+    {
+        "model": "courses.course",
+        "pk": 1,
+        "fields": {
+            "name": "React",
+            "duration": "00:00:05",
+            "description": "This is React Course",
+            "thumbnail": ""
+        }
+    },
+    {
+        "model": "courses.course",
+        "pk": 2,
+        "fields": {
+            "name": "React Native",
+            "duration": "00:00:06",
+            "description": "This is React native course",
+            "thumbnail": ""
+        }
+    }
+]
