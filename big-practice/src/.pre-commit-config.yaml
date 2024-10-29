@@ -1,16 +1,27 @@
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
-    hooks:
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-      - id: check-merge-conflict
-  # https://dev.to/techishdeep/maximize-your-python-efficiency-with-pre-commit-a-complete-but-concise-guide-39a5
-  - repo: https://github.com/PyCQA/flake8
-    rev: 7.1.0
-    hooks:
-      - id: flake8
-        name: "flake8"
-        types: [python]
-        args: []
+    - repo: https://github.com/pre-commit/pre-commit-hooks
+      rev: v4.6.0
+      hooks:
+          - id: end-of-file-fixer
+          - id: trailing-whitespace
+          - id: check-merge-conflict
+          - id: check-yaml
+          #   Prevent giant files from being committed.
+          - id: check-ast
+          - id: check-added-large-files
+          - id: debug-statements
+          - id: check-builtin-literals
+          - id: check-case-conflict
+          - id: check-docstring-first
+          - id: detect-private-key
 
+    # https://dev.to/techishdeep/maximize-your-python-efficiency-with-pre-commit-a-complete-but-concise-guide-39a5
+    - repo: https://github.com/PyCQA/flake8
+      rev: 7.1.0
+      hooks:
+          - id: flake8
+            name: "flake8"
+            types: [python]
+            args:
+                - --max-line-length=88
+                - --ignore=E203,E501,W503
