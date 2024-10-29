@@ -7,6 +7,8 @@ User = get_user_model()
 
 
 class LoginViewTest(TestCase):
+    fixtures = ['accounts.json']
+
     def setUp(self):
         # Create a request factory to simulate HTTP requests
         self.factory = RequestFactory()
