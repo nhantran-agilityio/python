@@ -1,24 +1,26 @@
 # Use the official Python image from the Docker Hub
 FROM python:3.12-slim
 
-
 # Set the working directory in the container
-WORKDIR /app
+WORKDIR /src
 
-# Copy the requirements file into the container
-COPY requirements.txt requirements.txt
+# Copy requirements and install dependencies
+COPY requirements.txt .
+
 
 # Install dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the application code
+# Copy the requirements file into the container
 COPY . .
 
 # Install Gunicorn
 RUN pip install gunicorn
+RUN pip install setuptools
 
 # Collect static files (adjust according to your needs)
-RUN python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput --clear
+
 
 # Expose the port on which the app will run
 EXPOSE 8000

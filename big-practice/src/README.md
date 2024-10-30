@@ -152,7 +152,12 @@ python manage.py runserver 8000
 
 - Go to [http://0.0.0.0:8000/swagger/](http://0.0.0.0:8000/swagger/) to view all APIs.
 - Go to Admin: [http://0.0.0.0:8000/admin/](http://0.0.0.0:8000/admin/)
-   - Username/password: Admin/Abcd@1234
+   - Username/password: NhanTran/Abcd@1234
+
+## Run with Docker compose
+```
+ docker-compose up --build -d
+```
 
 ## Unit Testing
 - coverage run manage.py test
