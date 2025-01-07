@@ -7,7 +7,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback_secret_key')
-
+EMAIL_PASS = os.getenv('EMAIL_PASS', 'fallback_email_pass_key')
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
@@ -24,7 +24,20 @@ INSTALLED_APPS = [
     "student",
     "courses",
     "report",
-    "accounts"
+    "accounts",
+    'django.contrib.sites',  # Required by allauth
+    'allauth',  # Required by allauth
+    'allauth.account',  # Required by allauth
+    'allauth.socialaccount',  # Required by allauth
+]
+
+# Add the SITE_ID setting
+SITE_ID = 1
+
+# Add the authentication backends
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -71,6 +84,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware'
 ]
 
 ROOT_URLCONF = 'studentManagement.urls'
@@ -141,3 +155,20 @@ STATICFILES_DIRS = [
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Add the email settings
+ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = 'email'
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+
+# Email Configuration
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'nhan.tran@asnet.com.vn'
+EMAIL_HOST_PASSWORD = EMAIL_PASS
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
