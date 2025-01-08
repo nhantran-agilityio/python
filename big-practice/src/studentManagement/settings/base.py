@@ -92,7 +92,7 @@ ROOT_URLCONF = 'studentManagement.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -167,7 +167,7 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'nhan.tran@asnet.com.vn'
+EMAIL_HOST_USER = 'nhan.tran170495@gmail.com'
 EMAIL_HOST_PASSWORD = EMAIL_PASS
 
 LOGIN_REDIRECT_URL = '/'
