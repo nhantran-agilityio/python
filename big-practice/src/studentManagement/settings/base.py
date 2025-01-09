@@ -11,6 +11,10 @@ EMAIL_PASS = os.getenv('EMAIL_PASS', 'fallback_email_pass_key')
 ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
+    "student",
+    "courses",
+    "report",
+    "accounts",
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -21,10 +25,6 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_yasg',
     "rest_framework",
-    "student",
-    "courses",
-    "report",
-    "accounts",
     'django.contrib.sites',  # Required by allauth
     'allauth',  # Required by allauth
     'allauth.account',  # Required by allauth
@@ -168,7 +168,7 @@ EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'nhan.tran170495@gmail.com'
-EMAIL_HOST_PASSWORD = EMAIL_PASS
+EMAIL_HOST_PASSWORD = 'yume snkf xwph vgco'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
