@@ -1,0 +1,12 @@
+<!-- filepath: /Users/nhantran/python-training/big-practice/src/templates/courses/statistics.html -->
+<h2>Course Statistics</h2>
+
+<h3>Average Enrollments</h3>
+<p>{{ average_enrollments }}</p>
+
+<h3>Top Courses</h3>
+<ul>
+    {% for course in top_courses %}
+        <li>{{ course.name }} - {{ course.num_enrollments }} enrollments</li>
+    {% endfor %}
+</ul>

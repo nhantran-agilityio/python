@@ -1,5 +1,7 @@
 from django.db import models
 from django.conf import settings
+from django.db.models import Count, Avg
+
 
 class Course(models.Model):
     name = models.CharField(max_length=50)
@@ -10,6 +12,16 @@ class Course(models.Model):
 
     def __str__(self):
         return self.name
+
+
+    @classmethod
+    def average_enrollments(cls):
+        return cls.objects.annotate(num_enrollments=Count('enrollment')).aggregate(Avg('num_enrollments'))['num_enrollments__avg']
+
+    @classmethod
+    def top_courses(cls, limit=5):
+        return cls.objects.annotate(num_enrollments=Count('enrollment')).order_by('-num_enrollments')[:limit]
+
 
 
 class Enrollment(models.Model):

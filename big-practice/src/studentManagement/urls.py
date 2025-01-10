@@ -47,4 +47,5 @@ urlpatterns = [
          name='schema-json'),
     path('accounts/', include('allauth.urls')),
     path('accounts/', include('accounts.urls')),
+    path('api/', include('courses.urls')),
 ]
