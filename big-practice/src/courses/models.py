@@ -9,10 +9,18 @@ class Course(models.Model):
     description = models.CharField(max_length=150)
     thumbnail = models.ImageField(upload_to='avatars/', null=True, blank=True)
     is_introductory = models.BooleanField(default=False)
+    enrollment_limit = models.PositiveIntegerField(default=30)
 
     def __str__(self):
         return self.name
 
+    @property
+    def current_enrollments(self):
+        return self.enrollment_set.count()
+
+    @property
+    def is_full(self):
+        return self.current_enrollments >= self.enrollment_limit
 
     @classmethod
     def average_enrollments(cls):
