@@ -2,7 +2,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import Enrollment
+from .models import Enrollment, Course, User
+
+@receiver(post_save, sender=User)
+def auto_enroll_intro_courses(sender, instance, created, **kwargs):
+    if created:  # Trigger only for new users
+        # Get the introductory courses
+        intro_courses = Course.objects.filter(is_introductory=True)
+        for course in intro_courses:
+            Enrollment.objects.get_or_create(user=instance, course=course)
+
 
 @receiver(post_save, sender=Enrollment)
 def send_course_full_email(sender, instance, created, **kwargs):
