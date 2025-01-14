@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>{% block title %}My Site{% endblock %}</title>
+    </head>
+    <body>
+        <header>
+            <h1>My Site</h1>
+        </header>
+        <nav>
+            <ul>
+                <li><a href="{% url 'home' %}">Home</a></li>
+                <li>
+                    <a href="{% url 'notifications_list' %}">Notifications</a>
+                </li>
+            </ul>
+        </nav>
+        <main>{% block content %} {% endblock %}</main>
+        <footer>
+            <p>&copy; 2023 My Site</p>
+        </footer>
+    </body>
+</html>

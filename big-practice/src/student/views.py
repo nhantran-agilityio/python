@@ -4,6 +4,7 @@ from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
 from .models import Student
 from .filters import StudentFilter
+from django.shortcuts import render
 
 
 class CustomPagination(PageNumberPagination):
@@ -18,3 +19,7 @@ class StudentViewSet(viewsets.ModelViewSet):
 
     filter_backends = (DjangoFilterBackend,)
     filterset_class = StudentFilter
+
+
+def home(request):
+    return render(request, 'home.html')

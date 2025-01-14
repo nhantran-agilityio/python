@@ -19,6 +19,7 @@ from django.urls import path, include
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
+from student.views import home
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -38,6 +39,8 @@ urlpatterns = [
     path("", include("student.urls")),
     path("", include("courses.urls")),
     path("", include("report.urls")),
+    path('', include('notifications.urls')),
+    path("", home, name="home"),
     path('api/accounts/', include('accounts.urls')),
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0),
          name='schema-swagger-ui'),
