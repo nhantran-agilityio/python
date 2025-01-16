@@ -2,13 +2,7 @@ from django.db import models
 from django.conf import settings
 from django.db.models import Count, Avg
 
-
-class Instructor(models.Model):
-    name = models.CharField(max_length=100)
-    email = models.EmailField()
-
-    def __str__(self):
-        return self.name
+from instructors.models import Instructor
 
 
 class Course(models.Model):
@@ -18,7 +12,7 @@ class Course(models.Model):
     thumbnail = models.ImageField(upload_to='avatars/', null=True, blank=True)
     is_introductory = models.BooleanField(default=True)
     enrollment_limit = models.PositiveIntegerField(default=30)
-    # instructors = models.ManyToManyField(Instructor)
+    instructors = models.ManyToManyField(Instructor)
 
     def __str__(self):
         return self.name

@@ -16,6 +16,7 @@ INSTALLED_APPS = [
     "report",
     "accounts",
     'notifications',
+    'instructors',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

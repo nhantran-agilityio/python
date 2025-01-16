@@ -2,34 +2,19 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-# from rest_framework.permissions import AllowAny
-# from django import forms
-
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import LoginSerializer
 from .models import User
 
 from django.shortcuts import render, redirect
-# from django.contrib.auth.models import User
-from django.core.mail import send_mail
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes,  force_str
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from .forms import RegistrationForm
-# from django.contrib.auth.forms import RegistrationForm
 from django.contrib.auth.tokens import default_token_generator
-from django.http import HttpResponse
 from django.contrib.auth import login
 from django.views import View
 from django.core.mail import EmailMessage
-# class RegisterView(generics.CreateAPIView):
-#     """
-#     The API View for user registration
-#     """
-
-#     queryset = User.objects.all()
-#     permission_classes = (AllowAny,)
-#     serializer_class = RegisterSerializer
 
 
 class RegisterView(View):
@@ -63,6 +48,7 @@ def activate_account(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
+
     except(TypeError, ValueError, OverflowError, User.DoesNotExist):
         user = None
     if user is not None and default_token_generator.check_token(user, token):
@@ -72,6 +58,7 @@ def activate_account(request, uidb64, token):
         return redirect('home')
     else:
         return render(request, 'email/activation_email.html')
+
 
 class LoginView(generics.GenericAPIView):
     """
