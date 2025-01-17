@@ -2,7 +2,10 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
-from .models import Enrollment, Course, User
+from django.db.models.signals import post_delete
+from accounts.models import User
+from notifications.models import Notification
+from .models import Enrollment, Course
 
 @receiver(post_save, sender=User)
 def auto_enroll_intro_courses(sender, instance, created, **kwargs):
@@ -24,3 +27,14 @@ def send_course_full_email(sender, instance, created, **kwargs):
             recipient_list = [instructor.email for instructor
                               in course.instructors.all()]
             send_mail(subject, message, from_email, recipient_list)
+
+
+@receiver(post_delete, sender=Enrollment)
+def send_enrollment_deletion_notification(sender, instance, **kwargs):
+    try:
+        student = instance.user
+        course = instance.course
+        message = f'You have been removed from the course: {course.name}.'
+        Notification.objects.create(user=student, message=message)
+    except User.DoesNotExist:
+        print('User does not exist')

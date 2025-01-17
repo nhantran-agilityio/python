@@ -35,7 +35,7 @@ class RegisterSerializer(serializers.ModelSerializer):
             "password",
             "confirmPassword",
             "lastName",
-            "firstName"
+            "firstName",
         )
 
     def validate(self, attrs: dict):

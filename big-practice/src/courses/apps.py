@@ -7,10 +7,5 @@ class CoursesConfig(AppConfig):
 
     def ready(self):
         import accounts.signals
+        import courses.signals
 
-
-# class AccountsConfig(AppConfig):
-#     name = 'accounts'
-
-#     def ready(self):
-#         import accounts.signals

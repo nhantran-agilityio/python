@@ -1,6 +1,7 @@
 import os
 from datetime import timedelta
 from pathlib import Path
+from celery.schedules import crontab
 
 # BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,6 +33,13 @@ INSTALLED_APPS = [
     'allauth.account',  # Required by allauth
     'allauth.socialaccount',  # Required by allauth
 ]
+
+CELERY_BEAT_SCHEDULE = {
+    'clean-up-inactive-courses': {
+        'task': 'courses.tasks.clean_up_inactive_courses',
+        'schedule': crontab(0, 0, day_of_week='sunday'),  # Run every Sunday at midnight
+    },
+}
 
 # Add the SITE_ID setting
 SITE_ID = 1
@@ -174,3 +182,12 @@ EMAIL_HOST_PASSWORD = 'yume snkf xwph vgco'
 
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+
+
+# Celery settings
+CELERY_BROKER_URL = 'redis://localhost:6379/0'
+CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'UTC'
