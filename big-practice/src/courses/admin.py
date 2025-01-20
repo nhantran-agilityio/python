@@ -3,7 +3,20 @@ from .models import Course
 
 
 class CourseAdmin(admin.ModelAdmin):
-    list_display = ('name', 'description', 'duration')
+    list_display = (
+        "name",
+        "description",
+        "duration",
+        "thumbnail",
+        "is_introductory",
+        "enrollment_limit",
+        "display_instructors",
+        "is_active"
+    )
+
+    def display_instructors(self, obj):
+        return ", ".join([instructor.name for instructor in obj.instructors.all()])
+    display_instructors.short_description = 'Instructors'
 
     # Optionally, add a filter by course to the Student admin
     def get_queryset(self, request):

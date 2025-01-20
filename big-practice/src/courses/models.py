@@ -1,10 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.db.models import Count, Avg
-from studentManagement.celery import shared_task
-from datetime import datetime, timedelta
 from instructors.models import Instructor
-from django.utils.timezone import now
 
 
 class Course(models.Model):
@@ -15,6 +12,8 @@ class Course(models.Model):
     is_introductory = models.BooleanField(default=True)
     enrollment_limit = models.PositiveIntegerField(default=30)
     instructors = models.ManyToManyField(Instructor)
+    is_active = models.BooleanField(default=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return self.name
@@ -38,15 +37,6 @@ class Course(models.Model):
         return cls.objects.annotate(
             num_enrollments=Count('enrollment')
             ).order_by('-num_enrollments')[:limit]
-
-    @shared_task
-    def clean_up_inactive_courses():
-        three_months_ago = datetime.now() - timedelta(days=90)
-        inactive_courses = Course.objects.filter(
-            is_active=False, updated_at__lt=three_months_ago
-        )
-        inactive_courses.delete()
-
 
 class Enrollment(models.Model):
     # user = models.ForeignKey(settings.AUTH_USER_MODEL,
