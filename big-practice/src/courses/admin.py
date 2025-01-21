@@ -7,7 +7,7 @@ class CourseAdmin(admin.ModelAdmin):
         "name",
         "description",
         "duration",
-        "thumbnail",
+        "updated_at",
         "is_introductory",
         "enrollment_limit",
         "display_instructors",

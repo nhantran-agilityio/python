@@ -33,10 +33,23 @@ INSTALLED_APPS = [
     'allauth.socialaccount',  # Required by allauth
 ]
 
+# Scheduling a task for weekly clean-up data (courses inactive for 3 months)
+# CELERY_BEAT_SCHEDULE = {
+#     'clean-up-inactive-courses': {
+#         'task': 'courses.tasks.clean_up_inactive_courses',
+#         'schedule': crontab(0, 0, day_of_week='sunday'),  # Run every Sunday at midnight
+#     },
+# }
+
+# Scheduling a task for weekly clean-up data (courses inactive for 1 hour)
 CELERY_BEAT_SCHEDULE = {
     'clean-up-inactive-courses': {
         'task': 'courses.tasks.clean_up_inactive_courses',
-        'schedule': crontab(0, 0, day_of_week='sunday'),  # Run every Sunday at midnight
+        'schedule': crontab(minute=30, hour=11, day_of_week='tuesday'),
+    },
+    'send-daily-report': {
+        'task': 'courses.tasks.send_daily_report',
+        'schedule': crontab(minute=0, hour=0),  # Run every day at midnight
     },
 }
 
