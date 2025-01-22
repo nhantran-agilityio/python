@@ -1,6 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.db.models import Count, Avg
+from django.core.cache import cache
 from instructors.models import Instructor
 
 
@@ -34,14 +35,18 @@ class Course(models.Model):
 
     @classmethod
     def top_courses(cls, limit=5):
-        return cls.objects.annotate(
-            num_enrollments=Count('enrollment')
+        # Try to get the top courses from the cache
+        top_courses = cache.get('top_courses')
+
+        if not top_courses:
+            # If not in cache, query the database and store the result in the cache
+            top_courses = cls.objects.annotate(
+                num_enrollments=Count('enrollment')
             ).order_by('-num_enrollments')[:limit]
+            cache.set('top_courses', top_courses, timeout=60*15)  # Cache for 15 minutes
+
 
 class Enrollment(models.Model):
-    # user = models.ForeignKey(settings.AUTH_USER_MODEL,
-    #                          on_delete=models.CASCADE)
-    # course = models.ForeignKey(Course, on_delete=models.CASCADE)
     course = models.ForeignKey(Course, on_delete=models.CASCADE,
                                related_name="enrollments")
     user = models.ForeignKey(settings.AUTH_USER_MODEL,
