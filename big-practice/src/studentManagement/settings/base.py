@@ -45,7 +45,7 @@ INSTALLED_APPS = [
 CELERY_BEAT_SCHEDULE = {
     'clean-up-inactive-courses': {
         'task': 'courses.tasks.clean_up_inactive_courses',
-        'schedule': crontab(minute=30, hour=11, day_of_week='tuesday'),
+        'schedule': crontab(minute=0, hour=0), # Run every day at midnight
     },
     'send-daily-report': {
         'task': 'courses.tasks.send_daily_report',
