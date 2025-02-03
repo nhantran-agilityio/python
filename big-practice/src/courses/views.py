@@ -2,10 +2,11 @@ from rest_framework import viewsets
 from .serializers import CourseSerializer
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.decorators import action
+import logging
 from .models import Course
 from rest_framework.response import Response
 
-
+logger = logging.getLogger(__name__)
 class CustomPagination(PageNumberPagination):
     page_size = 10
 

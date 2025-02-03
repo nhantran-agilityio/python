@@ -1,14 +1,25 @@
 import os
 from datetime import timedelta
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
 from pathlib import Path
 from celery.schedules import crontab
 
-# BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback_secret_key')
 EMAIL_PASS = os.getenv('EMAIL_PASS', 'fallback_email_pass_key')
 ALLOWED_HOSTS = []
+
+
+sentry_sdk.init(
+    dsn="https://3f141c29aa893c91d7b39906f87a0f35@o4508527683567616.ingest.us.sentry.io/4508527686975488",
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+    send_default_pii=True,
+)
+
+INTERNAL_IPS = ['127.0.0.1']
 
 INSTALLED_APPS = [
     "student",
@@ -32,6 +43,8 @@ INSTALLED_APPS = [
     'allauth.account',  # Required by allauth
     'allauth.socialaccount',  # Required by allauth
 ]
+
+
 
 # Scheduling a task for weekly clean-up data (courses inactive for 3 months)
 # CELERY_BEAT_SCHEDULE = {
@@ -115,6 +128,10 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'allauth.account.middleware.AccountMiddleware'
 ]
+
+INSTALLED_APPS += ['debug_toolbar']
+
+MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
 
 ROOT_URLCONF = 'studentManagement.urls'
 

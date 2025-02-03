@@ -20,6 +20,9 @@ from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework import permissions
 from student.views import home
+from django.conf import settings
+from django.urls import include, path
+
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -33,6 +36,7 @@ schema_view = get_schema_view(
     public=True,
     permission_classes=(permissions.AllowAny,),
 )
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -55,3 +59,7 @@ urlpatterns = [
     path('api/', include('instructors.urls')),
     path('', include('notifications.urls')),
 ]
+
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]

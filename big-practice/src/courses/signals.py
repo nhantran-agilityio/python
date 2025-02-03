@@ -7,6 +7,7 @@ from accounts.models import User
 from notifications.models import Notification
 from .models import Enrollment, Course
 
+
 @receiver(post_save, sender=User)
 def auto_enroll_intro_courses(sender, instance, created, **kwargs):
     if created:  # Trigger only for new users
@@ -22,7 +23,9 @@ def send_course_full_email(sender, instance, created, **kwargs):
         course = instance.course
         if course.is_full:
             subject = 'Course Enrollment Limit Reached'
-            message = f'The course "{course.name}" has reached its enrollment limit.'
+            message = (
+                f'The course "{course.name}" has reached its enrollment limit.'
+            )
             from_email = settings.EMAIL_HOST_USER
             recipient_list = [instructor.email for instructor
                               in course.instructors.all()]
