@@ -21,7 +21,8 @@ class Gender(Enum):
 class StudentManager(models.Manager):
     def student_over_20(self):
         today = timezone.now().date()
-        twenty_years_ago = today - timedelta(days=20*365.25)  # Approximate 20 years ago
+        # Approximate 20 years ago
+        twenty_years_ago = today - timedelta(days=20*365.25)
         return self.filter(birthday__lte=twenty_years_ago)
 
     def active_Students(self):
@@ -65,7 +66,6 @@ class Student(models.Model):
     is_active = models.BooleanField(default=True)
     courses = models.ManyToManyField('courses.Course', related_name='student',
                                      blank=True)
-
     objects = StudentManager()
 
     # Custom property
