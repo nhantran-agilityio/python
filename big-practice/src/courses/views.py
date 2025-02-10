@@ -1,10 +1,11 @@
 from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from .models import Course, Enrollment
+from student.models import Student
 from .serializers import CourseSerializer
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.decorators import action
 import logging
-from .models import Course
-from rest_framework.response import Response
 
 logger = logging.getLogger(__name__)
 
@@ -31,3 +32,22 @@ class CourseViewSet(viewsets.ModelViewSet):
             'average_enrollments': average_enrollments,
             'top_courses': top_courses_data,
         })
+
+    @action(detail=False, methods=['post'])
+    def enroll(self, request):
+        course_id = request.data.get('course_id')
+        student_id = request.data.get('student_id')
+
+        try:
+            course = Course.objects.get(id=course_id)
+            student = Student.objects.get(id=student_id)
+            enrollment = Enrollment.objects.create(
+                course=course, student=student)
+            return Response({
+                'status': 'enrolled',
+                'enrollment_id': enrollment.id
+            })
+        except Course.DoesNotExist:
+            return Response({'error': 'Course not found'}, status=404)
+        except Student.DoesNotExist:
+            return Response({'error': 'Student not found'}, status=404)

@@ -65,4 +65,4 @@ class Enrollment(models.Model):
     enrolled_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} enrolled in {self.course.name}"
+        return f"{self.student.full_name} enrolled in {self.course.name}"

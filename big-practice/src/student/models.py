@@ -4,6 +4,7 @@ from django.db.models.functions import Now, ExtractYear, ExtractMonth
 from datetime import date
 from django.utils import timezone
 from datetime import timedelta
+from django.conf import settings
 
 
 class Gender(Enum):
@@ -42,13 +43,13 @@ class StudentManager(models.Manager):
             int: Average age of Student
         """
         # Calc Student age
-        Students_with_age = self.annotate(
-            age_years=ExtractYear(Now()) - ExtractYear("birthday"),
-            age_months=ExtractMonth(Now()) - ExtractMonth("birthday"),
+        students_with_age = self.annotate(
+            age_years=ExtractYear(timezone.now()) - ExtractYear("birthday"),
+            age_months=ExtractMonth(timezone.now()) - ExtractMonth("birthday"),
         )
 
         # Calculate the average age
-        average_age = Students_with_age.aggregate(
+        average_age = students_with_age.aggregate(
             avg_age=models.Avg("age_years") + models.Avg("age_months") / 12
         )["avg_age"]
 
@@ -56,6 +57,12 @@ class StudentManager(models.Manager):
 
 
 class Student(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )  # Allow NULL
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.CharField(max_length=50)
@@ -80,9 +87,9 @@ class Student(models.Model):
         return f"{self.first_name} {self.last_name}"
 
     def get_age(self):
-        today = date.today()
-        age = today.year - self.birthday.year - ((today.month, today.day) < (
-            self.birthday.month, self.birthday.day))
+        today = timezone.now().date()
+        age = today.year - self.birthday.year
+        age -= (today.month, today.day) < (self.birthday.month, self.birthday.day)
         return age
 
     def __str__(self):
