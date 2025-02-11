@@ -45,7 +45,7 @@ class Course(models.Model):
             # If not in cache, query the database
             # and store the result in the cache
             top_courses = cls.objects.annotate(
-                num_enrollments=Count('enrollment')
+                num_enrollments=Count('course_enrollments')
             ).order_by('-num_enrollments')[
                 :limit
             ]

@@ -1,11 +1,14 @@
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.shortcuts import render
+from django.views import View
 from .models import Course, Enrollment
 from student.models import Student
 from .serializers import CourseSerializer
 from rest_framework.pagination import PageNumberPagination
 import logging
+
 
 logger = logging.getLogger(__name__)
 
@@ -51,3 +54,13 @@ class CourseViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Course not found'}, status=404)
         except Student.DoesNotExist:
             return Response({'error': 'Student not found'}, status=404)
+
+
+class CourseStatisticsView(View):
+    def get(self, request):
+        average_enrollments = Course.average_enrollments()
+        top_courses = Course.top_courses()
+        return render(request, 'statistics.html', {
+            'average_enrollments': average_enrollments,
+            'top_courses': top_courses,
+        })
