@@ -1,4 +1,5 @@
 from django.db.models.signals import post_save
+from django.utils import timezone
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
@@ -7,6 +8,8 @@ from accounts.models import User
 from notifications.models import Notification
 from .models import Enrollment, Course
 from student.models import Student
+import logging
+logger = logging.getLogger(__name__)
 
 @receiver(post_save, sender=User)
 def auto_enroll_intro_courses(sender, instance, created, **kwargs):
@@ -20,13 +23,17 @@ def auto_enroll_intro_courses(sender, instance, created, **kwargs):
                 first_name=instance.first_name,
                 last_name=instance.last_name,
                 email=instance.email,
-                birthday=timezone.now().date()  # Provide a default value for birthday
+                # Provide a default value for birthday
+                birthday=timezone.now().date()
             )
 
         # Get the introductory courses
         intro_courses = Course.objects.filter(is_introductory=True)
         for course in intro_courses:
             Enrollment.objects.get_or_create(student=student, course=course)
+
+            if created:
+                logger.info(f"Student {student.email} enrolled in course {course.name}")
 
 @receiver(post_save, sender=Enrollment)
 def send_course_full_email(sender, instance, created, **kwargs):
@@ -43,12 +50,12 @@ def send_course_full_email(sender, instance, created, **kwargs):
             send_mail(subject, message, from_email, recipient_list)
 
 
-@receiver(post_delete, sender=Enrollment)
-def send_enrollment_deletion_notification(sender, instance, **kwargs):
-    try:
-        student = instance.user
-        course = instance.course
-        message = f'You have been removed from the course: {course.name}.'
-        Notification.objects.create(student=student, message=message)
-    except User.DoesNotExist:
-        print('User does not exist')
+# @receiver(post_delete, sender=Enrollment)
+# def send_enrollment_deletion_notification(sender, instance, **kwargs):
+#     try:
+#         student = instance.user
+#         course = instance.course
+#         message = f'You have been removed from the course: {course.name}.'
+#         Notification.objects.create(student=student, message=message)
+#     except User.DoesNotExist:
+#         print('User does not exist')

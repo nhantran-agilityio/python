@@ -9,7 +9,7 @@ class Course(models.Model):
     description = models.CharField(max_length=150)
     thumbnail = models.ImageField(upload_to='avatars/', null=True, blank=True)
     is_introductory = models.BooleanField(default=True)
-    enrollment_limit = models.PositiveIntegerField(default=30)
+    enrollment_limit = models.PositiveIntegerField(default=2)
     instructors = models.ManyToManyField('instructors.Instructor')
     is_active = models.BooleanField(default=True)
     updated_at = models.DateTimeField(auto_now=True)

@@ -19,25 +19,25 @@ def send_enrollment_notification(sender, instance, created, **kwargs):
                 Notification.objects.create(user=instructor.user, message=message)
 
 
-@receiver(post_save, sender=settings.AUTH_USER_MODEL)
-def auto_enroll_new_user(sender, instance, created, **kwargs):
-    if created:
-        # Ensure the instance is a Student
-        student, created = Student.objects.get_or_create(
-            user=instance,
-            defaults={
-                'first_name': instance.first_name,
-                'last_name': instance.last_name,
-                'email': instance.email,
-                'birthday': timezone.now().date()
-            }
-        )
+# @receiver(post_save, sender=settings.AUTH_USER_MODEL)
+# def auto_enroll_new_user(sender, instance, created, **kwargs):
+#     if created:
+#         # Ensure the instance is a Student
+#         student, created = Student.objects.get_or_create(
+#             user=instance,
+#             defaults={
+#                 'first_name': instance.first_name,
+#                 'last_name': instance.last_name,
+#                 'email': instance.email,
+#                 'birthday': timezone.now().date()
+#             }
+#         )
 
-        # Check if the student was created or already exists
-        if not student:
-            return
+#         # Check if the student was created or already exists
+#         if not student:
+#             return
 
-        # Get the introductory courses
-        intro_courses = Course.objects.filter(is_introductory=True)
-        for course in intro_courses:
-            Enrollment.objects.get_or_create(student=student, course=course)
+#         # Get the introductory courses
+#         intro_courses = Course.objects.filter(is_introductory=True)
+#         for course in intro_courses:
+#             Enrollment.objects.get_or_create(student=student, course=course)

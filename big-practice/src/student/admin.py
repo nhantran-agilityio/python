@@ -13,7 +13,7 @@ class CourseListFilter(admin.SimpleListFilter):
 
     def queryset(self, request, queryset):
         if self.value():
-            return queryset.filter(enrolled_courses__id=self.value())
+            return queryset.filter(courses__id=self.value())
         return queryset
 
 
