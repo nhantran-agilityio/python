@@ -5,7 +5,7 @@ from django.core.cache import cache
 
 class Course(models.Model):
     name = models.CharField(max_length=50)
-    duration = models.DurationField()
+    duration = models.DurationField(null=True)
     description = models.CharField(max_length=150)
     thumbnail = models.ImageField(upload_to='avatars/', null=True, blank=True)
     is_introductory = models.BooleanField(default=True)
