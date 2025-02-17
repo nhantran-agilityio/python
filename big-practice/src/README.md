@@ -26,7 +26,7 @@ Build the simple Student Management app created with Python, Django, REST framew
 
 ## Database model
   - DB diagram
-  - [![db.png](https://i.postimg.cc/wjTS859G/db.png)](https://postimg.cc/jLm8y7wH)
+  - [![db.png](https://i.postimg.cc/TPGv0tH2/Screenshot-2025-02-17-at-18-12-15.png)](https://postimg.cc/Wd9ybwvx)
 
 ## Code structure
     ├── src/
@@ -47,6 +47,26 @@ Build the simple Student Management app created with Python, Django, REST framew
     │   │   ├── apps.py        <- configuration for this application
     │   │   ├── models.py      <- defines User models.
     │   │   ├── serializers.py <- convert data types into a format
+    │   │   ├── urls.py        <- define the URL routes
+    │   │   └── views.py       <- controller functions for handling HTTP requests
+    │   │
+    │   ├── instructors
+    │   │   ├── migrations     <- contains database migration files generated
+    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
+    │   │   ├── apps.py        <- configuration for this application
+    │   │   ├── models.py      <- defines User models.
+    │   │   ├── serializers.py <- convert data types into a format
+    │   │   ├── urls.py        <- define the URL routes
+    │   │   └── views.py       <- controller functions for handling HTTP requests
+    │   │
+    │   ├── logs
+    │   │   ├── django.log     <- recorded to monitor events, errors, and warnings in a Django  application.
+    │   │
+    │   ├── notifications
+    │   │   ├── migrations     <- contains database migration files generated
+    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
+    │   │   ├── apps.py        <- configuration for this application
+    │   │   ├── models.py      <- defines User models.
     │   │   ├── urls.py        <- define the URL routes
     │   │   └── views.py       <- controller functions for handling HTTP requests
     │   │
@@ -119,6 +139,24 @@ git checkout feat/django-big-practice
     - All information of student by course
     - Total number of student by course
     - Apply pagination for all listing APIs
+
+**Advances**
+- Additional functional
+    - Email confirmation is required for registration and password reset.
+    - Auto-enrollment in introduction courses for new users.
+    - Dynamic statistics like average enrollments or top courses.
+- Background tasks (asynchronous)
+    - Send an email welcome when the student successfully registers with the system.
+    - Send an email to the instructors if a course reaches enrollment limitation.
+- Notifications (nice-to-have +2 days)
+    - Users (students, instructors) can see a list of notifications in their dashboard
+    - Send notifications to the instructors when a student enrolls in the course
+    - Send notification to students when they are removed from their enrolled course
+- Scheduling
+    - Scheduling a task for weekly clean-up data (courses inactive for 3 months)
+    - Scheduling a task for a monthly report (a CSV file sent via email)  sent to the instructor about the number of enrolled students per their course.
+- Monitoring, testing and deployment
+    - Set up logging, and monitoring (e.g., Sentry)
 
 [![api.png](https://i.postimg.cc/hhFKtnmC/api.png)](https://postimg.cc/0KCTVLcm)
 
