@@ -16,7 +16,7 @@ Build the simple Student Management app created with Python, Django, REST framew
 - [Code Structure](#code-structure)
 - [How To Run](#how-to-run)
 - [Unit Testing](#unit-testing)
-- [Coverage Reprot](#coverage-report)
+- [Coverage Report](#coverage-report)
 
 ## Technical Stack
 - **Python 3.12**: Python programming language
@@ -159,7 +159,6 @@ git checkout feat/django-big-practice
     - Set up logging, and monitoring (e.g., Sentry)
 
 [![api.png](https://i.postimg.cc/hhFKtnmC/api.png)](https://postimg.cc/0KCTVLcm)
-
 
 
 **Run with virtualenv at local environment**

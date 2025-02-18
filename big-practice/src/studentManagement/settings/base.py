@@ -3,7 +3,6 @@ from datetime import timedelta
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from pathlib import Path
-from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -78,24 +77,14 @@ INSTALLED_APPS = [
     'django_filters',
     'drf_yasg',
     "rest_framework",
+    "django_celery_beat",
     'django.contrib.sites',  # Required by allauth
     'allauth',  # Required by allauth
     'allauth.account',  # Required by allauth
     'allauth.socialaccount',  # Required by allauth
 ]
 
-
-# Scheduling a task for weekly clean-up data (courses inactive for 3 months)
-CELERY_BEAT_SCHEDULE = {
-    'clean-up-inactive-courses': {
-        'task': 'courses.tasks.clean_up_inactive_courses',
-        'schedule': crontab(0, 0, day_of_week='sunday'),  # Run every Sunday at midnight
-    },
-    'send-daily-report': {
-        'task': 'courses.tasks.send_daily_report',
-        'schedule': crontab(minute=0, hour=0),  # Run every day at midnight
-    },
-}
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 # Add the SITE_ID setting
 SITE_ID = 1

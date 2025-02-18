@@ -21,6 +21,14 @@ class EnrollmentAdmin(admin.ModelAdmin):
         Notification.objects.create(user=student.user, message=message)
         super().delete_model(request, obj)
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Filter by course if course_id is passed in the URL
+        course_id = request.GET.get('course')
+        if course_id:
+            qs = qs.filter(course_id=course_id)
+        return qs
+
 
 class CourseAdmin(admin.ModelAdmin):
     list_display = (
@@ -35,11 +43,12 @@ class CourseAdmin(admin.ModelAdmin):
     )
 
     def display_instructors(self, obj):
-        return ", ".join([instructor.name for instructor in obj.instructors.all()])
+        instructors = [instructor.name for instructor in obj.instructors.all()]
+        return ", ".join(instructors)
     display_instructors.short_description = 'Instructors'
 
-    # Optionally, add a filter by course to the Student admin
     def get_queryset(self, request):
+        # Optionally, add a filter by course to the Student admin
         qs = super().get_queryset(request)
         # Filter by course if course_id is passed in the URL
         course_id = request.GET.get('course')
