@@ -1,6 +1,9 @@
 from django.db import models
 from django.db.models import Count, Avg
 from django.core.cache import cache
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class Course(models.Model):
@@ -41,7 +44,10 @@ class Course(models.Model):
         # Try to get the top courses from the cache
         top_courses = cache.get('top_courses')
 
-        if not top_courses:
+        if top_courses:
+            logger.debug("Top courses retrieved from cache")
+        else:
+            logger.debug("Top courses not found in cache")
             # If not in cache, query the database
             # and store the result in the cache
             top_courses = cls.objects.annotate(
@@ -52,6 +58,9 @@ class Course(models.Model):
             cache.set(
                 'top_courses', top_courses, timeout=60*15
             )  # Cache for 15 minutes
+            logger.debug("Top courses cached")
+
+        return top_courses
 
 
 class Enrollment(models.Model):
@@ -66,3 +75,10 @@ class Enrollment(models.Model):
 
     def __str__(self):
         return f"{self.student.full_name} enrolled in {self.course.name}"
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['course']),
+            models.Index(fields=['student']),
+            models.Index(fields=['enrolled_at']),
+        ]

@@ -1,7 +1,6 @@
 from django.db import models
 from enum import Enum
-from django.db.models.functions import Now, ExtractYear, ExtractMonth
-from datetime import date
+from django.db.models.functions import ExtractYear, ExtractMonth
 from django.utils import timezone
 from datetime import timedelta
 from django.conf import settings
@@ -89,8 +88,17 @@ class Student(models.Model):
     def get_age(self):
         today = timezone.now().date()
         age = today.year - self.birthday.year
-        age -= (today.month, today.day) < (self.birthday.month, self.birthday.day)
+        age -= (today.month, today.day) < (
+            self.birthday.month, self.birthday.day)
         return age
 
     def __str__(self):
         return self.full_name
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['email']),
+            models.Index(fields=['is_active']),
+            models.Index(fields=['birthday']),
+        ]

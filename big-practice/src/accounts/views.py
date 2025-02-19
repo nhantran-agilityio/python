@@ -54,7 +54,6 @@ def activate_account(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        login(request, user)
         return redirect('home')
     else:
         return render(request, 'email/activation_email.html')

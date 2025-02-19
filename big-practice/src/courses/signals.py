@@ -19,7 +19,8 @@ def auto_enroll_intro_courses(sender, instance, created, **kwargs):
     Args:
         sender (User): The model class that sent the signal.
         instance (User): The instance of the model class that sent the signal.
-        created (bool): A boolean indicating whether the user instance was created.
+        created (bool): A boolean indicating whether the user instance was
+            created.
     """
     if created:  # Trigger only for new users
         # Ensure the instance is a Student
@@ -80,7 +81,8 @@ def send_enrollment_notification(sender, instance, created, **kwargs):
 
     Args:
         sender (Enrollment): The model class that sent the signal.
-        instance (Enrollment): The instance of the model class that sent the signal.
+        instance (Enrollment): The instance of the model class that sent
+            the signal.
         created (bool): A boolean indicating whether the enrollment instance was created.
         **kwargs: Additional keyword arguments passed to the signal handler.
 
@@ -101,12 +103,13 @@ def send_enrollment_notification(sender, instance, created, **kwargs):
 @receiver(post_delete, sender=Enrollment)
 def send_enrollment_deletion_notification(sender, instance, **kwargs):
     """
-    Signal receiver that sends a notification to the student when their enrollment
-    is deleted.
+    Signal receiver that sends a notification to the student when their
+    enrollment is deleted.
 
     Args:
         sender (Enrollment): The model class that sent the signal.
-        instance (Enrollment): The instance of the model class that sent the signal.
+        instance (Enrollment): The instance of the model class that sent
+            the signal.
         **kwargs: Additional keyword arguments passed to the signal handler.
 
     """
