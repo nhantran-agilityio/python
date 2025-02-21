@@ -3,12 +3,11 @@
 ## Overview
 Build the simple Student Management app created with Python, Django, REST framework and SQLite. We can view detail requirement at [Link](https://docs.google.com/document/d/1JHRwU7X1Qqw5KF8nG7NHcQWsH0l4ZenITZtS6tc-zbE/edit?usp=sharing)
 
-## Timeline
-- Start day: *Aug 01, 2024*
-- End day: *Aug 12, 2024*
-
+## Timeline Basic
 - Estimate: 8 days
-- Actual: 9 days
+
+## Timeline Advanced
+- Estimate: 10 days
 
 ## Table of Contents
 - [Technical Stack](#technical-stack)
@@ -32,29 +31,29 @@ Build the simple Student Management app created with Python, Django, REST framew
     ├── src/
     │   ├── accounts
     │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── tests          <- define for performing tests user
-    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
+    │   │   ├── tests          <- define for performing tests account
+    │   │   ├── admin.py       <- configures the Django admin interface for managing Accounts models
     │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines User models.
+    │   │   ├── models.py      <- defines Accounts models.
     │   │   ├── serializers.py <- convert data types into a format
     │   │   ├── urls.py        <- define the URL routes
     │   │   └── views.py       <- controller functions for handling HTTP requests
     │   │
     │   ├── courses
     │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── tests          <- define for performing tests user
-    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
+    │   │   ├── tests          <- define for performing tests courses
+    │   │   ├── admin.py       <- configures the Django admin interface for managing Courses models
     │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines User models.
+    │   │   ├── models.py      <- defines Courses models.
     │   │   ├── serializers.py <- convert data types into a format
     │   │   ├── urls.py        <- define the URL routes
     │   │   └── views.py       <- controller functions for handling HTTP requests
     │   │
     │   ├── instructors
     │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
+    │   │   ├── admin.py       <- configures the Django admin interface for managing Instructors models
     │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines User models.
+    │   │   ├── models.py      <- defines Instructors models.
     │   │   ├── serializers.py <- convert data types into a format
     │   │   ├── urls.py        <- define the URL routes
     │   │   └── views.py       <- controller functions for handling HTTP requests
@@ -64,18 +63,18 @@ Build the simple Student Management app created with Python, Django, REST framew
     │   │
     │   ├── notifications
     │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
+    │   │   ├── admin.py       <- configures the Django admin interface for managing Notifications models
     │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines User models.
+    │   │   ├── models.py      <- defines Notifications models.
     │   │   ├── urls.py        <- define the URL routes
     │   │   └── views.py       <- controller functions for handling HTTP requests
     │   │
     │   ├── report
     │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── tests          <- define for performing tests user
-    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
+    │   │   ├── tests          <- define for performing tests report
+    │   │   ├── admin.py       <- configures the Django admin interface for managing Report models
     │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines User models.
+    │   │   ├── models.py      <- defines Report models.
     │   │   ├── serializers.py <- convert data types into a format
     │   │   ├── urls.py        <- define the URL routes
     │   │   └── views.py       <- controller functions for handling HTTP requests
@@ -91,8 +90,14 @@ Build the simple Student Management app created with Python, Django, REST framew
     │   │   └── views.py       <- controller functions for handling HTTP requests
     │   │
     │   ├── studentManagement
-    │   │   └── settings.py    <-  settings and configuration for database, apps, templates, etc...
-    │   │   └──  urls.py       <- URL routes for project, linking app routes
+    │   │   └── settings
+    │   │   |   └── base.py
+    │   │   |   └── dev.py
+    │   │   |   └── production.py
+    │   │   |   └── test.py
+    │   │   ├── __init__.py
+    │   │   └── celery.py
+    │   │   └── urls.py       <- URL routes for project, linking app routes
     │   │   ├── asgi.py        <- async web server configuration
     │   │   └── wsgi.py        <- sync web server configuration
     │
@@ -190,11 +195,6 @@ python manage.py runserver 8000
 - Go to [http://0.0.0.0:8000/swagger/](http://0.0.0.0:8000/swagger/) to view all APIs.
 - Go to Admin: [http://0.0.0.0:8000/admin/](http://0.0.0.0:8000/admin/)
    - Username/password: NhanTran/Abcd@1234
-
-## Run with Docker compose
-```
- docker-compose up --build -d
-```
 
 ## Unit Testing
 - coverage run manage.py test
