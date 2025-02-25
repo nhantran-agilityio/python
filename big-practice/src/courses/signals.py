@@ -1,4 +1,5 @@
 from django.db.models.signals import post_save
+from django.core.cache import cache
 from django.utils import timezone
 from django.dispatch import receiver
 from django.core.mail import send_mail
@@ -47,15 +48,17 @@ def auto_enroll_intro_courses(sender, instance, created, **kwargs):
                 )
 
 @receiver(post_save, sender=Enrollment)
-def send_course_full_email(sender, instance, created, **kwargs):
+def notify_course_instructors_when_course_is_full(
+    sender, instance, created, **kwargs
+):
     """
-    Signal receiver that sends an email to the course instructors
-    when a course has reached its enrollment limit.
+    Notify course instructors via email when a course has reached its
+    enrollment limit.
 
     Args:
         sender (Enrollment): The model class that sent the signal.
-        instance (Enrollment): The instance of the model class that sent
-            the signal.
+        instance (Enrollment): The instance of the model class that sent the
+            signal.
         created (bool): A boolean indicating whether the enrollment instance
             was created.
         **kwargs: Additional keyword arguments passed to the signal handler.
@@ -68,8 +71,9 @@ def send_course_full_email(sender, instance, created, **kwargs):
                 f'The course "{course.name}" has reached its enrollment limit.'
             )
             from_email = settings.EMAIL_HOST_USER
-            recipient_list = [instructor.email for instructor
-                              in course.instructors.all()]
+            recipient_list = [
+                instructor.email for instructor in course.instructors.all()
+            ]
             send_mail(subject, message, from_email, recipient_list)
 
 
@@ -120,3 +124,10 @@ def send_enrollment_deletion_notification(sender, instance, **kwargs):
         Notification.objects.create(user=student.user, message=message)
     except User.DoesNotExist:
         logger.error(f"User for student {student.email} does not exist.")
+
+
+@receiver([post_delete, post_save], sender=Course)
+def invalidate_cache_course(sender, instance, **kwargs):
+    logger.info("Clearing course cache")
+    cache.delete('top_courses')
+    cache.delete('course_statistics')
