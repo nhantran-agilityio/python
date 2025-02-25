@@ -1,5 +1,5 @@
 from django.db import models
-from django.db.models import Count, Avg
+from django.db.models import Count, Avg, QuerySet
 from django.core.cache import cache
 import logging
 
@@ -40,26 +40,19 @@ class Course(models.Model):
         ).aggregate(Avg('num_enrollments'))['num_enrollments__avg']
 
     @classmethod
-    def top_courses(cls, limit=5):
-        # Try to get the top courses from the cache
-        top_courses = cache.get('top_courses')
+    def top_courses(cls, limit: int = 5) -> QuerySet:
+        """Get the top courses by enrollment count, up to a limit."""
+        cached_top_courses = cache.get('top_courses')
 
-        if top_courses:
-            logger.debug("Top courses retrieved from cache")
-        else:
-            logger.debug("Top courses not found in cache")
-            # If not in cache, query the database
-            # and store the result in the cache
-            top_courses = cls.objects.annotate(
-                num_enrollments=Count('course_enrollments')
-            ).order_by('-num_enrollments')[
-                :limit
-            ]
-            cache.set(
-                'top_courses', top_courses, timeout=60*15
-            )  # Cache for 15 minutes
-            logger.debug("Top courses cached")
+        if cached_top_courses is not None:
+            return cached_top_courses
 
+        top_courses = (
+            cls.objects.annotate(num_enrollments=Count('course_enrollments'))
+            .order_by('-num_enrollments')[:limit]
+        )
+        cache.set('top_courses', top_courses, timeout=60 * 15)
+        logger.debug(f"Returning top courses: {top_courses}")
         return top_courses
 
 

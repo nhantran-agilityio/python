@@ -1,3 +1,6 @@
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
+from django.views.decorators.cache import cache_page
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -8,9 +11,11 @@ from student.models import Student
 from .serializers import CourseSerializer
 from rest_framework.pagination import PageNumberPagination
 import logging
-
+from django.utils.decorators import method_decorator
 
 logger = logging.getLogger(__name__)
+
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
 class CustomPagination(PageNumberPagination):
@@ -23,6 +28,7 @@ class CourseViewSet(viewsets.ModelViewSet):
     pagination_class = CustomPagination
 
     @action(detail=False, methods=['get'])
+    @method_decorator(cache_page(CACHE_TTL))
     def statistics(self, request):
         logger.debug("Fetching course statistics")
         average_enrollments = Course.average_enrollments()
@@ -38,25 +44,30 @@ class CourseViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['post'])
     def enroll(self, request):
+        """
+        Enroll a student in a course
+        """
         course_id = request.data.get('course_id')
         student_id = request.data.get('student_id')
 
         try:
             course = Course.objects.get(id=course_id)
             student = Student.objects.get(id=student_id)
-            enrollment = Enrollment.objects.create(
-                course=course, student=student)
-            return Response({
-                'status': 'enrolled',
-                'enrollment_id': enrollment.id
-            })
         except Course.DoesNotExist:
             return Response({'error': 'Course not found'}, status=404)
         except Student.DoesNotExist:
             return Response({'error': 'Student not found'}, status=404)
 
+        enrollment = Enrollment.objects.create(
+            course=course, student=student)
+        return Response({
+            'status': 'enrolled',
+            'enrollment_id': enrollment.id
+        })
+
 
 class CourseStatisticsView(View):
+    @method_decorator(cache_page(CACHE_TTL))
     def get(self, request):
         average_enrollments = Course.average_enrollments()
         top_courses = Course.top_courses()
