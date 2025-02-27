@@ -70,8 +70,13 @@ class CourseStatisticsView(View):
     @method_decorator(cache_page(CACHE_TTL))
     def get(self, request):
         average_enrollments = Course.average_enrollments()
-        top_courses = Course.top_courses()
+        top_courses = Course.top_courses().select_related('instructor').prefetch_related('enrollments__student')
         return render(request, 'statistics.html', {
             'average_enrollments': average_enrollments,
             'top_courses': top_courses,
         })
+
+
+def course_list(request):
+    courses = Course.objects.prefetch_related('instructors').all()
+    return render(request, 'course_list.html', {'courses': courses})

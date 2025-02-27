@@ -21,8 +21,6 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from student.views import home
 from django.conf import settings
-from django.urls import include, path
-
 
 schema_view = get_schema_view(
     openapi.Info(

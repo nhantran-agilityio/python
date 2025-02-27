@@ -10,9 +10,9 @@ class Report(models.Model):
     course = models.ForeignKey('courses.Course', on_delete=models.CASCADE,
                                null=True, related_name='report')
 
-    class Meta:
-        # Ensures that each student-course pair is unique
-        unique_together = ('student', 'course')
+    # class Meta:
+    #     # Ensures that each student-course pair is unique
+    #     unique_together = ('student', 'course')
 
     def __str__(self):
         return f"{self.student.full_name} - {self.course.name} - {self.point}"
