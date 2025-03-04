@@ -155,6 +155,10 @@ MIDDLEWARE = [
     'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
+if 'test' in os.sys.argv:
+    INSTALLED_APPS.remove('debug_toolbar')
+    MIDDLEWARE.remove('debug_toolbar.middleware.DebugToolbarMiddleware')
+
 
 ROOT_URLCONF = 'studentManagement.urls'
 

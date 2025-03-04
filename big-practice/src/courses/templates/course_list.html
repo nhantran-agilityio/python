@@ -21,7 +21,7 @@
         </thead>
         <tbody>
             {% for course in courses %}
-            <tr>
+            <tr style="background-color: {% if course.is_full %}green{% else %}yellow{% endif %}">
                 <td>{{ course.name }}</td>
                 <td>{{ course.duration }}</td>
                 <td>{{ course.description }}</td>

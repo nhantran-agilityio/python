@@ -24,7 +24,7 @@ class CustomPagination(PageNumberPagination):
 
 class CourseViewSet(viewsets.ModelViewSet):
     # queryset = Course.objects.all()
-    queryset = Course.objects.all().prefetch_related('instructors', 'enrollments')
+    queryset = Course.objects.prefetch_related('instructors', 'enrollments')
     serializer_class = CourseSerializer
     pagination_class = CustomPagination
 
@@ -34,7 +34,7 @@ class CourseViewSet(viewsets.ModelViewSet):
         logger.debug("Fetching course statistics")
         average_enrollments = Course.average_enrollments()
         logger.info(f"Average enrollments: {average_enrollments}")
-        # top_courses = Course.top_courses()
+        # top_courses = Course.top_courses().all()
         top_courses = Course.top_courses().prefetch_related('instructors')
         logger.debug(f"Top courses: {top_courses}")
         top_courses_data = CourseSerializer(top_courses, many=True).data
