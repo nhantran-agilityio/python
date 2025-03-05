@@ -102,8 +102,4 @@ class Student(models.Model):
             models.Index(fields=['email']),
             models.Index(fields=['is_active']),
             models.Index(fields=['birthday']),
-
-
-
-
         ]

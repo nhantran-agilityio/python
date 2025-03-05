@@ -1,0 +1,2 @@
+[MESSAGES CONTROL]
+enable=performance,unused-import,unused-variable,unused-argument
