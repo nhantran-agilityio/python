@@ -1,183 +1,130 @@
-# # Django Big Practice - Student Management
+# Django Big Practice - Student Management
 
 ## Overview
 
-Build the simple Student Management app created with Python, Django, REST framework and SQLite. We can view detail requirement at [Link](https://docs.google.com/document/d/1JHRwU7X1Qqw5KF8nG7NHcQWsH0l4ZenITZtS6tc-zbE/edit?usp=sharing)
+Build a simple Student Management app using Python, Django, REST framework, and SQLite. Detailed requirements can be found in the project documentation.
 
-## Timeline Basic
+## Timeline
 
--   Estimate: 8 days
-
-## Timeline Advanced
-
--   Estimate: 10 days
+-   Basic: 8 days
+-   Advanced: 10 days
 
 ## Table of Contents
 
 -   [Technical Stack](#technical-stack)
--   [Database model](#database-model)
+-   [Database Model](#database-model)
 -   [Code Structure](#code-structure)
--   [How To Run](#how-to-run)
+-   [How to Run](#how-to-run)
+-   [Admin Interface](#admin-interface)
+-   [APIs](#apis)
+-   [Advanced Features](#advanced-features)
 -   [Unit Testing](#unit-testing)
 -   [Coverage Report](#coverage-report)
 
 ## Technical Stack
 
 -   **Python 3.12**: Python programming language
--   **Django 5.0.7**: A high-level Python web framework that encourages rapid development and clean, pragmatic design.
--   **Django REST Framework 3.15.2**: A powerful toolkit for building Web APIs in Django, enabling easy serialization and rendering of data.
--   **SQlite**: SQLite is an in-process library that implements a self-contained, serverless, zero-configuration, transactional SQL database engine
+-   **Django 5.0.7**: A high-level Python web framework
+-   **Django REST Framework 3.15.2**: Toolkit for building Web APIs in Django
+-   **SQLite**: Self-contained, serverless, zero-configuration SQL database engine
 
-## Database model
+## Database Model
 
--   DB diagram: [![db.png](https://i.postimg.cc/TPGv0tH2/Screenshot-2025-02-17-at-18-12-15.png)](https://postimg.cc/Wd9ybwvx)
+-   DB diagram: ![db.png](https://i.postimg.cc/TPGv0tH2/Screenshot-2025-02-17-at-18-12-15.png)
 
-## Code structure
+## Code Structure
 
-    ├── src/
-    │   ├── accounts
-    │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── tests          <- define for performing tests account
-    │   │   ├── admin.py       <- configures the Django admin interface for managing Accounts models
-    │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines Accounts models.
-    │   │   ├── serializers.py <- convert data types into a format
-    │   │   ├── urls.py        <- define the URL routes
-    │   │   └── views.py       <- controller functions for handling HTTP requests
-    │   │
-    │   ├── courses
-    │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── tests          <- define for performing tests courses
-    │   │   ├── admin.py       <- configures the Django admin interface for managing Courses models
-    │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines Courses models.
-    │   │   ├── serializers.py <- convert data types into a format
-    │   │   ├── urls.py        <- define the URL routes
-    │   │   └── views.py       <- controller functions for handling HTTP requests
-    │   │
-    │   ├── instructors
-    │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── admin.py       <- configures the Django admin interface for managing Instructors models
-    │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines Instructors models.
-    │   │   ├── serializers.py <- convert data types into a format
-    │   │   ├── urls.py        <- define the URL routes
-    │   │   └── views.py       <- controller functions for handling HTTP requests
-    │   │
-    │   ├── logs
-    │   │   ├── django.log     <- recorded to monitor events, errors, and warnings in a Django  application.
-    │   │
-    │   ├── notifications
-    │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── admin.py       <- configures the Django admin interface for managing Notifications models
-    │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines Notifications models.
-    │   │   ├── urls.py        <- define the URL routes
-    │   │   └── views.py       <- controller functions for handling HTTP requests
-    │   │
-    │   ├── report
-    │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── tests          <- define for performing tests report
-    │   │   ├── admin.py       <- configures the Django admin interface for managing Report models
-    │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines Report models.
-    │   │   ├── serializers.py <- convert data types into a format
-    │   │   ├── urls.py        <- define the URL routes
-    │   │   └── views.py       <- controller functions for handling HTTP requests
-    │   │
-    │   ├── student
-    │   │   ├── migrations     <- contains database migration files generated
-    │   │   ├── tests          <- define for performing tests user
-    │   │   ├── admin.py       <- configures the Django admin interface for managing User models
-    │   │   ├── apps.py        <- configuration for this application
-    │   │   ├── models.py      <- defines User models.
-    │   │   ├── serializers.py <- convert data types into a format
-    │   │   ├── urls.py        <- define the URL routes
-    │   │   └── views.py       <- controller functions for handling HTTP requests
-    │   │
-    │   ├── studentManagement
-    │   │   └── settings
-    │   │   |   └── base.py
-    │   │   |   └── dev.py
-    │   │   |   └── production.py
-    │   │   |   └── test.py
-    │   │   ├── __init__.py
-    │   │   └── celery.py
-    │   │   └── urls.py       <- URL routes for project, linking app routes
-    │   │   ├── asgi.py        <- async web server configuration
-    │   │   └── wsgi.py        <- sync web server configuration
-    │
-    ├── .gitignore
-    ├── .editcongig
-    ├── .coveragerc            <- Config test coverage
-    ├── README.md
-    ├── Dockerfile
-    ├── .env.sample.py
-    ├── manage.py              <- execute several commands at a project level
-    ├── .flake8                <- checking the style and quality of Python code
-    ├── requirements
-    ├── .env.sample
-    ├── .pre-commit-config.yaml
-    └── docker-compose.yaml
+```
+src/
+├── accounts
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── courses
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── instructors
+│   ├── migrations
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── logs
+│   └── django.log
+├── notifications
+│   ├── migrations
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── report
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── student
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── studentManagement
+│   └── settings
+│       ├── base.py
+│       ├── dev.py
+│       ├── production.py
+│       ├── test.py
+│   ├── __init__.py
+│   ├── celery.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── .gitignore
+├── .editorconfig
+├── .coveragerc
+├── README.md
+├── Dockerfile
+├── .env.sample
+├── manage.py
+├── .flake8
+├── requirements.txt
+├── .env.sample
+├── .pre-commit-config.yaml
+└── docker-compose.yaml
+```
 
-## How to run
+## How to Run
 
 **Clone the repository**
 
 ```
-git clone git@gitlab.asoft-python.com:nhan.tran/python-training.git
+git clone git@example.com:your-username/your-repository.git
 cd python-training/
 git checkout feat/django-big-practice
 ```
 
-## Admin Interface
-
-**Admin can view all resources and have full permission on them.**
-
--   Can CRUD, View all course, report, student, user
--   Can search student by first name, last name and email
--   Can filter student by course
-
-[![admin-site.png](https://i.postimg.cc/P502LZwS/admin-site.png)](https://postimg.cc/68Ldg8zZ)
-**APIs**
-
--   Authentication
-    -   Login
-    -   Sign Up
--   Create, update and delete object Student, Course, Report
--   Filtering
-    -   View detail information of an student/course
-    -   Listing students
-    -   Order by first name
-    -   Search students by name or email
-    -   Search students by their birth range from date to date
--   Listing Course
-    -   All information of student by course
-    -   Total number of student by course
-    -   Apply pagination for all listing APIs
-
-**Advances**
-
--   Additional functional
-    -   Email confirmation is required for registration and password reset.
-    -   Auto-enrollment in introduction courses for new users.
-    -   Dynamic statistics like average enrollments or top courses.
--   Background tasks (asynchronous)
-    -   Send an email welcome when the student successfully registers with the system.
-    -   Send an email to the instructors if a course reaches enrollment limitation.
--   Notifications (nice-to-have +2 days)
-    -   Users (students, instructors) can see a list of notifications in their dashboard
-    -   Send notifications to the instructors when a student enrolls in the course
-    -   Send notification to students when they are removed from their enrolled course
--   Scheduling
-    -   Scheduling a task for weekly clean-up data (courses inactive for 3 months)
-    -   Scheduling a task for a monthly report (a CSV file sent via email) sent to the instructor about the number of enrolled students per their course.
--   Monitoring, testing and deployment
-    -   Set up logging, and monitoring (e.g., Sentry)
-
-[![api.png](https://i.postimg.cc/hhFKtnmC/api.png)](https://postimg.cc/0KCTVLcm)
-
-**Run with virtualenv at local environment**
+**Run with virtualenv in local environment**
 
 1. Create a virtual environment:
 
@@ -185,36 +132,95 @@ git checkout feat/django-big-practice
 python3 -m venv env
 ```
 
-2. Activate the virtual environment
+2. Activate the virtual environment:
 
 ```
 source env/bin/activate
 ```
 
-3. Install dependencies from requirements.txt.
+3. Install dependencies:
 
 ```
 cd src
 pip install -r requirements.txt
 ```
 
-4. Run server
+4. Run the server:
 
 ```
 python manage.py runserver 8000
 ```
 
-5. Browsable APIs
+5. Access APIs:
 
--   Go to [http://0.0.0.0:8000/swagger/](http://0.0.0.0:8000/swagger/) to view all APIs.
--   Go to Admin: [http://0.0.0.0:8000/admin/](http://0.0.0.0:8000/admin/)
-    -   Username/password: NhanTran/Abcd@1234
+-   [Swagger](http://0.0.0.0:8000/swagger/)
+-   [Admin](http://0.0.0.0:8000/admin/)
+    -   Set up an admin account by running the following command:
+        ```
+        python manage.py createsuperuser
+        ```
+
+## Admin Interface
+
+**Admin can view all resources and have full permissions.**
+
+-   CRUD operations on courses, reports, students, and users
+-   Search students by first name, last name, and email
+-   Filter students by course
+
+![admin-site.png](https://i.postimg.cc/P502LZwS/admin-site.png)
+
+## APIs
+
+-   Authentication
+    -   Login
+    -   Sign Up
+-   CRUD operations on Student, Course, Report
+-   Filtering
+    - View detailed information of a student/course
+    - List students
+    - Order by first name
+    - Search students by name or email
+    - Search students by birth date range
+-   List Courses
+    -   All information of students by course
+    -   Total number of students by course
+    -   Apply pagination for all listing APIs
+
+![api.png](https://i.postimg.cc/hhFKtnmC/api.png)
+
+## Advanced Features
+
+-   Email confirmation for registration and password reset
+-   Auto-enrollment in introductory courses for new users
+-   Dynamic statistics like average enrollments or top courses
+-   Background tasks (asynchronous)
+    -   Send a welcome email upon successful registration
+    -   Notify instructors if a course reaches enrollment limit
+-   Notifications
+    -   Users can see a list of notifications in their dashboard
+    -   Notify instructors when a student enrolls in a course
+    -   Notify students when they are removed from a course
+-   Scheduling
+    -   Weekly clean-up of inactive courses (3 months)
+    -   Monthly report (CSV) sent to instructors about enrolled students per course
+-   Monitoring, testing, and deployment
+    -   Set up logging and monitoring (e.g., Sentry)
 
 ## Unit Testing
 
--   coverage run manage.py test
--   coverage report
--   coverage html
+-   Run tests:
+
+```
+coverage run manage.py test
+```
+
+-   Generate coverage report:
+
+```
+coverage report
+coverage html
+```
 
 ## Coverage Report
 
