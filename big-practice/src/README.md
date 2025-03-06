@@ -1,33 +1,39 @@
-# Django Big Practice - Student Management
+# # Django Big Practice - Student Management
 
 ## Overview
+
 Build the simple Student Management app created with Python, Django, REST framework and SQLite. We can view detail requirement at [Link](https://docs.google.com/document/d/1JHRwU7X1Qqw5KF8nG7NHcQWsH0l4ZenITZtS6tc-zbE/edit?usp=sharing)
 
 ## Timeline Basic
-- Estimate: 8 days
+
+-   Estimate: 8 days
 
 ## Timeline Advanced
-- Estimate: 10 days
+
+-   Estimate: 10 days
 
 ## Table of Contents
-- [Technical Stack](#technical-stack)
-- [Database model](#database-model)
-- [Code Structure](#code-structure)
-- [How To Run](#how-to-run)
-- [Unit Testing](#unit-testing)
-- [Coverage Report](#coverage-report)
+
+-   [Technical Stack](#technical-stack)
+-   [Database model](#database-model)
+-   [Code Structure](#code-structure)
+-   [How To Run](#how-to-run)
+-   [Unit Testing](#unit-testing)
+-   [Coverage Report](#coverage-report)
 
 ## Technical Stack
-- **Python 3.12**: Python programming language
-- **Django 5.0.7**: A high-level Python web framework that encourages rapid development and clean, pragmatic design.
-- **Django REST Framework 3.15.2**: A powerful toolkit for building Web APIs in Django, enabling easy serialization and rendering of data.
-- **SQlite**: SQLite is an in-process library that implements a self-contained, serverless, zero-configuration, transactional SQL database engine
+
+-   **Python 3.12**: Python programming language
+-   **Django 5.0.7**: A high-level Python web framework that encourages rapid development and clean, pragmatic design.
+-   **Django REST Framework 3.15.2**: A powerful toolkit for building Web APIs in Django, enabling easy serialization and rendering of data.
+-   **SQlite**: SQLite is an in-process library that implements a self-contained, serverless, zero-configuration, transactional SQL database engine
 
 ## Database model
-  - DB diagram
-  - [![db.png](https://i.postimg.cc/TPGv0tH2/Screenshot-2025-02-17-at-18-12-15.png)](https://postimg.cc/Wd9ybwvx)
+
+-   DB diagram: [![db.png](https://i.postimg.cc/TPGv0tH2/Screenshot-2025-02-17-at-18-12-15.png)](https://postimg.cc/Wd9ybwvx)
 
 ## Code structure
+
     ├── src/
     │   ├── accounts
     │   │   ├── migrations     <- contains database migration files generated
@@ -115,7 +121,9 @@ Build the simple Student Management app created with Python, Django, REST framew
     └── docker-compose.yaml
 
 ## How to run
+
 **Clone the repository**
+
 ```
 git clone git@gitlab.asoft-python.com:nhan.tran/python-training.git
 cd python-training/
@@ -123,48 +131,51 @@ git checkout feat/django-big-practice
 ```
 
 ## Admin Interface
+
 **Admin can view all resources and have full permission on them.**
-- Can CRUD, View all course, report, student, user
-- Can search student by first name, last name and email
-- Can filter student by course
+
+-   Can CRUD, View all course, report, student, user
+-   Can search student by first name, last name and email
+-   Can filter student by course
 
 [![admin-site.png](https://i.postimg.cc/P502LZwS/admin-site.png)](https://postimg.cc/68Ldg8zZ)
 **APIs**
-- Authentication
-    - Login
-    - Sign Up
-- Create, update and delete object Student, Course, Report
-- Filtering
-    - View detail information of an student/course
-    - Listing students
-    - Order by first name
-    - Search students by name or email
-    - Search students by their birth range from date to date
-- Listing Course
-    - All information of student by course
-    - Total number of student by course
-    - Apply pagination for all listing APIs
+
+-   Authentication
+    -   Login
+    -   Sign Up
+-   Create, update and delete object Student, Course, Report
+-   Filtering
+    -   View detail information of an student/course
+    -   Listing students
+    -   Order by first name
+    -   Search students by name or email
+    -   Search students by their birth range from date to date
+-   Listing Course
+    -   All information of student by course
+    -   Total number of student by course
+    -   Apply pagination for all listing APIs
 
 **Advances**
-- Additional functional
-    - Email confirmation is required for registration and password reset.
-    - Auto-enrollment in introduction courses for new users.
-    - Dynamic statistics like average enrollments or top courses.
-- Background tasks (asynchronous)
-    - Send an email welcome when the student successfully registers with the system.
-    - Send an email to the instructors if a course reaches enrollment limitation.
-- Notifications (nice-to-have +2 days)
-    - Users (students, instructors) can see a list of notifications in their dashboard
-    - Send notifications to the instructors when a student enrolls in the course
-    - Send notification to students when they are removed from their enrolled course
-- Scheduling
-    - Scheduling a task for weekly clean-up data (courses inactive for 3 months)
-    - Scheduling a task for a monthly report (a CSV file sent via email)  sent to the instructor about the number of enrolled students per their course.
-- Monitoring, testing and deployment
-    - Set up logging, and monitoring (e.g., Sentry)
+
+-   Additional functional
+    -   Email confirmation is required for registration and password reset.
+    -   Auto-enrollment in introduction courses for new users.
+    -   Dynamic statistics like average enrollments or top courses.
+-   Background tasks (asynchronous)
+    -   Send an email welcome when the student successfully registers with the system.
+    -   Send an email to the instructors if a course reaches enrollment limitation.
+-   Notifications (nice-to-have +2 days)
+    -   Users (students, instructors) can see a list of notifications in their dashboard
+    -   Send notifications to the instructors when a student enrolls in the course
+    -   Send notification to students when they are removed from their enrolled course
+-   Scheduling
+    -   Scheduling a task for weekly clean-up data (courses inactive for 3 months)
+    -   Scheduling a task for a monthly report (a CSV file sent via email) sent to the instructor about the number of enrolled students per their course.
+-   Monitoring, testing and deployment
+    -   Set up logging, and monitoring (e.g., Sentry)
 
 [![api.png](https://i.postimg.cc/hhFKtnmC/api.png)](https://postimg.cc/0KCTVLcm)
-
 
 **Run with virtualenv at local environment**
 
@@ -175,9 +186,11 @@ python3 -m venv env
 ```
 
 2. Activate the virtual environment
+
 ```
 source env/bin/activate
 ```
+
 3. Install dependencies from requirements.txt.
 
 ```
@@ -186,22 +199,25 @@ pip install -r requirements.txt
 ```
 
 4. Run server
+
 ```
 python manage.py runserver 8000
 ```
 
 5. Browsable APIs
 
-- Go to [http://0.0.0.0:8000/swagger/](http://0.0.0.0:8000/swagger/) to view all APIs.
-- Go to Admin: [http://0.0.0.0:8000/admin/](http://0.0.0.0:8000/admin/)
-   - Username/password: NhanTran/Abcd@1234
+-   Go to [http://0.0.0.0:8000/swagger/](http://0.0.0.0:8000/swagger/) to view all APIs.
+-   Go to Admin: [http://0.0.0.0:8000/admin/](http://0.0.0.0:8000/admin/)
+    -   Username/password: NhanTran/Abcd@1234
 
 ## Unit Testing
-- coverage run manage.py test
-- coverage report
-- coverage html
+
+-   coverage run manage.py test
+-   coverage report
+-   coverage html
 
 ## Coverage Report
+
 ```
 Name                                 Stmts   Miss Branch BrPart  Cover
 ----------------------------------------------------------------------
