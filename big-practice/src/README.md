@@ -30,7 +30,7 @@ Build a simple Student Management app using Python, Django, REST framework, and 
 
 ## Database Model
 
--   DB diagram: ![db.png](https://i.postimg.cc/TPGv0tH2/Screenshot-2025-02-17-at-18-12-15.png)
+-   DB diagram: ![db.png](https://i.postimg.cc/RFjW1154/Screenshot-2025-03-06-at-17-15-21.png)
 
 ## Code Structure
 
