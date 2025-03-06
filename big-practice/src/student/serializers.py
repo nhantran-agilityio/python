@@ -53,7 +53,7 @@ class StudentSerializer(serializers.ModelSerializer):
         # Clear existing courses and add new ones
         instance.courses.clear()
         for course_data in courses_data:
-            course, created = Course.objects.get_or_create(**course_data)
+            course = Course.objects.get_or_create(**course_data)
             instance.courses.add(course)
 
         return instance
