@@ -36,6 +36,7 @@ class StudentManager(models.Manager):
 
     def student_avg_age(self):
         """
+
         Get average age of Student.
 
         Returns:

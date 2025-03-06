@@ -23,7 +23,6 @@ class StudentModelTest(TestCase):
             address="123 Main St",
             email="john.doe@example.com",
             gender="Male",
-            # birthday='1990-01-01',
             birthday=date(today.year - 18, 1, 1),
         )
         self.student2 = Student.objects.create(
@@ -33,7 +32,6 @@ class StudentModelTest(TestCase):
             address="456 Elm St",
             email="jane.smith@example.com",
             gender="Female",
-            # birthday='1995-05-15',
             birthday=date(today.year - 24, 1, 1),
         )
 
@@ -41,12 +39,13 @@ class StudentModelTest(TestCase):
         self.assertEqual(self.student.full_name, 'Nhan Tran')
 
     def test_student_creation(self):
+        today = date.today()
         self.assertEqual(self.student.first_name, 'Nhan')
         self.assertEqual(self.student.last_name, 'Tran')
         self.assertEqual(self.student.email, 'test@gmail.com')
         self.assertEqual(self.student.address, '80 Le Cao Lang')
         self.assertEqual(self.student.gender, 'Male')
-        self.assertEqual(self.student.birthday, date(2000, 1, 1))
+        self.assertEqual(self.student.birthday, date(today.year - 24, 1, 1))
         self.assertTrue(self.student.is_active)
 
     def test_student_str_method(self):

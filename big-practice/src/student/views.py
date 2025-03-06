@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets
 from student.serializers import StudentSerializer
 from rest_framework.pagination import PageNumberPagination
 from django_filters.rest_framework import DjangoFilterBackend
@@ -12,9 +12,10 @@ class CustomPagination(PageNumberPagination):
 
 
 class StudentViewSet(viewsets.ModelViewSet):
-    # permission_classes = [permissions.IsAuthenticated]
     pagination_class = CustomPagination
-    queryset = Student.objects.filter(is_active=True).order_by("first_name")
+    queryset = Student.objects.filter(is_active=True)\
+        .select_related('user')\
+        .order_by("first_name")
     serializer_class = StudentSerializer
 
     filter_backends = (DjangoFilterBackend,)

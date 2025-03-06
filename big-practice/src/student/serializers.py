@@ -5,13 +5,11 @@ from courses.serializers import CourseSerializer
 
 
 class StudentSerializer(serializers.ModelSerializer):
-    # url = serializers.HyperlinkedIdentityField(view_name='student-detail')
     courses = CourseSerializer(many=True)
 
     class Meta:
         model = Student
         fields = [
-            # "url",
             "first_name",
             "last_name",
             "birthday",
@@ -53,7 +51,7 @@ class StudentSerializer(serializers.ModelSerializer):
         # Clear existing courses and add new ones
         instance.courses.clear()
         for course_data in courses_data:
-            course, created = Course.objects.get_or_create(**course_data)
+            course = Course.objects.get_or_create(**course_data)
             instance.courses.add(course)
 
         return instance

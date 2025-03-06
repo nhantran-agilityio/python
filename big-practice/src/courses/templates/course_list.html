@@ -1,0 +1,42 @@
+<!-- filepath: /Users/nhantran/python-training/big-practice/src/courses/templates/courses/course_list.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course List</title>
+</head>
+<body>
+    <h1>Course List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Course Name</th>
+                <th>Duration</th>
+                <th>Description</th>
+                <th>Instructors</th>
+                <th>Current Enrollments</th>
+                <th>Is Full</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for course in courses %}
+            <tr style="background-color: {% if course.is_full %}green{% else %}yellow{% endif %}">
+                <td>{{ course.name }}</td>
+                <td>{{ course.duration }}</td>
+                <td>{{ course.description }}</td>
+                <td>
+                    <ul>
+                        {% for instructor in course.instructors.all %}
+                        <li>{{ instructor.name }}</li>
+                        {% endfor %}
+                    </ul>
+                </td>
+                <td>{{ course.current_enrollments }}</td>
+                <td>{{ course.is_full }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

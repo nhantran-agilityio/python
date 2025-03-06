@@ -12,7 +12,6 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from .forms import RegistrationForm
 from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import login
 from django.views import View
 from django.core.mail import EmailMessage
 
