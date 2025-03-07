@@ -1,9 +1,13 @@
+from django.conf import settings
+from django.core.cache.backends.base import DEFAULT_TIMEOUT
 from django.db import models
 from django.db.models import Count, Avg, QuerySet
 from django.core.cache import cache
 import logging
 
 logger = logging.getLogger(__name__)
+
+CACHE_TTL = getattr(settings, 'CACHE_TTL', DEFAULT_TIMEOUT)
 
 
 class Course(models.Model):
@@ -51,7 +55,7 @@ class Course(models.Model):
             cls.objects.annotate(num_enrollments=Count('course_enrollments'))
             .order_by('-num_enrollments')[:limit]
         )
-        cache.set('top_courses', top_courses, timeout=60 * 15)
+        cache.set('top_courses', top_courses, timeout=CACHE_TTL)
         logger.debug(f"Returning top courses: {top_courses}")
         return top_courses
 

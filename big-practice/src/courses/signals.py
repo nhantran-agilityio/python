@@ -12,6 +12,7 @@ from student.models import Student
 import logging
 logger = logging.getLogger(__name__)
 
+
 @receiver(post_save, sender=User)
 def auto_enroll_intro_courses(sender, instance, created, **kwargs):
     """
@@ -126,8 +127,26 @@ def send_enrollment_deletion_notification(sender, instance, **kwargs):
         logger.error(f"User for student {student.email} does not exist.")
 
 
+# @receiver([post_delete, post_save], sender=Course)
+# def invalidate_cache_course(sender, instance, **kwargs):
+#     logger.info("Clearing course cache")
+#     cache.delete('top_courses')
+#     cache.delete('course_statistics')
+
 @receiver([post_delete, post_save], sender=Course)
 def invalidate_cache_course(sender, instance, **kwargs):
     logger.info("Clearing course cache")
     cache.delete('top_courses')
     cache.delete('course_statistics')
+    revalidate_cache()
+
+
+def revalidate_cache():
+    logger.info("Revalidating course cache")
+    top_courses = Course.top_courses().prefetch_related('instructors')
+    course_statistics = {
+        'average_enrollments': Course.average_enrollments(),
+        'top_courses': top_courses,
+    }
+    cache.set('top_courses', top_courses)
+    cache.set('course_statistics', course_statistics)

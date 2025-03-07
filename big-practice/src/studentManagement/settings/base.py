@@ -8,7 +8,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'fallback_secret_key')
 EMAIL_PASS = os.getenv('EMAIL_PASS', 'fallback_email_pass_key')
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '0.0.0.0'
+]
 
 
 sentry_sdk.init(

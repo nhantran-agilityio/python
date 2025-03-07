@@ -154,6 +154,7 @@ python manage.py runserver 8000
 5. Access APIs:
 
 -   [Swagger](http://0.0.0.0:8000/swagger/)
+-   [Redoc](http://0.0.0.0:8000/redoc/)
 -   [Admin](http://0.0.0.0:8000/admin/)
     -   Set up an admin account by running the following command:
         ```

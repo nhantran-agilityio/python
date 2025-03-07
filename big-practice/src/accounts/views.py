@@ -2,9 +2,7 @@ from rest_framework import status, generics
 from rest_framework.response import Response
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from .serializers import LoginSerializer
-from .models import User
-
+from .serializers import LoginSerializer, RegisterSerializer
 from django.shortcuts import render, redirect
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes,  force_str
@@ -12,17 +10,19 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
 from .forms import RegistrationForm
 from django.contrib.auth.tokens import default_token_generator
-from django.views import View
 from django.core.mail import EmailMessage
+from .models import User
 
 
-class RegisterView(View):
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = RegisterSerializer
 
     def get(self, request):
         form = RegistrationForm()
         return render(request, 'email/register.html', {'form': form})
 
-    def post(self, request):
+    def post(self, request, *args, **kwargs):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
