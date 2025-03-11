@@ -18,9 +18,9 @@ class RegisterView(generics.CreateAPIView):
     queryset = User.objects.all()
     serializer_class = RegisterSerializer
 
-    def get(self, request):
-        form = RegistrationForm()
-        return render(request, 'email/register.html', {'form': form})
+    # def get(self, request):
+    #     form = RegistrationForm()
+    #     return render(request, 'email/register.html', {'form': form})
 
     def post(self, request, *args, **kwargs):
         form = RegistrationForm(request.POST)
