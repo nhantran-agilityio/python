@@ -9,8 +9,17 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
-
+import os
 from pathlib import Path
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn="https://91f0b41a381e962e22d40a52c8b4a9bb@o4508527683567616.ingest.us.sentry.io/4508975009693696",
+    integrations=[DjangoIntegration()],
+    traces_sample_rate=1.0,
+    send_default_pii=True,
+)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,13 +29,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-jmex55=*bkwo_dk4sx+&(11j#%%&o1&@7p)i*i6zs0_!@fu^ng'
+SECRET_KEY = os.getenv('SECRET_KEY', 'fallback_secret_key')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
-
+# Set ALLOWED_HOSTS based on environment variable or default to localhost
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", '*').split(",")
 
 # Application definition
 
