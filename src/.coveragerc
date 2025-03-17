@@ -1,0 +1,14 @@
+[run]
+branch = True
+
+[report]
+omit =
+    */migrations/*
+    */admin.py
+    ./manage.py
+    */wsgi.py
+    */__init__.py
+    */config/*
+    */apps.py
+    */serializers.py
+    */urls.py

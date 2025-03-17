@@ -14,11 +14,11 @@ class RegisterView(APIView):
         request_body=RegisterSerializer,
         operation_description="Register a new user",
         responses={
-            201: "User registered successfully",
-            400: "Bad Request - Invalid Data"
+            status.HTTP_201_CREATED: "User registered successfully",
+            status.HTTP_400_BAD_REQUEST: "Bad Request - Invalid Data"
         }
     )
-    def post(self, request, *args, **kwargs):
+    def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
