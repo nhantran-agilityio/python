@@ -2,3 +2,6 @@
 
 # Production tools
 sentry-sdk==2.22.0
+gunicorn
+whitenoise
+psycopg2-binary
