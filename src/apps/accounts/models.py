@@ -11,7 +11,7 @@ def user_avatar_upload(instance, filename):
     return os.path.join('avatars/', filename)
 
 
-class CustomUser(AbstractUser):
+class User(AbstractUser):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, null=True, blank=True)

@@ -1,6 +1,6 @@
 from rest_framework import status
 from rest_framework.test import APITestCase
-from apps.accounts.models import CustomUser
+from apps.accounts.models import User
 
 
 class RegisterViewTests(APITestCase):
@@ -25,7 +25,7 @@ class RegisterViewTests(APITestCase):
         response = self.client.post(self.url, self.user_data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(response.data['message'], 'User registered successfully')
-        self.assertTrue(CustomUser.objects.filter(email='newuser@example.com').exists())
+        self.assertTrue(User.objects.filter(email='newuser@example.com').exists())
 
     def test_register_user_password_mismatch(self):
         self.user_data['confirm_password'] = 'differentpassword'

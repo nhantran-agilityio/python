@@ -3,13 +3,13 @@ from django.test import TestCase
 from django.utils import timezone
 from django.urls import reverse
 
-from apps.accounts.models import CustomUser, user_avatar_upload
+from apps.accounts.models import User, user_avatar_upload
 
 
-class CustomUserModelTest(TestCase):
+class UserModelTest(TestCase):
     def setUp(self):
         self.url = reverse('register')
-        self.user = CustomUser.objects.create(
+        self.user = User.objects.create(
             email='testuser@example.com',
             username='testuser',
             first_name='Test',
