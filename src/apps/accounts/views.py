@@ -1,5 +1,5 @@
 import os
-from rest_framework import status
+from rest_framework import status, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer
@@ -11,6 +11,8 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view
+from rest_framework_simplejwt.tokens import RefreshToken
+from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
 
@@ -72,3 +74,17 @@ def activate_account(request, uidb64, token):
         return Response({"message": "Account activated successfully."}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        refresh = RefreshToken.for_user(user)
+        return Response({
+            'refresh': str(refresh),
+            'access': str(refresh.access_token),
+        }, status=status.HTTP_200_OK)
