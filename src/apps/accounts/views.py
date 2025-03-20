@@ -1,14 +1,26 @@
-# accounts/views.py
+import os
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from .serializers import RegisterSerializer
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes,  force_str
+from django.template.loader import render_to_string
+from django.core.mail import EmailMessage
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from rest_framework.decorators import api_view
+from dotenv import load_dotenv
+from .models import User
+
+load_dotenv()
 
 
 class RegisterView(APIView):
     permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
+    queryset = User.objects.all()
 
     @swagger_auto_schema(
         request_body=RegisterSerializer,
@@ -21,6 +33,42 @@ class RegisterView(APIView):
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "User registered successfully"}, status=status.HTTP_201_CREATED)
+            user = serializer.save()
+            user.is_active = False
+            user.save()
+            mail_subject = 'Activate your account.'
+            frontend_url = os.getenv("EMAIL_HOST_USER")
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = default_token_generator.make_token(user)
+            activation_link = f"{frontend_url}?uidb64={uid}&token={token}"
+            message = render_to_string('email/activation_email.txt', {
+                'user': user,
+                'domain': activation_link,
+            })
+            to_email = user.email
+            email = EmailMessage(mail_subject, message, to=[to_email])
+            email.send()
+            return Response(
+                {
+                    "message": "User registered successfully. "
+                               "Please check your email to activate your account."
+                },
+                status=status.HTTP_201_CREATED
+            )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+def activate_account(request, uidb64, token):
+    try:
+        uid = force_str(urlsafe_base64_decode(uidb64))
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user is not None and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        return Response({"message": "Account activated successfully."}, status=status.HTTP_200_OK)
+    else:
+        return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
