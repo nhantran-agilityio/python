@@ -1,3 +1,4 @@
+setuptools==76.0.0
 asgiref==3.8.1
 certifi==2025.1.31
 cfgv==3.4.0

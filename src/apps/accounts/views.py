@@ -1,8 +1,8 @@
 import os
-from rest_framework import status
+from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, UserDetailSerializer
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from django.contrib.auth.tokens import default_token_generator
@@ -11,6 +11,9 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view
+from rest_framework.authtoken.models import Token
+from rest_framework.authentication import BasicAuthentication
+from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
 
@@ -37,7 +40,7 @@ class RegisterView(APIView):
             user.is_active = False
             user.save()
             mail_subject = 'Activate your account.'
-            frontend_url = os.getenv("EMAIL_HOST_USER")
+            frontend_url = os.getenv("FE_DOMAIN")
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             activation_link = f"{frontend_url}?uidb64={uid}&token={token}"
@@ -72,3 +75,41 @@ def activate_account(request, uidb64, token):
         return Response({"message": "Account activated successfully."}, status=status.HTTP_200_OK)
     else:
         return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LoginView(generics.GenericAPIView):
+    serializer_class = LoginSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+
+            # Generate or retrieve the token for the user
+            token, created = Token.objects.get_or_create(user=user)
+
+            # Return the token and user info
+            return Response({
+                "token": token.key,
+                "user_id": user.id,
+                "email": user.email
+            }, status=status.HTTP_200_OK)
+
+        # Return errors if invalid
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserDetailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
+
+    def get(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = UserDetailSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
