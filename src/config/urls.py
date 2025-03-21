@@ -24,6 +24,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/accounts/', include('apps.accounts.urls')),
+    path('api/job/', include('apps.job.urls')),
+    path('api/document/', include('apps.document.urls')),
     path('accounts/', include('allauth.urls')),
 
     # Swagger URLs

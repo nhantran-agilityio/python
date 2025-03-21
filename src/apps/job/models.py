@@ -10,7 +10,7 @@ class Job(models.Model):
     description = models.TextField()
     role = models.CharField(max_length=100)
     department = models.CharField(max_length=100)
-    line_management = models.BigIntegerField()
+    line_management = models.CharField(max_length=100)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
 
