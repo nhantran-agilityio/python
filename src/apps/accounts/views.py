@@ -5,6 +5,7 @@ from rest_framework.views import APIView
 from .serializers import RegisterSerializer, UserDetailSerializer
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes,  force_str
 from django.template.loader import render_to_string
@@ -16,6 +17,7 @@ from rest_framework.authentication import BasicAuthentication
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
+
 
 load_dotenv()
 
@@ -104,12 +106,42 @@ class LoginView(generics.GenericAPIView):
 class UserDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     authentication_classes = [BasicAuthentication]
+    serializer_class = UserDetailSerializer
 
     def get(self, request, pk):
         try:
             user = User.objects.get(pk=pk)
         except User.DoesNotExist:
-            return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
+            return Response({"error": "User not found."},
+                            status=status.HTTP_404_NOT_FOUND)
 
-        serializer = UserDetailSerializer(user)
+        serializer = self.serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+
+            }
+        ),
+        responses={200: 'User updated successfully'}
+    )
+    def put(self, request, pk):
+        try:
+            user = User.objects.get(pk=pk)
+        except User.DoesNotExist:
+            return Response({"error": "User not found."},
+                            status=status.HTTP_404_NOT_FOUND)
+
+        if request.user != user:
+            return Response(
+                {"error": "You do not have permission to edit this user."},
+                status=status.HTTP_403_FORBIDDEN)
+
+        serializer = self.serializer_class(user, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "User updated successfully"},
+                            status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
