@@ -11,9 +11,8 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import BasicAuthentication
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
@@ -101,10 +100,10 @@ class LoginView(generics.GenericAPIView):
         # Return errors if invalid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class UserDetailView(APIView):
-    # FIXME
-    # permission_classes = [permissions.IsAuthenticated]
-    # authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+    authentication_classes = [BasicAuthentication]
 
     def get(self, request, pk):
         try:
