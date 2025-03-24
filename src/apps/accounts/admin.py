@@ -10,7 +10,9 @@ class AccountAdmin(admin.ModelAdmin):
         "email",
         "is_active",
         "role",
-        "phone"
+        "phone",
+        "avatar",
+        "job",
     )
     search_fields = ("first_name", "last_name", "email")
 

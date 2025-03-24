@@ -3,6 +3,8 @@ from django.contrib.auth.models import AbstractUser
 import uuid
 import os
 
+from apps.job.models import Job
+
 
 def user_avatar_upload(instance, filename):
     """Generate file path for new avatar upload"""
@@ -17,16 +19,13 @@ class User(AbstractUser):
     username = models.CharField(max_length=150, null=True, blank=True)
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
-    job_title = models.CharField(max_length=150, null=True, blank=True)
-    job_category = models.CharField(max_length=150, null=True, blank=True)
-    department = models.CharField(max_length=150, null=True, blank=True)
     phone = models.CharField(max_length=20)
     role = models.CharField(max_length=50, null=True, blank=True)
     is_receive_newsletters = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     avatar = models.ImageField(upload_to=user_avatar_upload, null=True, blank=True)
-
+    job = models.ForeignKey(Job, related_name='users', on_delete=models.CASCADE, null=True, blank=True)
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

@@ -5,6 +5,9 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 
+from apps.document.seralizers import DocumentSerializer
+from apps.job.seralizers import JobSerializer
+
 User = get_user_model()
 
 
@@ -16,7 +19,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'username', 'first_name', 'last_name',
-            'job_title', 'job_category', 'department', 'phone',
+            'job', 'documents', 'phone',
             'password', 'confirm_password', 'role', 'is_receive_newsletters', 'avatar'
         ]
 
@@ -60,9 +63,13 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    job = JobSerializer()
+    documents = DocumentSerializer(many=True, read_only=True)
+
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'job_title', 'job_category',
-            'department', 'phone', 'avatar', 'created_at', 'updated_at'
+            'id', 'email', 'first_name', 'last_name',
+            'job', 'documents', 'phone', 'avatar', 'created_at',
+            'updated_at'
         ]
