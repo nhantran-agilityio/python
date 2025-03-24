@@ -12,9 +12,7 @@ class AccountAdmin(admin.ModelAdmin):
         "role",
         "phone",
         "avatar",
-        "job_title",
-        "job_category",
-        "department",
+        "job",
     )
     search_fields = ("first_name", "last_name", "email")
 

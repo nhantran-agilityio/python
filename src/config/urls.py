@@ -24,8 +24,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/accounts/', include('apps.accounts.urls')),
-    path('api/job/', include('apps.job.urls')),
-    path('api/document/', include('apps.document.urls')),
+    path('api/jobs/', include('apps.job.urls')),
+    path('api/documents/', include('apps.document.urls')),
     path('accounts/', include('allauth.urls')),
 
     # Swagger URLs
@@ -40,7 +40,6 @@ urlpatterns = [
         name='schema-redoc'
     ),
     path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
-
 ]
 
 # if settings.DEBUG:

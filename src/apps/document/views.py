@@ -1,34 +1,52 @@
 from rest_framework import status
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import permissions
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Document
-from apps.document.seralizers import DocumentSerializer
-from rest_framework.decorators import api_view
+from rest_framework.views import APIView
+from rest_framework.authentication import BasicAuthentication
+from rest_framework.permissions import IsAuthenticated
+from drf_yasg.utils import swagger_auto_schema
+from drf_yasg import openapi
+from apps.document.models import Document
+from apps.document.seralizers import DocumentUploadSerializer
 
 
-class DocumentUploadView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class MultipleDocumentUploadView(APIView):
+    authentication_classes = [BasicAuthentication]
     parser_classes = [MultiPartParser, FormParser]
+    permission_classes = [IsAuthenticated]
 
-    @api_view(['POST'])
+    @swagger_auto_schema(
+        operation_description="Upload multiple documents",
+        manual_parameters=[
+            openapi.Parameter(
+                'documents', openapi.IN_FORM, type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_FILE),
+                description='List of document files to upload'
+            ),
+            openapi.Parameter(
+                'document_type', openapi.IN_FORM, type=openapi.TYPE_STRING,
+                description='List of document types corresponding to each file'
+            ),
+            openapi.Parameter(
+                'user', openapi.IN_FORM, type=openapi.TYPE_STRING, description='User ID'
+            ),
+        ],
+        responses={201: 'Files uploaded successfully!', 400: 'Bad Request'}
+    )
     def post(self, request, *args, **kwargs):
-        user = request.user
-        files = request.FILES.getlist('files')
-        document_type = request.data.get('document_type')
+        files = request.FILES.getlist('documents')
+        document_types = request.data.getlist('document_type')
+        user = request.data.get('user')
 
-        if not files:
-            return Response({"error": "No files uploaded."}, status=status.HTTP_400_BAD_REQUEST)
+        if not files or not document_types:
+            return Response({'error': 'Documents and document_type fields are required'}, status=status.HTTP_400_BAD_REQUEST)
 
-        if not document_type:
-            return Response({"error": "Document type is required."}, status=status.HTTP_400_BAD_REQUEST)
+        if len(files) != len(document_types):
+            return Response({'error': 'Number of files must match number of document types'}, status=status.HTTP_400_BAD_REQUEST)
 
-        documents = []
-        for file in files:
-            document = Document(user=user, document_type=document_type, file=file)
-            document.save()
-            documents.append(document)
+        uploaded_files = []
+        for file, doc_type in zip(files, document_types):
+            if doc_type not in dict(Document.DOCUMENT_TYPES):
+                return Response({'error': f'Invalid document type: {doc_type}'}, status=status.HTTP_400_BAD_REQUEST)
 
-        serializer = DocumentSerializer(documents, many=True)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+            document = Document.objects.create(user_id=user, document_file=file, document_type=doc_type)
+            uploaded_files.append(DocumentUploadSerializer(document).data)

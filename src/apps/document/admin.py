@@ -4,7 +4,7 @@ from .models import Document
 
 class DocumentAdmin(admin.ModelAdmin):
     list_display = (
-       "job", "file_name", "file_path", "uploaded_at"
+       "user", "file_name", "file_path", "uploaded_at", "document_type"
     )
 
 

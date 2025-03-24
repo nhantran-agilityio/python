@@ -4,7 +4,7 @@ from .models import Job
 
 class JobAdmin(admin.ModelAdmin):
     list_display = (
-        "user",
+        "id",
         "name",
         "description",
         "role",
