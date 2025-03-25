@@ -3,6 +3,9 @@ from .models import LeaveApplication, EmployeeLeaveBalance
 
 
 class LeaveApplicationSerializer(serializers.ModelSerializer):
+    employee_name = serializers.CharField(source="employee.first_name",
+                                          read_only=True)
+
     class Meta:
         model = LeaveApplication
         fields = "__all__"
