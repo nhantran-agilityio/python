@@ -8,12 +8,19 @@ from apps.leave_application.models import (
 from apps.leave_application.serializers import (
     EmployeeLeaveBalanceSerializer,
     LeaveApplicationSerializer,
+    LeaveApplicationStatusUpdateSerializer
 )
 
 
 class LeaveApplicationListView(generics.ListCreateAPIView):
     queryset = LeaveApplication.objects.all()
     serializer_class = LeaveApplicationSerializer
+
+
+class LeaveApplicationDetailView(generics.RetrieveAPIView):
+    queryset = LeaveApplication.objects.all()
+    serializer_class = LeaveApplicationSerializer
+    permission_classes = [IsAuthenticated]
 
 
 class LeaveApplicationByUserView(generics.ListAPIView):
@@ -28,3 +35,9 @@ class LeaveApplicationByUserView(generics.ListAPIView):
 class EmployeeLeaveBalanceView(generics.RetrieveUpdateDestroyAPIView):
     queryset = EmployeeLeaveBalance.objects.all()
     serializer_class = EmployeeLeaveBalanceSerializer
+
+
+class LeaveApplicationStatusUpdateView(generics.UpdateAPIView):
+    queryset = LeaveApplication.objects.all()
+    serializer_class = LeaveApplicationStatusUpdateSerializer
+    permission_classes = [IsAuthenticated]
