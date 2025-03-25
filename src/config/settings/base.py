@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'apps.job',
     'apps.document',
     'apps.job_responsibility',
+    'apps.leave_application',
     'allauth',
     'allauth.account',
     'allauth.socialaccount',

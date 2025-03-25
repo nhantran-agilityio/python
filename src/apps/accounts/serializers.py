@@ -71,5 +71,5 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'first_name', 'last_name',
             'job', 'documents', 'phone', 'avatar', 'created_at',
-            'updated_at'
+            'updated_at', 'role', 'is_receive_newsletters', 'is_active'
         ]

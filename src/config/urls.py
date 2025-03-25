@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/jobs/', include('apps.job.urls')),
     path('api/documents/', include('apps.document.urls')),
     path('accounts/', include('allauth.urls')),
+    path('api/leave-applications/', include('apps.leave_application.urls')),
 
     # Swagger URLs
     path(
