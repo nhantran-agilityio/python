@@ -215,6 +215,8 @@ EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
+CSRF_TRUSTED_ORIGINS = ["https://human-resource.up.railway.app"]
+
 
 # SSL Configuration for Development
 SECURE_SSL_REDIRECT = True
