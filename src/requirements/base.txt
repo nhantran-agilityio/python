@@ -32,3 +32,4 @@ django-rest-auth==0.9.5
 djangorestframework-simplejwt==5.2.2
 django-cors-headers==4.7.0
 django-filter==25.1
+dj-database-url==2.3.0
