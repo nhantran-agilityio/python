@@ -11,7 +11,7 @@ from django.utils.encoding import force_bytes,  force_str
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import BasicAuthentication
 from .serializers import LoginSerializer
@@ -64,6 +64,7 @@ class RegisterView(APIView):
 
 
 @api_view(['GET'])
+@permission_classes([AllowAny])
 def activate_account(request, uidb64, token):
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))

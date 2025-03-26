@@ -5,6 +5,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 from django.contrib.auth import authenticate
 
+from apps.document.models import Document
 from apps.document.seralizers import DocumentSerializer
 from apps.job.seralizers import JobSerializer
 
@@ -14,6 +15,7 @@ User = get_user_model()
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     confirm_password = serializers.CharField(write_only=True)
+    documents = serializers.CharField(required=False, allow_null=True)
 
     class Meta:
         model = User
@@ -29,10 +31,15 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
 
     def create(self, validated_data):
+        documents_data = validated_data.pop('documents', None)
         validated_data.pop('confirm_password')
         validated_data['password'] = make_password(validated_data['password'])
 
         user = User.objects.create(**validated_data)
+
+        if documents_data:
+            for document_data in documents_data:
+                Document.objects.create(user=user, document_file=document_data)
 
         return user
 
