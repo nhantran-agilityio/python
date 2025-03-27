@@ -14,6 +14,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import BasicAuthentication
+from urllib.parse import urlencode
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
@@ -45,7 +46,11 @@ class RegisterView(APIView):
             frontend_url = os.getenv("FE_DOMAIN")
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            activation_link = f"{frontend_url}?uidb64={uid}&token={token}"
+            params = {
+                "uidb64": uid,
+                "token": token
+            }
+            activation_link = f"{frontend_url}?{urlencode(params)}"
             message = render_to_string('email/activation_email.txt', {
                 'user': user,
                 'domain': activation_link,

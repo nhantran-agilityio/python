@@ -1,5 +1,5 @@
 Hi {{ user.username }},
 
 Please click the link below to activate your account:
-{{ domain }}
+{{ domain|safe  }}
 Thank you for using our service!
