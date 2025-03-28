@@ -13,7 +13,6 @@ from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import BasicAuthentication
 from urllib.parse import urlencode
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
@@ -111,7 +110,6 @@ class LoginView(generics.GenericAPIView):
 
 class UserDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [BasicAuthentication]
     serializer_class = UserDetailSerializer
 
     def get(self, request, pk):

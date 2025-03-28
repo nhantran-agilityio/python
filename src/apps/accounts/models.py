@@ -35,7 +35,6 @@ class User(AbstractUser):
     is_receive_newsletters = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    isCandidate = models.BooleanField(default=True, null=True, blank=True)
     avatar = models.ImageField(upload_to=user_avatar_upload, null=True, blank=True)
     job = models.ForeignKey(Job, related_name='users', on_delete=models.CASCADE, null=True, blank=True)
     USERNAME_FIELD = 'email'
