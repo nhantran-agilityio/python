@@ -2,7 +2,6 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
-from rest_framework.authentication import BasicAuthentication
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -11,7 +10,6 @@ from apps.document.seralizers import DocumentUploadSerializer
 
 
 class MultipleDocumentUploadView(APIView):
-    authentication_classes = [BasicAuthentication]
     parser_classes = [MultiPartParser, FormParser]
     permission_classes = [IsAuthenticated]
 

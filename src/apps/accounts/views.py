@@ -2,7 +2,7 @@ import os
 from rest_framework import status, generics, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import RegisterSerializer, UserDetailSerializer
+from .serializers import RegisterSerializer, UserDetailSerializer, UserListSerializer
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -13,7 +13,7 @@ from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import BasicAuthentication
+from urllib.parse import urlencode
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
@@ -45,7 +45,11 @@ class RegisterView(APIView):
             frontend_url = os.getenv("FE_DOMAIN")
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            activation_link = f"{frontend_url}?uidb64={uid}&token={token}"
+            params = {
+                "uidb64": uid,
+                "token": token
+            }
+            activation_link = f"{frontend_url}?{urlencode(params)}"
             message = render_to_string('email/activation_email.txt', {
                 'user': user,
                 'domain': activation_link,
@@ -106,7 +110,6 @@ class LoginView(generics.GenericAPIView):
 
 class UserDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
-    authentication_classes = [BasicAuthentication]
     serializer_class = UserDetailSerializer
 
     def get(self, request, pk):
@@ -146,3 +149,8 @@ class UserDetailView(APIView):
             return Response({"message": "User updated successfully"},
                             status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserListSerializer

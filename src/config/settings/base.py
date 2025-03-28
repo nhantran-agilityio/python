@@ -115,6 +115,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
+DATABASE_URL = os.getenv('DATABASE_URL')
 
 if os.getenv('DEBUG') == 'True':
     DATABASES = {
@@ -124,11 +125,21 @@ if os.getenv('DEBUG') == 'True':
         }
     }
 else:
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=os.getenv('DATABASE_URL')
-        )
-    }
+    if DATABASE_URL:
+        DATABASES = {
+            'default': dj_database_url.config(default=DATABASE_URL)
+        }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': os.getenv('POSTGRES_DB'),
+                'USER': os.getenv('POSTGRES_USER'),
+                'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+                'HOST': os.getenv('POSTGRES_HOST'),
+                'PORT': os.getenv('POSTGRES_PORT'),
+            }
+        }
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
@@ -182,9 +193,6 @@ AUTH_USER_MODEL = 'accounts.User'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
-    ),
-    'DEFAULT_PERMISSION_CLASSES': (
-        'rest_framework.permissions.IsAuthenticated',
     ),
 }
 

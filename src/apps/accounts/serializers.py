@@ -80,3 +80,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
             'job', 'documents', 'phone', 'avatar', 'created_at',
             'updated_at', 'role', 'is_receive_newsletters', 'is_active'
         ]
+
+
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = '__all__'
