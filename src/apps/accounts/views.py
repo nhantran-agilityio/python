@@ -109,7 +109,8 @@ class LoginView(generics.GenericAPIView):
 
 
 class UserDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # FIXME: check to can use permission_classes
+    # permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserDetailSerializer
 
     def get(self, request, pk):
