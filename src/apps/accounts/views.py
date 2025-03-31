@@ -1,8 +1,13 @@
 import os
 from rest_framework import status, generics, permissions
+from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import RegisterSerializer, UserDetailSerializer, UserListSerializer
+from .serializers import (
+    RegisterSerializer,
+    UserDetailSerializer,
+    UserListSerializer,
+)
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
@@ -12,7 +17,7 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 from urllib.parse import urlencode
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
@@ -90,21 +95,27 @@ class LoginView(generics.GenericAPIView):
 
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-
         if serializer.is_valid():
-            user = serializer.validated_data['user']
+            username = serializer.validated_data['username']
+            password = serializer.validated_data['password']
+            user = authenticate(request, username=username, password=password)
 
-            # Generate or retrieve the token for the user
-            token, created = Token.objects.get_or_create(user=user)
+            if user:
+                # Generate JWT tokens
+                refresh = RefreshToken.for_user(user)
+                return Response({
+                    "refresh": str(refresh),
+                    "access": str(refresh.access_token),
+                    "user": {
+                        "id": user.id,
+                        "username": user.username,
+                        "email": user.email,
+                    }
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "Invalid credentials"},
+                                status=status.HTTP_401_UNAUTHORIZED)
 
-            # Return the token and user info
-            return Response({
-                "token": token.key,
-                "user_id": user.id,
-                "email": user.email
-            }, status=status.HTTP_200_OK)
-
-        # Return errors if invalid
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
