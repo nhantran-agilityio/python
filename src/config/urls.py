@@ -3,8 +3,11 @@ from django.urls import path, include
 from django.conf import settings
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from drf_yasg import openapi
-from rest_framework.authentication import BasicAuthentication
+from rest_framework_simplejwt.views import (
+    TokenRefreshView,
+)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -16,14 +19,15 @@ schema_view = get_schema_view(
         license=openapi.License(name="BSD License"),
     ),
     public=True,
+    authentication_classes=[JWTAuthentication],
     permission_classes=[permissions.AllowAny],
-    authentication_classes=[BasicAuthentication],
 )
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/accounts/', include('apps.accounts.urls')),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/jobs/', include('apps.job.urls')),
     path('api/documents/', include('apps.document.urls')),
     path('accounts/', include('allauth.urls')),

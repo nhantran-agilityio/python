@@ -1,9 +1,7 @@
 # accounts/serializers.py
 from rest_framework import serializers
-from rest_framework.authtoken.models import Token
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
-from django.contrib.auth import authenticate
 
 from apps.document.models import Document
 from apps.document.seralizers import DocumentSerializer
@@ -45,28 +43,8 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    email = serializers.CharField()
+    username = serializers.CharField()
     password = serializers.CharField(write_only=True)
-
-    def validate(self, data):
-        email = data.get('email')
-        password = data.get('password')
-
-        if email and password:
-            user = authenticate(username=email, password=password)
-
-            if user:
-                if not user.is_active:
-                    raise serializers.ValidationError("User account is disabled.")
-            else:
-                raise serializers.ValidationError("Unable to log in with provided credentials.")
-        else:
-            raise serializers.ValidationError("Must include 'email' and 'password'.")
-
-        token, _ = Token.objects.get_or_create(user=user)
-        data['user'] = user
-        data['token'] = token.key
-        return data
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
