@@ -96,9 +96,9 @@ class LoginView(generics.GenericAPIView):
     def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
-            username = serializer.validated_data['username']
+            email = serializer.validated_data['email']
             password = serializer.validated_data['password']
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(request, username=email, password=password)
 
             if user:
                 # Generate JWT tokens
@@ -108,7 +108,6 @@ class LoginView(generics.GenericAPIView):
                     "access": str(refresh.access_token),
                     "user": {
                         "id": user.id,
-                        "username": user.username,
                         "email": user.email,
                     }
                 }, status=status.HTTP_200_OK)
