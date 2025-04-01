@@ -54,6 +54,7 @@ class LeaveApplicationPagination(pagination.PageNumberPagination):
 
 
 class LeaveApplicationListView(generics.ListCreateAPIView):
+    permission_classes = [IsAuthenticated]
     queryset = LeaveApplication.objects.all()
     filter_backends = [DjangoFilterBackend]
     serializer_class = LeaveApplicationSerializer
@@ -65,8 +66,13 @@ class LeaveApplicationListView(generics.ListCreateAPIView):
                               description="Filter by employee first name",
                               type=openapi.TYPE_STRING),
             openapi.Parameter('type', openapi.IN_QUERY,
-                              description="Filter by type",
-                              type=openapi.TYPE_STRING),
+                              description=(
+                                  "Filter by type (comma-separated values, "
+                                  "e.g., Annual,Sick)"
+                              ),
+                              type=openapi.TYPE_ARRAY,
+                              items=openapi.Items(type=openapi.TYPE_STRING)
+                              ),
         ]
     )
     def get(self, request, *args, **kwargs):
@@ -75,14 +81,15 @@ class LeaveApplicationListView(generics.ListCreateAPIView):
     def get_queryset(self):
         queryset = LeaveApplication.objects.all()
         first_name = self.request.query_params.get("first_name", None)
-        leave_type = self.request.query_params.get("type", None)
+        leave_types = self.request.query_params.get("type", None)
 
         if first_name:
             queryset = queryset.filter(
                 employee__first_name__icontains=first_name)
 
-        if leave_type:
-            queryset = queryset.filter(type__iexact=leave_type)
+        if leave_types:
+            leave_type_list = leave_types.split(',')
+            queryset = queryset.filter(type__in=leave_type_list)
 
         return queryset
 
