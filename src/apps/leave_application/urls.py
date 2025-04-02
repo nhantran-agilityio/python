@@ -34,5 +34,7 @@ urlpatterns = [
          name='leave-application-edit'),  # Edit endpoint
     path('<uuid:pk>/delete', LeaveApplicationDeleteView.as_view(),
          name='leave-application-delete'),  # Delete endpoint
+    path('history/download/<uuid:user_id>/<str:file_format>/',
+         LeaveApplicationDownloadView.as_view(), name='leave-history-download')
 
 ]
