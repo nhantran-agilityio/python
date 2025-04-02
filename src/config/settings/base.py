@@ -269,7 +269,6 @@ else:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-
 ADMIN_EMAIL = "nhan.tran170595@gmail.com"
 
 # Celery settings

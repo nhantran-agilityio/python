@@ -5,6 +5,7 @@ from apps.leave_application.views import (
     LeaveApplicationDetailView,
     LeaveApplicationListView,
     LeaveApplicationStatusUpdateView,
+    LeaveApplicationDownloadView,
 )
 
 urlpatterns = [
@@ -24,5 +25,8 @@ urlpatterns = [
     path('<uuid:pk>/status/',
          LeaveApplicationStatusUpdateView.as_view(),
          name='leave-application-status-update'),
+    path('download/<str:file_format>/',
+         LeaveApplicationDownloadView.as_view(),
+         name='leave-application-download'),
 
 ]
