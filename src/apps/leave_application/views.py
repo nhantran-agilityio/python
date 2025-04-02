@@ -2,7 +2,14 @@ from rest_framework import generics, pagination
 from rest_framework.permissions import IsAuthenticated
 from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
+from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.http import HttpResponse
+from io import BytesIO
+from reportlab.pdfgen import canvas
+import csv
+from reportlab.lib.pagesizes import letter
+import pandas as pd
 from drf_yasg.utils import swagger_auto_schema
 from apps.leave_application.models import (
     LeaveApplication,
@@ -118,3 +125,104 @@ class LeaveApplicationStatusUpdateView(generics.UpdateAPIView):
     queryset = LeaveApplication.objects.all()
     serializer_class = LeaveApplicationStatusUpdateSerializer
     permission_classes = [IsAuthenticated]
+
+
+class LeaveApplicationDownloadView(APIView):
+    def get(self, request, file_format, *args, **kwargs):
+        """
+        Download leave applications as PDF, CSV, or Excel file.
+
+        Args:
+            file_format (str): File format to download in. Choices are 'pdf', 'csv', 'excel'.
+
+        Returns:
+            HttpResponse: Response containing the downloaded file.
+        """
+        leave_applications = LeaveApplication.objects.select_related('employee').all()
+        # Convert data to a list of dicts
+        data = [
+            {
+                'employee': leave.employee.first_name,  # Access the related employee's name
+                'type': leave.type,
+                'start_date': leave.start_date,
+                'end_date': leave.end_date,
+                'durations': leave.durations,
+                'resumption_date': leave.resumption_date,
+                'reason': leave.reason,
+                'status': leave.status,
+            }
+            for leave in leave_applications
+        ]
+
+        if file_format == 'pdf':
+            # Generate PDF
+            response = HttpResponse(content_type='application/pdf')
+            response['Content-Disposition'] = (
+                'attachment; filename="leave_applications.pdf"'
+            )
+            p = canvas.Canvas(response, pagesize=letter)
+            p.drawString(100, 750, "Leave Applications")
+            y_position = 730
+            for application in data:
+                p.drawString(
+                    100, y_position,
+                    f"Employee: {application['employee']} | "
+                    f"Type: {application['type']} | "
+                    f"start_date: {application['start_date']} | "
+                    f"end_date: {application['end_date']} | "
+                    f"reason: {application['reason']} | "
+                    f"resumption_date: {application['resumption_date']} | "
+                    f"durations: {application['durations']} | "
+                    f"Status: {application['status']}"
+                )
+                y_position -= 20
+            p.showPage()
+            p.save()
+            return response
+
+        elif file_format == 'csv':
+            # Generate CSV
+            response = HttpResponse(content_type='text/csv')
+            response['Content-Disposition'] = (
+                'attachment; filename="leave_applications.csv"'
+            )
+            fieldnames = ['employee', 'type', 'start_date', 'end_date',
+                          'durations', 'resumption_date', 'reason', 'status']
+            writer = csv.DictWriter(response, fieldnames=fieldnames)
+            writer.writeheader()
+            for application in data:
+                writer.writerow({
+                    'employee': application['employee'],
+                    'type': application['type'],
+                    'start_date': application['start_date'],
+                    'end_date': application['end_date'],
+                    'durations': application['durations'],
+                    'resumption_date': application['resumption_date'],
+                    'reason': application['reason'],
+                    'status': application['status'],
+                })
+            return response
+
+        elif file_format == 'excel':
+            # Generate Excel
+            response = HttpResponse(
+                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            )
+            response['Content-Disposition'] = (
+                'attachment; filename="leave_applications.xlsx"'
+            )
+
+            # Create Excel file using pandas and BytesIO
+            fieldnames = ['employee', 'type', 'start_date', 'end_date',
+                          'durations', 'resumption_date', 'reason', 'status']
+            df = pd.DataFrame(data, columns=fieldnames)
+            with BytesIO() as buffer:  # Use BytesIO for binary data
+                with pd.ExcelWriter(
+                    buffer, engine='openpyxl'
+                ) as writer:
+                    df.to_excel(
+                        writer, index=False, sheet_name='Leave Applications'
+                    )
+                buffer.seek(0)
+                response.write(buffer.getvalue())
+            return response

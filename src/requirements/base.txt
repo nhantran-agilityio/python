@@ -37,3 +37,5 @@ celery==5.4.0
 django-celery-beat==2.7.0
 redis==5.2.1
 djangorestframework-camel-case==1.4.2
+pandas==2.2.3
+reportlab==4.3.1
