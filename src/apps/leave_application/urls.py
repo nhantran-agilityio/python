@@ -2,7 +2,9 @@ from django.urls import path
 
 from apps.leave_application.views import (
     LeaveApplicationByUserView,
+    LeaveApplicationDeleteView,
     LeaveApplicationDetailView,
+    LeaveApplicationEditView,
     LeaveApplicationListView,
     LeaveApplicationStatusUpdateView,
     LeaveApplicationDownloadView,
@@ -28,5 +30,9 @@ urlpatterns = [
     path('download/<str:file_format>/',
          LeaveApplicationDownloadView.as_view(),
          name='leave-application-download'),
+    path('<uuid:pk>/update', LeaveApplicationEditView.as_view(),
+         name='leave-application-edit'),  # Edit endpoint
+    path('<uuid:pk>/delete', LeaveApplicationDeleteView.as_view(),
+         name='leave-application-delete'),  # Delete endpoint
 
 ]
