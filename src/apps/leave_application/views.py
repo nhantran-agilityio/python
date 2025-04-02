@@ -22,6 +22,32 @@ from apps.leave_application.serializers import (
 )
 
 
+from rest_framework.permissions import BasePermission
+
+
+class IsEmployee(BasePermission):
+    """
+    Custom permission to allow only admins or employees to access the view.
+    """
+
+    def has_permission(self, request, view):
+        # Allow access if the user is authenticated and has the required role
+        return (
+            request.user.is_authenticated and
+            request.user.role in ['candidate', 'employee']
+        )
+
+
+class IsAdmin(BasePermission):
+    """
+    Custom permission to allow only admins to access the view.
+    """
+
+    def has_permission(self, request, view):
+        # Allow access if the user is authenticated and is an admin
+        return request.user.is_authenticated and request.user.role == 'admin'
+
+
 class LeaveApplicationPagination(pagination.PageNumberPagination):
     page_size_query_param = 'limit'
     max_page_size = 50
@@ -121,10 +147,21 @@ class EmployeeLeaveBalanceView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = EmployeeLeaveBalanceSerializer
 
 
+class LeaveApplicationEditView(generics.UpdateAPIView):
+    queryset = LeaveApplication.objects.all()
+    serializer_class = LeaveApplicationSerializer  # Use the same serializer for creating/updating
+    permission_classes = [IsAuthenticated, IsEmployee]
+
+
+class LeaveApplicationDeleteView(generics.DestroyAPIView):
+    queryset = LeaveApplication.objects.all()
+    permission_classes = [IsAuthenticated, IsEmployee]
+
+
 class LeaveApplicationStatusUpdateView(generics.UpdateAPIView):
     queryset = LeaveApplication.objects.all()
     serializer_class = LeaveApplicationStatusUpdateSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
 
 
 class LeaveApplicationDownloadView(APIView):
