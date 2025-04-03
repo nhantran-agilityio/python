@@ -32,6 +32,13 @@ class LeaveApplication(models.Model):
                               default="Pending")
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    recall_status = models.CharField(max_length=10, choices=STATUS_CHOICES,
+                                     default="Pending")
+    recall_reason = models.TextField(blank=True, null=True)
+    recall_date = models.DateField(blank=True, null=True)
+    is_recalled = models.BooleanField(default=False)
+    new_resumption_date = models.DateField(blank=True, null=True)
+    days_remaining = models.PositiveIntegerField(blank=True, null=True)
 
 
 class EmployeeLeaveBalance(models.Model):

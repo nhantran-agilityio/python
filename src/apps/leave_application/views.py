@@ -7,6 +7,7 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 from io import BytesIO
 from reportlab.pdfgen import canvas
+from rest_framework import status
 import csv
 from reportlab.lib.pagesizes import letter
 import pandas as pd
@@ -266,3 +267,50 @@ class LeaveApplicationDownloadView(APIView):
                 buffer.seek(0)
                 response.write(buffer.getvalue())
             return response
+
+
+class RecallLeaveApplicationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk, *args, **kwargs):
+        """
+        Recall a leave application by the user.
+
+        Args:
+            pk (int): Primary key of the leave application.
+
+        Returns:
+            Response: Success or error message.
+        """
+        try:
+            leave_application = LeaveApplication.objects.get(
+                pk=pk, employee=request.user
+            )
+
+            if leave_application.status == 'Approved':
+                return Response(
+                    {"error": "You cannot recall an approved leave application."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            if leave_application.is_recalled:
+                return Response(
+                    {"error": "This leave application has already been recalled."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            # Mark the leave application as recalled
+            leave_application.is_recalled = True
+            leave_application.status = 'Recalled'
+            leave_application.save()
+
+            return Response(
+                {"message": "Leave application recalled successfully."},
+                status=status.HTTP_200_OK
+            )
+
+        except LeaveApplication.DoesNotExist:
+            return Response(
+                {"error": "Leave application not found or you do not have permission to recall it."},
+                status=status.HTTP_404_NOT_FOUND
+            )
