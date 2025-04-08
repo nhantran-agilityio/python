@@ -163,5 +163,6 @@ class UserDetailView(APIView):
 
 
 class UserListView(generics.ListAPIView):
+    pagination_class = None
     queryset = User.objects.all()
     serializer_class = UserListSerializer
