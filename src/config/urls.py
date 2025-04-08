@@ -9,6 +9,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 
+
 schema_view = get_schema_view(
     openapi.Info(
         title="Human Resource Management API",
@@ -33,6 +34,12 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('api/leave-applications/', include('apps.leave_application.urls')),
     path("api/notifications/", include("apps.notifications.urls")),
+    path("api/contacts/", include("apps.contact.urls")),
+    path("api/guarantors/", include("apps.guarantor.urls")),
+    path("api/educations/", include("apps.education.urls")),
+    path("api/families/", include("apps.family.urls")),
+    path("api/financials/", include("apps.financial.urls")),
+    path("api/kins/", include("apps.kin.urls")),
 
     # Swagger URLs
     path(
@@ -45,7 +52,8 @@ urlpatterns = [
         schema_view.with_ui('redoc', cache_timeout=0),
         name='schema-redoc'
     ),
-    path('swagger.json', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger.json', schema_view.without_ui(cache_timeout=0),
+         name='schema-json'),
 ]
 
 # if settings.DEBUG:
