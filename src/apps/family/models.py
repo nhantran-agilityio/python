@@ -11,4 +11,3 @@ class Family(models.Model):
     relationship = models.CharField(max_length=50)
     phone = models.CharField(max_length=20)
     address = models.TextField()
-

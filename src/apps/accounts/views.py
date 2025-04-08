@@ -133,34 +133,6 @@ class UserDetailView(APIView):
         serializer = self.serializer_class(user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    @swagger_auto_schema(
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-
-            }
-        ),
-        responses={200: 'User updated successfully'}
-    )
-    def put(self, request, pk):
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            return Response({"error": "User not found."},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        if request.user != user:
-            return Response(
-                {"error": "You do not have permission to edit this user."},
-                status=status.HTTP_403_FORBIDDEN)
-
-        serializer = self.serializer_class(user, data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({"message": "User updated successfully"},
-                            status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 class UserListView(generics.ListAPIView):
     pagination_class = None
