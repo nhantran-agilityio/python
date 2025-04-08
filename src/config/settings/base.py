@@ -58,6 +58,7 @@ INSTALLED_APPS = [
     'apps.job_responsibility',
     'apps.leave_application',
     'allauth',
+    'apps.notifications',
     'allauth.account',
     'django_filters',
     'allauth.socialaccount',
@@ -269,7 +270,7 @@ else:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
-ADMIN_EMAIL = "nhan.tran170595@gmail.com"
+ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
 
 # Celery settings
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'

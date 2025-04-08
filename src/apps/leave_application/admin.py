@@ -14,6 +14,9 @@ class LeaveApplicationAdmin(admin.ModelAdmin):
         "document_path",
         "relief_officer",
         "status",
+        "recall_status",
+        "is_recalled",
+        "recall_reason",
         "created_at",
         "updated_at",
 
