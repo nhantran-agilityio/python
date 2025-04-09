@@ -1,33 +1,44 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from django.shortcuts import get_object_or_404
-from drf_yasg.utils import swagger_auto_schema
 from apps.accounts.models import User
+from rest_framework import viewsets, permissions
+from rest_framework.exceptions import PermissionDenied
 
 from .models import Education
 from .serializers import EducationSerializer
 
 
-class EducationDetailAPIView(APIView):
-    def get(self, request, user_id):
-        user = get_object_or_404(User, id=user_id)
-        education = get_object_or_404(Education, user=user)
-        serializer = EducationSerializer(education)
-        return Response(serializer.data)
+class EducationViewSet(viewsets.ModelViewSet):
+    queryset = Education.objects.all()
+    serializer_class = EducationSerializer
+    permission_classes = [permissions.IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Update education details partially.",
-        request_body=EducationSerializer,  # Use the serializer to define the request body
-        responses={
-            200: EducationSerializer,
-            400: "Invalid data provided."
-        }
-    )
-    def patch(self, request, pk):
-        education = get_object_or_404(Education, pk=pk)
-        serializer = EducationSerializer(education, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        user = self.request.user
+        user_id = self.request.query_params.get("user_id")
+        record_type = self.request.query_params.get("type")  # Optional
+
+        queryset = self.queryset
+
+        if user_id:
+            queryset = queryset.filter(user__id=user_id)
+        else:
+            queryset = queryset.filter(user=user)
+
+        # Only filter by type if user passes it
+        if record_type in ["Academic", "Professional"]:
+            queryset = queryset.filter(type=record_type)
+
+        return queryset
+
+    def perform_create(self, serializer):
+        user_id = self.request.query_params.get("user_id")
+        if user_id:
+            user = get_object_or_404(User, id=user_id)
+
+            if not self.request.user.is_staff and user != self.request.user:
+                raise PermissionDenied("You are not allowed to create record for this user.")
+
+            serializer.save(user=user)
+        else:
+            # Default to current user logged in
+            serializer.save(user=self.request.user)

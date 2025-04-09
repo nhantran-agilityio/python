@@ -1,7 +1,7 @@
-from django.urls import path
-from .views import EducationDetailAPIView
+from rest_framework.routers import DefaultRouter
+from .views import EducationViewSet
 
-urlpatterns = [
-    path('<uuid:user_id>/', EducationDetailAPIView.as_view(),
-         name='education-by_user'),
-]
+router = DefaultRouter()
+router.register(r'', EducationViewSet, basename='educations')
+
+urlpatterns = router.urls

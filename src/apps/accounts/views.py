@@ -3,16 +3,10 @@ from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .serializers import (
-    RegisterSerializer,
-    UserDetailSerializer,
-    UserListSerializer,
-)
 from rest_framework.permissions import AllowAny
 from drf_yasg.utils import swagger_auto_schema
-from drf_yasg import openapi
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_bytes,  force_str
+from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -22,7 +16,11 @@ from urllib.parse import urlencode
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
-
+from .serializers import (
+    RegisterSerializer,
+    UserDetailSerializer,
+    UserListSerializer,
+)
 
 load_dotenv()
 
@@ -120,7 +118,7 @@ class LoginView(generics.GenericAPIView):
 
 
 class UserDetailView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserDetailSerializer
 
     def get(self, request, pk):
