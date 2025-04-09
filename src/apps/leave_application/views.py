@@ -4,10 +4,10 @@ from django_filters.rest_framework import DjangoFilterBackend
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from datetime import date
 from django.http import HttpResponse
 from io import BytesIO
 from reportlab.pdfgen import canvas
-from rest_framework import status
 import csv
 from reportlab.lib.pagesizes import letter
 import pandas as pd
@@ -107,6 +107,12 @@ class LeaveApplicationListView(generics.ListCreateAPIView):
                               type=openapi.TYPE_ARRAY,
                               items=openapi.Items(type=openapi.TYPE_STRING)
                               ),
+            openapi.Parameter('isRecall', openapi.IN_QUERY,
+                              description=(
+                                  "Filter current active leaves "
+                                  "(start_date <= today <= end_date)"
+                              ),
+                              type=openapi.TYPE_BOOLEAN),
         ]
     )
     def get(self, request, *args, **kwargs):
@@ -114,16 +120,25 @@ class LeaveApplicationListView(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = LeaveApplication.objects.all()
-        first_name = self.request.query_params.get("first_name", None)
-        leave_types = self.request.query_params.get("type", None)
+        first_name = self.request.query_params.get("first_name")
+        leave_types = self.request.query_params.get("type")
+        is_recall = self.request.query_params.get("isRecall", "false").lower() == "true"
+        today = date.today()
 
         if first_name:
             queryset = queryset.filter(
-                employee__first_name__icontains=first_name)
+                employee__first_name__icontains=first_name
+            )
 
         if leave_types:
             leave_type_list = leave_types.split(',')
             queryset = queryset.filter(type__in=leave_type_list)
+
+        if is_recall:
+            queryset = queryset.filter(
+                start_date__lte=today,
+                end_date__gte=today
+            )
 
         return queryset
 
@@ -174,7 +189,8 @@ class LeaveApplicationDownloadView(APIView):
         Download leave applications as PDF, CSV, or Excel file.
 
         Args:
-            file_format (str): File format to download in. Choices are 'pdf', 'csv', 'excel'.
+            file_format (str): File format to download in.
+                Choices are 'pdf', 'csv', 'excel'.
 
         Returns:
             HttpResponse: Response containing the downloaded file.
@@ -183,7 +199,8 @@ class LeaveApplicationDownloadView(APIView):
         # Convert data to a list of dicts
         data = [
             {
-                'employee': leave.employee.first_name,  # Access the related employee's name
+                'employee': leave.employee.first_name,
+                # Access the related employee's name
                 'type': leave.type,
                 'start_date': leave.start_date,
                 'end_date': leave.end_date,
@@ -247,7 +264,10 @@ class LeaveApplicationDownloadView(APIView):
         elif file_format == 'excel':
             # Generate Excel
             response = HttpResponse(
-                content_type='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+                content_type=(
+                    'application/vnd.openxmlformats-officedocument.'
+                    'spreadsheetml.sheet'
+                )
             )
             response['Content-Disposition'] = (
                 'attachment; filename="leave_applications.xlsx"'
