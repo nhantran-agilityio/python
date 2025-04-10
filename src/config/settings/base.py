@@ -64,7 +64,7 @@ INSTALLED_APPS = [
     'apps.job_responsibility',
     'apps.leave_application',
     'allauth',
-    'apps.notifications',
+    'apps.notification',
     'allauth.account',
     'django_filters',
     'allauth.socialaccount',
@@ -202,10 +202,6 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
-    'DEFAULT_PAGINATION_CLASS': (
-        'rest_framework.pagination.PageNumberPagination'
-    ),
-    'PAGE_SIZE': 10,  # Number of items per page
     'DEFAULT_RENDERER_CLASSES': (
         'djangorestframework_camel_case.render.CamelCaseJSONRenderer',
     ),

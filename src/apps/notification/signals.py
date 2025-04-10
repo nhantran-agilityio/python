@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from apps.leave_application.models import LeaveApplication
-from apps.notifications.models import Notification
+from .models import Notification
 
 
 @receiver(post_save, sender=LeaveApplication)
