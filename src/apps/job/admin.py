@@ -7,9 +7,9 @@ class JobAdmin(admin.ModelAdmin):
         "id",
         "name",
         "description",
-        "role",
         "department",
         "line_management",
+        "job_category",
     )
     search_fields = ("first_name", "last_name", "email")
 
