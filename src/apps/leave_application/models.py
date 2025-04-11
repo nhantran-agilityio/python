@@ -25,7 +25,7 @@ class LeaveApplication(models.Model):
     durations = models.IntegerField()
     resumption_date = models.DateField()
     reason = models.TextField()
-    document_path = models.CharField(max_length=255, blank=True, null=True)
+    document_path = models.FileField(upload_to='documents/', blank=True, null=True)
     relief_officer = models.ForeignKey(User, on_delete=models.SET_NULL,
                                        null=True, related_name="relief_officer")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,
