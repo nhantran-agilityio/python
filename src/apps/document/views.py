@@ -5,12 +5,14 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
+from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 import zipfile
 from io import BytesIO
 from django.http import HttpResponse
 from apps.document.models import Document
 from apps.document.seralizers import DocumentUploadSerializer
+from apps.accounts.models import User
 
 
 class MultipleDocumentUploadView(APIView):
@@ -127,3 +129,58 @@ class DownloadAllDocumentsView(APIView):
         response = HttpResponse(zip_buffer, content_type="application/zip")
         response["Content-Disposition"] = f'attachment; filename="{zip_filename}"'
         return response
+
+
+class GetDocumentsByUserView(APIView):
+    """
+    API to retrieve documents uploaded by a specific user.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve all documents uploaded by a specific user.",
+        manual_parameters=[
+            openapi.Parameter(
+                name="user_id",
+                in_=openapi.IN_QUERY,
+                type=openapi.TYPE_STRING,
+                description="The ID of the user whose documents you want to retrieve."
+            )
+        ],
+        responses={
+            200: openapi.Response(
+                description="Documents retrieved successfully.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_OBJECT)
+                )
+            ),
+            404: "User not found or no documents available for the user."
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Retrieve all documents uploaded by a specific user.
+        """
+        user_id = request.query_params.get("user_id")
+        if not user_id:
+            return Response(
+                {"error": "User ID is required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate if the user exists
+        user = get_object_or_404(User, id=user_id)
+
+        # Query documents for the specified user
+        documents = Document.objects.filter(user=user)
+
+        if not documents.exists():
+            return Response(
+                {"error": "No documents found for the specified user."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Serialize the documents
+        serializer = DocumentUploadSerializer(documents, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

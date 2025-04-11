@@ -3,11 +3,13 @@ from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
+from drf_yasg import openapi
+from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
@@ -118,18 +120,44 @@ class LoginView(generics.GenericAPIView):
 
 
 class UserDetailView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserDetailSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [JSONParser, MultiPartParser, FormParser] # Required for file uploads
 
-    def get(self, request, pk):
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            return Response({"error": "User not found."},
-                            status=status.HTTP_404_NOT_FOUND)
+    def get(self, request):
+        serializer = UserDetailSerializer(request.user)
+        return Response(serializer.data)
 
-        serializer = self.serializer_class(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    # @swagger_auto_schema(
+    #     operation_description="Update the details of the authenticated user.",
+    #     request_body=openapi.Schema(
+    #         type=openapi.TYPE_OBJECT,
+    #         properties={
+    #             'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='First name of the user'),
+    #             'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='Last name of the user'),
+    #             'avatar': openapi.Schema(type=openapi.TYPE_FILE, description='Avatar image file'),
+    #         },
+    #         required=['first_name', 'last_name']
+    #     ),
+    #     responses={
+    #         200: "User details updated successfully.",
+    #         400: "Invalid data provided."
+    #     }
+    # )
+
+    @swagger_auto_schema(
+        operation_description="Update the details of the authenticated user.",
+        request_body=UserDetailSerializer,
+        responses={
+            200: "User details updated successfully.",
+            400: "Bad Request"
+        }
+    )
+    def patch(self, request):
+        serializer = UserDetailSerializer(instance=request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserListView(generics.ListAPIView):

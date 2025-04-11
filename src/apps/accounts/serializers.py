@@ -2,6 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 
+from apps.job.seralizers import JobSerializer
+
 
 User = get_user_model()
 
@@ -38,9 +40,33 @@ class LoginSerializer(serializers.Serializer):
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
+    job = JobSerializer()
+
     class Meta:
         model = User
-        fields = '__all__'
+        fields = [
+            'id', 'email', 'username', 'first_name', 'last_name',
+            'phone', 'role', 'is_receive_newsletters', 'avatar',
+            'job'
+        ]
+
+    def update(self, instance, validated_data):
+        # Pop nested job data
+        job_data = validated_data.pop('job', {})
+
+        # Update user fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        # Update job if present
+        job = instance.job
+        if job_data:
+            for attr, value in job_data.items():
+                setattr(job, attr, value)
+            job.save()
+
+        return instance
 
 
 class UserListSerializer(serializers.ModelSerializer):

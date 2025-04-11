@@ -6,6 +6,7 @@ from apps.leave_application.views import (
     LeaveApplicationStatusUpdateView,
     RecallApplicationStatusUpdateView,
     LeaveApplicationDownloadView,
+    RecallLeaveApplicationView,
 )
 
 urlpatterns = [
@@ -45,4 +46,5 @@ urlpatterns = [
         LeaveApplicationDownloadView.as_view(),
         name='leave-history-download'
     ),
+    path('<uuid:pk>/recall/', RecallLeaveApplicationView.as_view(), name='recall-leave-application'),
 ]

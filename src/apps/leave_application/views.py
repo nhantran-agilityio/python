@@ -22,7 +22,8 @@ from apps.leave_application.serializers import (
     EmployeeLeaveBalanceSerializer,
     LeaveApplicationSerializer,
     LeaveApplicationStatusUpdateSerializer,
-    RecallApplicationStatusUpdateSerializer
+    RecallApplicationStatusUpdateSerializer,
+    LeaveRecallSerializer  # Added missing import
 )
 
 
@@ -91,7 +92,7 @@ class LeaveApplicationPagination(pagination.PageNumberPagination):
 
 
 class LeaveApplicationListAPIView(APIView):
-    # permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(
@@ -373,3 +374,25 @@ class LeaveApplicationDownloadView(APIView):
                 buffer.seek(0)
                 response.write(buffer.getvalue())
             return response
+
+
+class RecallLeaveApplicationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Update recall information of a leave application",
+        request_body=LeaveRecallSerializer,
+        responses={
+            200: "Recall info updated successfully",
+            400: "Invalid data",
+            404: "LeaveApplication not found"
+        }
+    )
+    def patch(self, request, pk):
+        leave_application = get_object_or_404(LeaveApplication, pk=pk)
+
+        serializer = LeaveRecallSerializer(leave_application, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
