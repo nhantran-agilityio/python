@@ -127,23 +127,6 @@ class UserDetailView(APIView):
         serializer = UserDetailSerializer(request.user)
         return Response(serializer.data)
 
-    # @swagger_auto_schema(
-    #     operation_description="Update the details of the authenticated user.",
-    #     request_body=openapi.Schema(
-    #         type=openapi.TYPE_OBJECT,
-    #         properties={
-    #             'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='First name of the user'),
-    #             'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='Last name of the user'),
-    #             'avatar': openapi.Schema(type=openapi.TYPE_FILE, description='Avatar image file'),
-    #         },
-    #         required=['first_name', 'last_name']
-    #     ),
-    #     responses={
-    #         200: "User details updated successfully.",
-    #         400: "Invalid data provided."
-    #     }
-    # )
-
     @swagger_auto_schema(
         operation_description="Update the details of the authenticated user.",
         request_body=UserDetailSerializer,

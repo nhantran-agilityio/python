@@ -4,7 +4,6 @@ from apps.leave_application.views import (
     LeaveApplicationDetailAPIView,
     LeaveApplicationListAPIView,
     LeaveApplicationStatusUpdateView,
-    RecallApplicationStatusUpdateView,
     LeaveApplicationDownloadView,
     RecallLeaveApplicationView,
 )
@@ -25,12 +24,6 @@ urlpatterns = [
         LeaveApplicationStatusUpdateView.as_view(),
         name='leave-application-status-update'
     ),
-    path(
-        '<uuid:pk>/recall-status/',
-        RecallApplicationStatusUpdateView.as_view(),
-        name='recall-application-status-update'
-    ),
-
     path(
         'users/<uuid:user_id>/',
         LeaveApplicationByUserView.as_view(),
