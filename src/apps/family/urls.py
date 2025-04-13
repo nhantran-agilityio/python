@@ -1,6 +1,10 @@
-from django.urls import path
-from .views import FamilyDetailAPIView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import FamilyViewSet
+
+router = DefaultRouter()
+router.register(r'', FamilyViewSet, basename='family')
 
 urlpatterns = [
-    path('<uuid:user_id>/', FamilyDetailAPIView.as_view(), name='family-by_user'),
+    path('', include(router.urls)),
 ]

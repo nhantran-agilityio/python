@@ -9,12 +9,6 @@ class LeaveRecallSerializer(serializers.ModelSerializer):
 
 
 class LeaveApplicationSerializer(serializers.ModelSerializer):
-    startDate = serializers.DateField(source='start_date')
-    endDate = serializers.DateField(source='end_date')
-    resumptionDate = serializers.DateField(source='resumption_date')
-    documentPath = serializers.FileField(source='document_path')
-    reliefOfficer = serializers.PrimaryKeyRelatedField(source='relief_officer',
-                                                       read_only=True)
     relief_officer_first_name = serializers.SerializerMethodField()
     relief_officer_last_name = serializers.SerializerMethodField()
     employeeName = serializers.SerializerMethodField()
@@ -23,14 +17,14 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
         model = LeaveApplication
         fields = [
             "id",
-            'startDate',
-            'endDate',
-            'resumptionDate',
+            'start_date',
+            'end_date',
+            'resumption_date',
             'employeeName',
             'type',
             'employee',
-            'reliefOfficer',
-            'documentPath',
+            'relief_officer',
+            'document_path',
             'reason',
             'durations',
             'relief_officer_first_name',

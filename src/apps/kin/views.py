@@ -1,50 +1,34 @@
-from rest_framework.views import APIView
+from django.http import Http404
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework import status
-from drf_yasg import openapi
-from django.shortcuts import get_object_or_404
-from drf_yasg.utils import swagger_auto_schema
-from apps.accounts.models import User
+from rest_framework.permissions import IsAuthenticated
 from .models import Kin
 from .serializers import KinSerializer
 
 
-class KinDetailAPIView(APIView):
-    def get(self, request, user_id):
-        user = get_object_or_404(User, id=user_id)
-        kin = get_object_or_404(KinSerializer, user=user)
+class KinViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing Kin instances.
+    """
+    serializer_class = KinSerializer
+    permission_classes = [IsAuthenticated]
 
-        serializer = KinSerializer(kin)
-        return Response(serializer.data)
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Http404:
+            return Response({
+                "message": "No Kin found with the given ID.",
+                "data": None
+            }, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(instance)
+        return Response({
+            "message": "Success",
+            "data": serializer.data
+        })
 
-    @swagger_auto_schema(
-        operation_description="Update kin details partially.",
-        request_body=KinSerializer,
-        responses={
-            200: KinSerializer,
-            400: "Invalid data provided."
-        }
-    )
-    def patch(self, request, pk):
-        kin = get_object_or_404(Kin, pk=pk)
-        serializer = KinSerializer(kin, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        return Kin.objects.filter(user=self.request.user)
 
-    @swagger_auto_schema(
-        operation_description="Create a new contact",
-        request_body=KinSerializer,
-        manual_parameters=[
-            openapi.Parameter('Authorization', openapi.IN_HEADER,
-                              description="Token: Bearer <access_token>",
-                              type=openapi.TYPE_STRING),
-        ]
-    )
-    def post(self, request):
-        serializer = KinSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

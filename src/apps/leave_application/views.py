@@ -57,6 +57,7 @@ class IsAdmin(BasePermission):
 class LeaveApplicationPagination(pagination.PageNumberPagination):
     page_size_query_param = 'limit'
     max_page_size = 50
+    page_size = 10
 
     def paginate_queryset(self, queryset, request, view=None):
         """
