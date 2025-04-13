@@ -7,11 +7,10 @@ from apps.job.models import Job
 
 
 def user_avatar_upload(instance, filename):
-    """Generate file path for new avatar upload"""
-    ext = filename.split('.')[-1]
-    filename = f'{instance.id}.{ext}'
-    return os.path.join('avatars/', filename)
-
+    """
+    Generate a dynamic file path for user avatars.
+    """
+    return f'avatars/{instance.id}/{filename}'
 
 class Role(models.TextChoices):
     ADMIN = "admin", "Admin"

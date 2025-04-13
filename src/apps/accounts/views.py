@@ -9,7 +9,8 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from drf_yasg import openapi
-from rest_framework.parsers import MultiPartParser, FormParser, JSONParser
+from djangorestframework_camel_case.parser import CamelCaseJSONParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
@@ -121,18 +122,50 @@ class LoginView(generics.GenericAPIView):
 
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [JSONParser, MultiPartParser, FormParser] # Required for file uploads
+    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser] # Required for file uploads
 
     def get(self, request):
-        serializer = UserDetailSerializer(request.user)
+        user = User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
+        serializer = UserDetailSerializer(user)
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_description="Update the details of the authenticated user.",
-        request_body=UserDetailSerializer,
+        operation_description="Update the details of the authenticated user, including uploading an avatar.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='First name of the user'),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='Last name of the user'),
+                'role': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=["admin", "candidate", "employee"],
+                    description='Role of the user (admin, candidate, employee)'
+                ),
+                'job': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'name': openapi.Schema(type=openapi.TYPE_STRING, description='Job name'),
+                        'description': openapi.Schema(type=openapi.TYPE_STRING, description='Job description'),
+                        'department': openapi.Schema(type=openapi.TYPE_STRING, description='Job department'),
+                        'lineManagement': openapi.Schema(type=openapi.TYPE_STRING, description='Line management'),
+                        'jobCategory': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            enum=["Full Time", "Part Time"],
+                            description='Job category (Full Time, Part Time)'
+                        ),
+                    },
+                    description='Job details'
+                ),
+                'jobId': openapi.Schema(type=openapi.TYPE_STRING, format='uuid', description='Job ID'),
+                'avatar': openapi.Schema(type=openapi.TYPE_FILE, description='Avatar image file'),
+            },
+        ),
         responses={
-            200: "User details updated successfully.",
-            400: "Bad Request"
+            200: openapi.Response(
+                description="User details updated successfully.",
+                schema=UserDetailSerializer
+            ),
+            400: "Invalid data provided."
         }
     )
     def patch(self, request):

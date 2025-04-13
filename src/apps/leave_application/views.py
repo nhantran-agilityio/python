@@ -11,6 +11,7 @@ from rest_framework import status
 from reportlab.pdfgen import canvas
 import csv
 from rest_framework.parsers import MultiPartParser, FormParser
+from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from reportlab.lib.pagesizes import letter
 import pandas as pd
 from drf_yasg.utils import swagger_auto_schema
@@ -23,7 +24,7 @@ from apps.leave_application.serializers import (
     LeaveApplicationSerializer,
     LeaveApplicationStatusUpdateSerializer,
     RecallApplicationStatusUpdateSerializer,
-    LeaveRecallSerializer  # Added missing import
+    LeaveRecallSerializer
 )
 
 
@@ -93,7 +94,7 @@ class LeaveApplicationPagination(pagination.PageNumberPagination):
 
 class LeaveApplicationListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -171,7 +172,7 @@ class LeaveApplicationListAPIView(APIView):
 
 class LeaveApplicationDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser]
+    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
 
     """
     API to retrieve the details of a specific leave application.

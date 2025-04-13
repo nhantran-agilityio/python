@@ -8,10 +8,13 @@ class JobAdmin(admin.ModelAdmin):
         "name",
         "description",
         "department",
-        "line_management",
+        "get_line_management",
         "job_category",
     )
     search_fields = ("first_name", "last_name", "email")
+
+    def get_line_management(self, obj):
+        return obj.get_line_management()
 
 
 admin.site.register(Job, JobAdmin)

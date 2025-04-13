@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 
+from apps.job.models import Job
 from apps.job.seralizers import JobSerializer
 
 
@@ -41,31 +42,34 @@ class LoginSerializer(serializers.Serializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     job = JobSerializer()
+    job_id = serializers.UUIDField(write_only=True, required=False)
 
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'username', 'first_name', 'last_name',
-            'phone', 'role', 'is_receive_newsletters', 'avatar',
-            'job'
+            'id', 'first_name', 'last_name',
+            'role', 'avatar',
+            'job', 'job_id'
         ]
 
     def update(self, instance, validated_data):
-        # Pop nested job data
-        job_data = validated_data.pop('job', {})
+        job_data = validated_data.pop("job", None)
 
-        # Update user fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
-        instance.save()
 
-        # Update job if present
-        job = instance.job
         if job_data:
-            for attr, value in job_data.items():
-                setattr(job, attr, value)
-            job.save()
+            if instance.job:
+                # update job existing
+                for attr, value in job_data.items():
+                    setattr(instance.job, attr, value)
+                instance.job.save()
+            else:
+                # Create a new job if it doesn't exist
+                new_job = Job.objects.create(**job_data)
+                instance.job = new_job
 
+        instance.save()
         return instance
 
 

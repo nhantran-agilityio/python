@@ -29,7 +29,6 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/accounts/', include('apps.accounts.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/jobs/', include('apps.job.urls')),
     path('api/documents/', include('apps.document.urls')),
     path('accounts/', include('allauth.urls')),
     path('api/leave-applications/', include('apps.leave_application.urls')),

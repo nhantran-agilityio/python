@@ -1,8 +1,6 @@
 from django.db import models
 import uuid
 
-# from apps.accounts.models import User
-
 
 class JobCategory(models.TextChoices):
     FULL_TIME = "Full Time", "Full Time"
@@ -11,11 +9,9 @@ class JobCategory(models.TextChoices):
 
 class Job(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    # user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='jobs')
     name = models.CharField(max_length=100)
     description = models.TextField(blank=True, null=True)
     department = models.CharField(max_length=100)
-    line_management = models.CharField(max_length=100)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
     job_category = models.CharField(
@@ -23,6 +19,18 @@ class Job(models.Model):
         choices=JobCategory.choices,
         default=JobCategory.FULL_TIME
     )
+    line_management = models.ForeignKey(
+        'accounts.User',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="managed_jobs",
+    )
+
+    def get_line_management(self):
+        if self.line_management:
+            return f"{self.line_management.first_name} {self.line_management.last_name}"
+        return 'No Manager'
 
     def __str__(self):
         return self.name
