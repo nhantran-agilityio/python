@@ -1,6 +1,7 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from .models import Notification
 from .serializers import NotificationSerializer
@@ -44,3 +45,22 @@ class NotificationListView(APIView):
             serializer.save()
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+
+class NotificationDetailView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve the details of a specific notification by its ID.",
+        responses={
+            200: NotificationSerializer,
+            404: "Notification not found."
+        }
+    )
+    def get(self, request, pk):
+        """
+        Retrieve the details of a specific notification by its ID.
+        """
+        notification = get_object_or_404(Notification, pk=pk, user=request.user)
+        serializer = NotificationSerializer(notification)
+        return Response(serializer.data, status=200)

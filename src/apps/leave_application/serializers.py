@@ -37,6 +37,7 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
             'days_remaining',
             'created_at',
             'updated_at',
+
         ]
 
     def get_relief_officer_first_name(self, obj):

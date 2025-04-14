@@ -1,6 +1,5 @@
 from django.urls import path
 from apps.leave_application.views import (
-    LeaveApplicationByUserView,
     LeaveApplicationDetailAPIView,
     LeaveApplicationListAPIView,
     LeaveApplicationStatusUpdateView,
@@ -25,19 +24,9 @@ urlpatterns = [
         name='leave-application-status-update'
     ),
     path(
-        'users/<uuid:user_id>/',
-        LeaveApplicationByUserView.as_view(),
-        name='leave-application-by-user'
-    ),
-    path(
         'download/<str:file_format>/',
         LeaveApplicationDownloadView.as_view(),
         name='leave-application-download'
-    ),
-    path(
-        'history/download/<uuid:user_id>/<str:file_format>/',
-        LeaveApplicationDownloadView.as_view(),
-        name='leave-history-download'
     ),
     path('<uuid:pk>/recall/', RecallLeaveApplicationView.as_view(), name='recall-leave-application'),
 ]

@@ -39,6 +39,8 @@ class LeaveApplication(models.Model):
     is_recalled = models.BooleanField(default=False)
     new_resumption_date = models.DateField(blank=True, null=True)
     days_remaining = models.PositiveIntegerField(blank=True, null=True)
+    recalled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='recalls_made')
+    recall_deadline = models.DateField(null=True, blank=True)
 
 
 class EmployeeLeaveBalance(models.Model):

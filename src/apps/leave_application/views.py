@@ -243,16 +243,16 @@ class LeaveApplicationDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class LeaveApplicationByUserView(generics.ListAPIView):
-    serializer_class = LeaveApplicationSerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = LeaveApplicationPagination
-    page_size_query_param = 'limit'
-    max_page_size = 50
+# class LeaveApplicationByUserView(generics.ListAPIView):
+#     serializer_class = LeaveApplicationSerializer
+#     permission_classes = [IsAuthenticated]
+#     pagination_class = LeaveApplicationPagination
+#     page_size_query_param = 'limit'
+#     max_page_size = 50
 
-    def get_queryset(self):
-        user_id = self.kwargs['user_id']
-        return LeaveApplication.objects.filter(employee_id=user_id)
+#     def get_queryset(self):
+#         user_id = self.kwargs['user_id']
+#         return LeaveApplication.objects.filter(employee_id=user_id)
 
 
 class EmployeeLeaveBalanceView(generics.RetrieveUpdateDestroyAPIView):
