@@ -33,12 +33,10 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('api/leave-applications/', include('apps.leave_application.urls')),
     path("api/notifications/", include("apps.notifications.urls")),
-    path("api/contacts/", include("apps.contact.urls")),
     path("api/guarantors/", include("apps.guarantor.urls")),
     path("api/educations/", include("apps.education.urls")),
     path("api/families/", include("apps.family.urls")),
     path("api/financials/", include("apps.financial.urls")),
-    path("api/kins/", include("apps.kin.urls")),
 
     # Swagger URLs
     path(

@@ -1,12 +1,9 @@
 import uuid
 from django.db import models
 
-from apps.accounts.models import User
-
 
 class Kin(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='kins')
     name = models.CharField(max_length=100)
     job = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)

@@ -1,4 +1,5 @@
 import os
+from urllib.request import Request
 from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
@@ -157,8 +158,30 @@ class UserDetailView(APIView):
                     },
                     description='Job details'
                 ),
-                'jobId': openapi.Schema(type=openapi.TYPE_STRING, format='uuid', description='Job ID'),
                 'avatar': openapi.Schema(type=openapi.TYPE_FILE, description='Avatar image file'),
+                'phone': openapi.Schema(type=openapi.TYPE_STRING, description='phone'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='email'),
+                'contact': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'phoneNum2': openapi.Schema(type=openapi.TYPE_STRING, description='Contact phone number 2'),
+                        'cityOfResidence': openapi.Schema(type=openapi.TYPE_STRING, description='Contact city of residence'),
+                        'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Contact residential address'),
+                    },
+                    description='Contact details'
+                ),
+                'kin': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the next of kin'),
+                        'relationship': openapi.Schema(type=openapi.TYPE_STRING, description='Relationship to the user'),
+                        'phone': openapi.Schema(type=openapi.TYPE_STRING, description='Phone number of the next of kin'),
+                        'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email of the next of kin'),
+                        'job': openapi.Schema(type=openapi.TYPE_STRING, description='Job of the next of kin'),
+                        'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Address of the next of kin'),
+                    },
+                    description='Next of kin details'
+                ),
             },
         ),
         responses={
@@ -169,7 +192,7 @@ class UserDetailView(APIView):
             400: "Invalid data provided."
         }
     )
-    def patch(self, request):
+    def patch(self, request: Request) -> Response:
         serializer = UserDetailSerializer(instance=request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
