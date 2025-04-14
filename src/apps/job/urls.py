@@ -1,9 +1,7 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
+from .views import JobViewSet
 
-from apps.job.views import JobByUserView, JobListCreateView
+router = DefaultRouter()
+router.register(r'', JobViewSet, basename='jobs')
 
-
-urlpatterns = [
-    path('', JobListCreateView.as_view(), name='job-list-create'),
-    path('<uuid:user_id>/', JobByUserView.as_view(), name='job-by-user'),
-]
+urlpatterns = router.urls

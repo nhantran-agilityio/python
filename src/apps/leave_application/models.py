@@ -25,7 +25,7 @@ class LeaveApplication(models.Model):
     durations = models.IntegerField()
     resumption_date = models.DateField()
     reason = models.TextField()
-    document_path = models.CharField(max_length=255, blank=True, null=True)
+    document_path = models.FileField(upload_to='documents/', blank=True, null=True)
     relief_officer = models.ForeignKey(User, on_delete=models.SET_NULL,
                                        null=True, related_name="relief_officer")
     status = models.CharField(max_length=10, choices=STATUS_CHOICES,
@@ -39,6 +39,8 @@ class LeaveApplication(models.Model):
     is_recalled = models.BooleanField(default=False)
     new_resumption_date = models.DateField(blank=True, null=True)
     days_remaining = models.PositiveIntegerField(blank=True, null=True)
+    recalled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='recalls_made')
+    recall_deadline = models.DateField(null=True, blank=True)
 
 
 class EmployeeLeaveBalance(models.Model):

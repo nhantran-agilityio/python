@@ -99,31 +99,59 @@ class DownloadAllDocumentsView(APIView):
     def get(self, request, *args, **kwargs):
         """
         Download all documents uploaded by the authenticated user as a zip file.
+        Returns a message if no documents are available.
         """
-        # Query all documents for the authenticated user
         documents = Document.objects.filter(user=request.user)
 
         if not documents.exists():
             return Response(
-                {"error": "No documents found for the user."},
-                status=status.HTTP_404_NOT_FOUND
+                {"message": "No documents found to download."},
+                status=status.HTTP_200_OK
             )
 
-        # Create a zip file in memory
         zip_filename = f"{request.user.username}_documents.zip"
         zip_buffer = BytesIO()
 
         with zipfile.ZipFile(zip_buffer, "w") as zip_file:
             for document in documents:
-                # Get the file path
                 file_path = document.document_file.path
-                # Add the file to the zip with its original name
-                zip_file.write(file_path, os.path.basename(file_path))
+                if os.path.exists(file_path):
+                    zip_file.write(file_path, os.path.basename(file_path))
 
-        # Set the buffer's position to the beginning
         zip_buffer.seek(0)
 
-        # Return the zip file as a response
         response = HttpResponse(zip_buffer, content_type="application/zip")
         response["Content-Disposition"] = f'attachment; filename="{zip_filename}"'
         return response
+
+
+class GetDocumentsAPIView(APIView):
+    """
+    API to retrieve documents based on user role.
+    Admins get all documents; regular users get only their own.
+    """
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Retrieve documents. Admins get all; users get only their own.",
+        responses={
+            200: openapi.Response(
+                description="Documents retrieved successfully.",
+                schema=openapi.Schema(
+                    type=openapi.TYPE_ARRAY,
+                    items=openapi.Items(type=openapi.TYPE_OBJECT)
+                )
+            )
+        }
+    )
+    def get(self, request, *args, **kwargs):
+        """
+        Retrieve documents depending on the user role.
+        """
+        if request.user.role == "admin":
+            documents = Document.objects.all()
+        else:
+            documents = Document.objects.filter(user=request.user)
+
+        serializer = DocumentUploadSerializer(documents, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

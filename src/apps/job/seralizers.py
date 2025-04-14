@@ -1,13 +1,21 @@
 from rest_framework import serializers
-from apps.document.seralizers import DocumentSerializer
 from apps.job_responsibility.seralizers import JobResponsibilitySerializer
 from .models import Job
 
 
 class JobSerializer(serializers.ModelSerializer):
     responsibilities = JobResponsibilitySerializer(many=True, read_only=True)
-    documents = DocumentSerializer(many=True, read_only=True)
+    line_management_full_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
-        fields = '__all__'
+        fields = [
+            'id', 'name', 'description', 'department',
+            'job_category',
+            'responsibilities', 'line_management_full_name'
+        ]
+
+    def get_line_management_full_name(self, obj):
+        if isinstance(obj, Job):
+            return obj.get_line_management()
+        return None

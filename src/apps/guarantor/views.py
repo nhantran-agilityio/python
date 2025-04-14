@@ -1,55 +1,34 @@
-from rest_framework.views import APIView
+from django.http import Http404
+from rest_framework import viewsets, status
 from rest_framework.response import Response
-from rest_framework import status
-from drf_yasg import openapi
-from django.shortcuts import get_object_or_404
-from drf_yasg.utils import swagger_auto_schema
-from apps.accounts.models import User
-
+from rest_framework.permissions import IsAuthenticated
 from .models import Guarantor
 from .serializers import GuarantorSerializer
 
 
-class GuarantorDetailAPIView(APIView):
-    def get(self, request, user_id):
-        user = get_object_or_404(User, id=user_id)
-        guarantor = get_object_or_404(GuarantorSerializer, user=user)
-        serializer = GuarantorSerializer(guarantor)
-        return Response(serializer.data)
+class GuarantorViewSet(viewsets.ModelViewSet):
+    """
+    A viewset for viewing and editing Guarantor instances.
+    """
+    serializer_class = GuarantorSerializer
+    permission_classes = [IsAuthenticated]
 
-    @swagger_auto_schema(
-        operation_description="Update guarantor details partially.",
-        request_body=GuarantorSerializer,
-        responses={
-            200: GuarantorSerializer,
-            400: "Invalid data provided."
-        }
-    )
-    def patch(self, request, pk):
-        guarantor = get_object_or_404(Guarantor, pk=pk)
-        serializer = GuarantorSerializer(guarantor, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def retrieve(self, request, *args, **kwargs):
+        try:
+            instance = self.get_object()
+        except Http404:
+            return Response({
+                "message": "No Guarantor found with the given ID.",
+                "data": None
+            }, status=status.HTTP_200_OK)
+        serializer = self.get_serializer(instance)
+        return Response({
+            "message": "Success",
+            "data": serializer.data
+        })
 
-    @swagger_auto_schema(
-        operation_description="Create a new contact",
-        request_body=GuarantorSerializer,
-        manual_parameters=[
-            openapi.Parameter('Authorization', openapi.IN_HEADER,
-                              description="Token: Bearer <access_token>",
-                              type=openapi.TYPE_STRING),
-        ]
-    )
-    def post(self, request):
-        serializer = GuarantorSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save(user=request.user)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    def get_queryset(self):
+        return Guarantor.objects.filter(user=self.request.user)
 
-    def delete(self, request, pk=None):
-        contact = get_object_or_404(Guarantor, pk=pk, user=request.user)
-        contact.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

@@ -1,16 +1,17 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
-import os
 
+from apps.contact.models import Contact
 from apps.job.models import Job
+from apps.kin.models import Kin
 
 
 def user_avatar_upload(instance, filename):
-    """Generate file path for new avatar upload"""
-    ext = filename.split('.')[-1]
-    filename = f'{instance.id}.{ext}'
-    return os.path.join('avatars/', filename)
+    """
+    Generate a dynamic file path for user avatars.
+    """
+    return f'avatars/{instance.id}/{filename}'
 
 
 class Role(models.TextChoices):
@@ -35,8 +36,31 @@ class User(AbstractUser):
     is_receive_newsletters = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    avatar = models.ImageField(upload_to=user_avatar_upload, null=True, blank=True)
-    job = models.ForeignKey(Job, related_name='users', on_delete=models.CASCADE, null=True, blank=True)
+    avatar = models.ImageField(
+        upload_to=user_avatar_upload,
+        null=True,
+        blank=True
+    )
+    job = models.ForeignKey(
+        Job,
+        related_name='users',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
+    contact = models.ForeignKey(
+        Contact,
+        related_name='users',
+        on_delete=models.CASCADE,
+        null=True, blank=True
+    )
+    kin = models.ForeignKey(
+        Kin,
+        related_name='users',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 

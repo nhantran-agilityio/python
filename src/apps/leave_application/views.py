@@ -1,14 +1,17 @@
 from rest_framework import generics, pagination
 from rest_framework.permissions import IsAuthenticated
-from django_filters.rest_framework import DjangoFilterBackend
+from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from datetime import date
 from django.http import HttpResponse
 from io import BytesIO
+from rest_framework import status
 from reportlab.pdfgen import canvas
 import csv
+from rest_framework.parsers import MultiPartParser, FormParser
+from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from reportlab.lib.pagesizes import letter
 import pandas as pd
 from drf_yasg.utils import swagger_auto_schema
@@ -19,7 +22,9 @@ from apps.leave_application.models import (
 from apps.leave_application.serializers import (
     EmployeeLeaveBalanceSerializer,
     LeaveApplicationSerializer,
-    LeaveApplicationStatusUpdateSerializer
+    LeaveApplicationStatusUpdateSerializer,
+    RecallApplicationStatusUpdateSerializer,
+    LeaveRecallSerializer
 )
 
 
@@ -52,6 +57,7 @@ class IsAdmin(BasePermission):
 class LeaveApplicationPagination(pagination.PageNumberPagination):
     page_size_query_param = 'limit'
     max_page_size = 50
+    page_size = 10
 
     def paginate_queryset(self, queryset, request, view=None):
         """
@@ -87,12 +93,9 @@ class LeaveApplicationPagination(pagination.PageNumberPagination):
         return super().get_paginated_response(data)
 
 
-class LeaveApplicationListView(generics.ListCreateAPIView):
+class LeaveApplicationListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    queryset = LeaveApplication.objects.all()
-    filter_backends = [DjangoFilterBackend]
-    serializer_class = LeaveApplicationSerializer
-    pagination_class = LeaveApplicationPagination
+    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -113,17 +116,28 @@ class LeaveApplicationListView(generics.ListCreateAPIView):
                                   "(start_date <= today <= end_date)"
                               ),
                               type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter('limit', openapi.IN_QUERY,
+                              description="Number of results per page",
+                              type=openapi.TYPE_INTEGER),
+            openapi.Parameter('page', openapi.IN_QUERY,
+                              description="Page number",
+                              type=openapi.TYPE_INTEGER),
         ]
     )
     def get(self, request, *args, **kwargs):
-        return super().get(request, *args, **kwargs)
-
-    def get_queryset(self):
+        user = request.user
         queryset = LeaveApplication.objects.all()
-        first_name = self.request.query_params.get("first_name")
-        leave_types = self.request.query_params.get("type")
-        is_recall = self.request.query_params.get("isRecall", "false").lower() == "true"
         today = date.today()
+
+        # Base queryset: Admin gets all, user gets only own records
+        if user.role == 'admin':
+            queryset = LeaveApplication.objects.all()
+        else:
+            queryset = LeaveApplication.objects.filter(employee=user)
+
+        first_name = request.query_params.get("first_name")
+        leave_types = request.query_params.get("type")
+        is_recall = request.query_params.get("isRecall", "false").lower() == "true"
 
         if first_name:
             queryset = queryset.filter(
@@ -137,10 +151,98 @@ class LeaveApplicationListView(generics.ListCreateAPIView):
         if is_recall:
             queryset = queryset.filter(
                 start_date__lte=today,
-                end_date__gte=today
+                end_date__gte=today,
+                status="Approved"
             )
 
-        return queryset
+        paginator = LeaveApplicationPagination()
+        paginated_queryset = paginator.paginate_queryset(queryset, request)
+        serializer = LeaveApplicationSerializer(paginated_queryset, many=True)
+        return paginator.get_paginated_response(serializer.data)
+
+    @swagger_auto_schema(
+        operation_description="Create a new leave application with an optional document upload.",
+        request_body=LeaveApplicationSerializer,
+        responses={
+            201: "Leave application ion created successfully.",
+            400: "Bad Request"
+        }
+    )
+    def post(self, request, *args, **kwargs):
+        """
+        Create a new leave application with file upload.
+        """
+        serializer = LeaveApplicationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(employee=request.user)  # Automatically set the employee
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LeaveApplicationDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
+
+    """
+    API to retrieve the details of a specific leave application.
+    """
+    @swagger_auto_schema(
+        operation_description="Retrieve the details of a specific leave application by its ID.",
+        responses={
+            200: openapi.Response(
+                description="Leave application details retrieved successfully.",
+                schema=LeaveApplicationSerializer
+            ),
+            404: "Leave application not found."
+        }
+    )
+    def get(self, request, pk, *args, **kwargs):
+        """
+        Retrieve the details of a specific leave application.
+        """
+        leave_application = get_object_or_404(LeaveApplication, pk=pk)
+        serializer = LeaveApplicationSerializer(leave_application)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    @swagger_auto_schema(
+        operation_description="Update an existing leave application",
+        request_body=LeaveApplicationSerializer,
+        responses={
+            201: "Leave application updated successfully",
+            400: "Bad Request",
+            404: "Leave application not found."
+        }
+    )
+    def patch(self, request, pk, *args, **kwargs):
+        """
+        Partially update a leave application.
+        """
+        leave_application = get_object_or_404(LeaveApplication, pk=pk)
+        serializer = LeaveApplicationSerializer(
+            leave_application, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    @swagger_auto_schema(
+        operation_description="Delete a leave application by its ID.",
+        responses={
+            204: "Leave application deleted successfully.",
+            404: "Leave application not found."
+        }
+    )
+    def delete(self, request, pk, *args, **kwargs):
+        """
+        Delete a leave application.
+        """
+        leave_application = get_object_or_404(LeaveApplication, pk=pk)
+        leave_application.delete()
+        return Response(
+            {"message": "Leave application deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 
 class LeaveApplicationDetailView(generics.RetrieveAPIView):
@@ -149,32 +251,9 @@ class LeaveApplicationDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
 
-class LeaveApplicationByUserView(generics.ListAPIView):
-    serializer_class = LeaveApplicationSerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = LeaveApplicationPagination
-    page_size_query_param = 'limit'
-    max_page_size = 50
-
-    def get_queryset(self):
-        user_id = self.kwargs['user_id']
-        return LeaveApplication.objects.filter(employee_id=user_id)
-
-
 class EmployeeLeaveBalanceView(generics.RetrieveUpdateDestroyAPIView):
     queryset = EmployeeLeaveBalance.objects.all()
     serializer_class = EmployeeLeaveBalanceSerializer
-
-
-class LeaveApplicationEditView(generics.UpdateAPIView):
-    queryset = LeaveApplication.objects.all()
-    serializer_class = LeaveApplicationSerializer  # Use the same serializer for creating/updating
-    permission_classes = [IsAuthenticated, IsEmployee]
-
-
-class LeaveApplicationDeleteView(generics.DestroyAPIView):
-    queryset = LeaveApplication.objects.all()
-    permission_classes = [IsAuthenticated, IsEmployee]
 
 
 class LeaveApplicationStatusUpdateView(generics.UpdateAPIView):
@@ -183,19 +262,23 @@ class LeaveApplicationStatusUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
 
+class RecallApplicationStatusUpdateView(generics.UpdateAPIView):
+    queryset = LeaveApplication.objects.all()
+    serializer_class = RecallApplicationStatusUpdateSerializer
+    permission_classes = [IsAuthenticated, IsEmployee]
+
+
 class LeaveApplicationDownloadView(APIView):
     def get(self, request, file_format, *args, **kwargs):
         """
-        Download leave applications as PDF, CSV, or Excel file.
-
-        Args:
-            file_format (str): File format to download in.
-                Choices are 'pdf', 'csv', 'excel'.
-
-        Returns:
-            HttpResponse: Response containing the downloaded file.
+        Download leave applications (filtered by role) as PDF, CSV, or Excel.
         """
-        leave_applications = LeaveApplication.objects.select_related('employee').all()
+        user = request.user
+        if user.role == 'admin':
+            # Admin can view all leave applications
+            leave_applications = LeaveApplication.objects.select_related('employee').all()
+        else:
+            leave_applications = LeaveApplication.objects.select_related('employee').filter(employee=user)
         # Convert data to a list of dicts
         data = [
             {
@@ -287,3 +370,25 @@ class LeaveApplicationDownloadView(APIView):
                 buffer.seek(0)
                 response.write(buffer.getvalue())
             return response
+
+
+class RecallLeaveApplicationView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @swagger_auto_schema(
+        operation_description="Update recall information of a leave application",
+        request_body=LeaveRecallSerializer,
+        responses={
+            200: "Recall info updated successfully",
+            400: "Invalid data",
+            404: "LeaveApplication not found"
+        }
+    )
+    def patch(self, request, pk):
+        leave_application = get_object_or_404(LeaveApplication, pk=pk)
+
+        serializer = LeaveRecallSerializer(leave_application, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

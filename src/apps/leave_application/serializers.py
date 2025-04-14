@@ -1,23 +1,59 @@
 from rest_framework import serializers
-from django.contrib.auth import get_user_model
-
 from .models import LeaveApplication, EmployeeLeaveBalance
 
 
-class ReliefOfficerSerializer(serializers.ModelSerializer):
+class LeaveRecallSerializer(serializers.ModelSerializer):
     class Meta:
-        model = get_user_model()
-        fields = ["id", "first_name", "last_name", "email"]
+        model = LeaveApplication
+        fields = ['recall_date', 'recall_reason', 'recall_status', 'is_recalled']
 
 
 class LeaveApplicationSerializer(serializers.ModelSerializer):
-    relief_officer = ReliefOfficerSerializer(read_only=True)
-    employee_name = serializers.CharField(source="employee.first_name",
-                                          read_only=True)
+    relief_officer_first_name = serializers.SerializerMethodField()
+    relief_officer_last_name = serializers.SerializerMethodField()
+    employeeName = serializers.SerializerMethodField()
 
     class Meta:
         model = LeaveApplication
-        fields = "__all__"
+        fields = [
+            "id",
+            'start_date',
+            'end_date',
+            'resumption_date',
+            'employeeName',
+            'type',
+            'employee',
+            'relief_officer',
+            'document_path',
+            'reason',
+            'durations',
+            'relief_officer_first_name',
+            'relief_officer_last_name',
+            'status',
+            'recall_status',
+            'recall_reason',
+            'recall_date',
+            'is_recalled',
+            'days_remaining',
+            'created_at',
+            'updated_at',
+
+        ]
+
+    def get_relief_officer_first_name(self, obj):
+        if obj.relief_officer:
+            return obj.relief_officer.first_name
+        return None
+
+    def get_relief_officer_last_name(self, obj):
+        if obj.relief_officer:
+            return obj.relief_officer.last_name
+        return None
+
+    def get_employeeName(self, obj):
+        if obj.employee:
+            return f"{obj.employee.first_name} {obj.employee.last_name}"
+        return None
 
 
 class EmployeeLeaveBalanceSerializer(serializers.ModelSerializer):
@@ -30,3 +66,9 @@ class LeaveApplicationStatusUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = LeaveApplication
         fields = ['status']
+
+
+class RecallApplicationStatusUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LeaveApplication
+        fields = ['recall_status']

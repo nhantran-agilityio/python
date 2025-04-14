@@ -1,13 +1,17 @@
 import os
+from urllib.request import Request
 from rest_framework import status, generics, permissions
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
+from drf_yasg import openapi
+from djangorestframework_camel_case.parser import CamelCaseJSONParser
+from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
@@ -107,7 +111,8 @@ class LoginView(generics.GenericAPIView):
                     "user": {
                         "id": user.id,
                         "email": user.email,
-                        "role": user.role
+                        "role": user.role,
+                        "username": user.get_full_name(),
                     }
                 }, status=status.HTTP_200_OK)
             else:
@@ -118,18 +123,81 @@ class LoginView(generics.GenericAPIView):
 
 
 class UserDetailView(APIView):
-    # permission_classes = [permissions.IsAuthenticated]
-    serializer_class = UserDetailSerializer
+    permission_classes = [IsAuthenticated]
+    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser] # Required for file uploads
 
-    def get(self, request, pk):
-        try:
-            user = User.objects.get(pk=pk)
-        except User.DoesNotExist:
-            return Response({"error": "User not found."},
-                            status=status.HTTP_404_NOT_FOUND)
+    def get(self, request):
+        user = User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
+        serializer = UserDetailSerializer(user)
+        return Response(serializer.data)
 
-        serializer = self.serializer_class(user)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+    @swagger_auto_schema(
+        operation_description="Update the details of the authenticated user, including uploading an avatar.",
+        request_body=openapi.Schema(
+            type=openapi.TYPE_OBJECT,
+            properties={
+                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='First name of the user'),
+                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='Last name of the user'),
+                'role': openapi.Schema(
+                    type=openapi.TYPE_STRING,
+                    enum=["admin", "candidate", "employee"],
+                    description='Role of the user (admin, candidate, employee)'
+                ),
+                'job': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'name': openapi.Schema(type=openapi.TYPE_STRING, description='Job name'),
+                        'description': openapi.Schema(type=openapi.TYPE_STRING, description='Job description'),
+                        'department': openapi.Schema(type=openapi.TYPE_STRING, description='Job department'),
+                        'lineManagement': openapi.Schema(type=openapi.TYPE_STRING, description='Line management'),
+                        'jobCategory': openapi.Schema(
+                            type=openapi.TYPE_STRING,
+                            enum=["Full Time", "Part Time"],
+                            description='Job category (Full Time, Part Time)'
+                        ),
+                    },
+                    description='Job details'
+                ),
+                'avatar': openapi.Schema(type=openapi.TYPE_FILE, description='Avatar image file'),
+                'phone': openapi.Schema(type=openapi.TYPE_STRING, description='phone'),
+                'email': openapi.Schema(type=openapi.TYPE_STRING, description='email'),
+                'contact': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'phoneNum2': openapi.Schema(type=openapi.TYPE_STRING, description='Contact phone number 2'),
+                        'cityOfResidence': openapi.Schema(type=openapi.TYPE_STRING, description='Contact city of residence'),
+                        'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Contact residential address'),
+                    },
+                    description='Contact details'
+                ),
+                'kin': openapi.Schema(
+                    type=openapi.TYPE_OBJECT,
+                    properties={
+                        'name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the next of kin'),
+                        'relationship': openapi.Schema(type=openapi.TYPE_STRING, description='Relationship to the user'),
+                        'phone': openapi.Schema(type=openapi.TYPE_STRING, description='Phone number of the next of kin'),
+                        'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email of the next of kin'),
+                        'job': openapi.Schema(type=openapi.TYPE_STRING, description='Job of the next of kin'),
+                        'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Address of the next of kin'),
+                    },
+                    description='Next of kin details'
+                ),
+            },
+        ),
+        responses={
+            200: openapi.Response(
+                description="User details updated successfully.",
+                schema=UserDetailSerializer
+            ),
+            400: "Invalid data provided."
+        }
+    )
+    def patch(self, request: Request) -> Response:
+        serializer = UserDetailSerializer(instance=request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserListView(generics.ListAPIView):
