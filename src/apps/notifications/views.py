@@ -1,7 +1,6 @@
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from .models import Notification
 from .serializers import NotificationSerializer
@@ -19,8 +18,11 @@ class NotificationListView(APIView):
         """
         Retrieve a list of unread notifications for the authenticated user.
         """
-        notifications = Notification.objects.filter(user=request.user,
-                                                    is_read=False)
+        if request.user.role == "admin":
+            notifications = Notification.objects.all()
+        else:
+            notifications = Notification.objects.filter(user=request.user, is_read=False)
+
         serializer = NotificationSerializer(notifications, many=True)
         return Response(serializer.data)
 
@@ -61,6 +63,10 @@ class NotificationDetailView(APIView):
         """
         Retrieve the details of a specific notification by its ID.
         """
-        notification = get_object_or_404(Notification, pk=pk, user=request.user)
+        notification = Notification.objects.filter(pk=pk, user=request.user).first()
+
+        if notification is None:
+            return Response({}, status=200)  # Trả về phản hồi trống với mã 200
+
         serializer = NotificationSerializer(notification)
         return Response(serializer.data, status=200)

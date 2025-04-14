@@ -125,11 +125,19 @@ class LeaveApplicationListAPIView(APIView):
         ]
     )
     def get(self, request, *args, **kwargs):
+        user = request.user
         queryset = LeaveApplication.objects.all()
+        today = date.today()
+
+        # Base queryset: Admin gets all, user gets only own records
+        if user.role == 'admin':
+            queryset = LeaveApplication.objects.all()
+        else:
+            queryset = LeaveApplication.objects.filter(employee=user)
+
         first_name = request.query_params.get("first_name")
         leave_types = request.query_params.get("type")
         is_recall = request.query_params.get("isRecall", "false").lower() == "true"
-        today = date.today()
 
         if first_name:
             queryset = queryset.filter(
@@ -243,18 +251,6 @@ class LeaveApplicationDetailView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
 
 
-# class LeaveApplicationByUserView(generics.ListAPIView):
-#     serializer_class = LeaveApplicationSerializer
-#     permission_classes = [IsAuthenticated]
-#     pagination_class = LeaveApplicationPagination
-#     page_size_query_param = 'limit'
-#     max_page_size = 50
-
-#     def get_queryset(self):
-#         user_id = self.kwargs['user_id']
-#         return LeaveApplication.objects.filter(employee_id=user_id)
-
-
 class EmployeeLeaveBalanceView(generics.RetrieveUpdateDestroyAPIView):
     queryset = EmployeeLeaveBalance.objects.all()
     serializer_class = EmployeeLeaveBalanceSerializer
@@ -275,16 +271,14 @@ class RecallApplicationStatusUpdateView(generics.UpdateAPIView):
 class LeaveApplicationDownloadView(APIView):
     def get(self, request, file_format, *args, **kwargs):
         """
-        Download leave applications as PDF, CSV, or Excel file.
-
-        Args:
-            file_format (str): File format to download in.
-                Choices are 'pdf', 'csv', 'excel'.
-
-        Returns:
-            HttpResponse: Response containing the downloaded file.
+        Download leave applications (filtered by role) as PDF, CSV, or Excel.
         """
-        leave_applications = LeaveApplication.objects.select_related('employee').all()
+        user = request.user
+        if user.role == 'admin':
+            # Admin can view all leave applications
+            leave_applications = LeaveApplication.objects.select_related('employee').all()
+        else:
+            leave_applications = LeaveApplication.objects.select_related('employee').filter(employee=user)
         # Convert data to a list of dicts
         data = [
             {
