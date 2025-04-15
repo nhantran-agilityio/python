@@ -131,73 +131,91 @@ class UserDetailView(APIView):
         serializer = UserDetailSerializer(user)
         return Response(serializer.data)
 
+    # @swagger_auto_schema(
+    #     operation_description="Update the details of the authenticated user, including uploading an avatar.",
+    #     request_body=openapi.Schema(
+    #         type=openapi.TYPE_OBJECT,
+    #         properties={
+    #             'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='First name of the user'),
+    #             'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='Last name of the user'),
+    #             'role': openapi.Schema(
+    #                 type=openapi.TYPE_STRING,
+    #                 enum=["admin", "candidate", "employee"],
+    #                 description='Role of the user (admin, candidate, employee)'
+    #             ),
+    #             'job': openapi.Schema(
+    #                 type=openapi.TYPE_OBJECT,
+    #                 properties={
+    #                     'name': openapi.Schema(type=openapi.TYPE_STRING, description='Job name'),
+    #                     'description': openapi.Schema(type=openapi.TYPE_STRING, description='Job description'),
+    #                     'department': openapi.Schema(type=openapi.TYPE_STRING, description='Job department'),
+    #                     'lineManagement': openapi.Schema(type=openapi.TYPE_STRING, description='Line management'),
+    #                     'jobCategory': openapi.Schema(
+    #                         type=openapi.TYPE_STRING,
+    #                         enum=["Full Time", "Part Time"],
+    #                         description='Job category (Full Time, Part Time)'
+    #                     ),
+    #                 },
+    #                 description='Job details'
+    #             ),
+    #             'jobId': openapi.Schema(type=openapi.TYPE_STRING, description='Job Id'),
+    #             'avatar': openapi.Schema(type=openapi.TYPE_FILE, description='Avatar image file'),
+    #             'phone': openapi.Schema(type=openapi.TYPE_STRING, description='phone'),
+    #             'email': openapi.Schema(type=openapi.TYPE_STRING, description='email'),
+    #             'contact': openapi.Schema(
+    #                 type=openapi.TYPE_OBJECT,
+    #                 properties={
+    #                     'phoneNum2': openapi.Schema(type=openapi.TYPE_STRING, description='Contact phone number 2'),
+    #                     'cityOfResidence': openapi.Schema(type=openapi.TYPE_STRING, description='Contact city of residence'),
+    #                     'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Contact residential address'),
+    #                 },
+    #                 description='Contact details'
+    #             ),
+    #             'kin': openapi.Schema(
+    #                 type=openapi.TYPE_OBJECT,
+    #                 properties={
+    #                     'name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the next of kin'),
+    #                     'relationship': openapi.Schema(type=openapi.TYPE_STRING, description='Relationship to the user'),
+    #                     'phone': openapi.Schema(type=openapi.TYPE_STRING, description='Phone number of the next of kin'),
+    #                     'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email of the next of kin'),
+    #                     'job': openapi.Schema(type=openapi.TYPE_STRING, description='Job of the next of kin'),
+    #                     'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Address of the next of kin'),
+    #                 },
+    #                 description='Next of kin details'
+    #             ),
+    #         },
+    #     ),
+    #     responses={
+    #         200: openapi.Response(
+    #             description="User details updated successfully.",
+    #             schema=UserDetailSerializer
+    #         ),
+    #         400: "Invalid data provided."
+    #     }
+    # )
     @swagger_auto_schema(
-        operation_description="Update the details of the authenticated user, including uploading an avatar.",
-        request_body=openapi.Schema(
-            type=openapi.TYPE_OBJECT,
-            properties={
-                'first_name': openapi.Schema(type=openapi.TYPE_STRING, description='First name of the user'),
-                'last_name': openapi.Schema(type=openapi.TYPE_STRING, description='Last name of the user'),
-                'role': openapi.Schema(
-                    type=openapi.TYPE_STRING,
-                    enum=["admin", "candidate", "employee"],
-                    description='Role of the user (admin, candidate, employee)'
-                ),
-                'job': openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'name': openapi.Schema(type=openapi.TYPE_STRING, description='Job name'),
-                        'description': openapi.Schema(type=openapi.TYPE_STRING, description='Job description'),
-                        'department': openapi.Schema(type=openapi.TYPE_STRING, description='Job department'),
-                        'lineManagement': openapi.Schema(type=openapi.TYPE_STRING, description='Line management'),
-                        'jobCategory': openapi.Schema(
-                            type=openapi.TYPE_STRING,
-                            enum=["Full Time", "Part Time"],
-                            description='Job category (Full Time, Part Time)'
-                        ),
-                    },
-                    description='Job details'
-                ),
-                'avatar': openapi.Schema(type=openapi.TYPE_FILE, description='Avatar image file'),
-                'phone': openapi.Schema(type=openapi.TYPE_STRING, description='phone'),
-                'email': openapi.Schema(type=openapi.TYPE_STRING, description='email'),
-                'contact': openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'phoneNum2': openapi.Schema(type=openapi.TYPE_STRING, description='Contact phone number 2'),
-                        'cityOfResidence': openapi.Schema(type=openapi.TYPE_STRING, description='Contact city of residence'),
-                        'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Contact residential address'),
-                    },
-                    description='Contact details'
-                ),
-                'kin': openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties={
-                        'name': openapi.Schema(type=openapi.TYPE_STRING, description='Name of the next of kin'),
-                        'relationship': openapi.Schema(type=openapi.TYPE_STRING, description='Relationship to the user'),
-                        'phone': openapi.Schema(type=openapi.TYPE_STRING, description='Phone number of the next of kin'),
-                        'email': openapi.Schema(type=openapi.TYPE_STRING, description='Email of the next of kin'),
-                        'job': openapi.Schema(type=openapi.TYPE_STRING, description='Job of the next of kin'),
-                        'residentialAddress': openapi.Schema(type=openapi.TYPE_STRING, description='Address of the next of kin'),
-                    },
-                    description='Next of kin details'
-                ),
-            },
-        ),
-        responses={
-            200: openapi.Response(
-                description="User details updated successfully.",
-                schema=UserDetailSerializer
-            ),
-            400: "Invalid data provided."
-        }
+        operation_description="Cập nhật thông tin cá nhân của người dùng hiện tại.",
+        request_body=UserDetailSerializer,
+        responses={200: UserDetailSerializer},
+        tags=["User"]
     )
-    def patch(self, request: Request) -> Response:
-        serializer = UserDetailSerializer(instance=request.user, data=request.data, partial=True)
+    def patch(self, request):
+        user = request.user
+        serializer = UserDetailSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response({
+                "message": "User updated successfully.",
+                "data": serializer.data
+            })
+        return Response(serializer.errors, status=400)
+
+    # def patch(self, request: Request) -> Response:
+    #     serializer = UserDetailSerializer(instance=request.user, data=request.data, partial=True)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_200_OK)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserListView(generics.ListAPIView):
