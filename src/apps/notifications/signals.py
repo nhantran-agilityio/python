@@ -7,7 +7,7 @@ from apps.notifications.models import Notification
 
 @receiver(post_save, sender=LeaveApplication)
 def send_leave_recall_notification(sender, instance, created, **kwargs):
-    if instance.is_recalled:
+    if instance.is_recalled and instance.recall_status == "Pending":
         relief_officer = instance.relief_officer
         full_name = f"{relief_officer.first_name} {relief_officer.last_name}" if relief_officer else "an unknown officer"
 

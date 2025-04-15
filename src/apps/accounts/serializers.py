@@ -56,37 +56,32 @@ class UserDetailSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'first_name', 'last_name',
-            'role', 'avatar',
+            'avatar',
             'job', 'job_id', 'contact', 'phone',
             'is_receive_newsletters', 'email', 'contact_id', 'kin', 'kin_id'
         ]
 
-    def update(self, instance, validated_data):
-        """Update a user and its related objects."""
-        for field, value in validated_data.items():
-            if field == 'job':
-                if instance.job:
-                    Job.objects.filter(id=instance.job.id).update(**value)
-                else:
-                    job = Job.objects.create(**value)
-                    instance.job = job
-            elif field == 'contact':
-                if instance.contact:
-                    Contact.objects.filter(id=instance.contact.id).update(**value)
-                else:
-                    contact = Contact.objects.create(**value)
-                    instance.contact = contact
-            elif field == 'kin':
-                if instance.kin:
-                    Kin.objects.filter(id=instance.kin.id).update(**value)
-                else:
-                    kin = Kin.objects.create(**value)
-                    instance.kin = kin
+    def update_or_create_nested(self, instance, nested_data, related_name, serializer_class):
+        if nested_data:
+            nested_instance = getattr(instance, related_name)
+            if nested_instance:
+                serializer = serializer_class(nested_instance, data=nested_data)
             else:
-                setattr(instance, field, value)
+                serializer = serializer_class(data=nested_data)
+            serializer.is_valid(raise_exception=True)
+            saved = serializer.save()
+            setattr(instance, related_name, saved)
 
-        instance.save()
-        return instance
+    def update(self, instance, validated_data):
+        job_data = validated_data.pop('job', None)
+        contact_data = validated_data.pop('contact', None)
+        kin_data = validated_data.pop('kin', None)
+
+        self.update_or_create_nested(instance, job_data, 'job', JobSerializer)
+        self.update_or_create_nested(instance, contact_data, 'contact', ContactSerializer)
+        self.update_or_create_nested(instance, kin_data, 'kin', KinSerializer)
+
+        return super().update(instance, validated_data)
 
 
 class UserListSerializer(serializers.ModelSerializer):
