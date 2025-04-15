@@ -1,29 +1,42 @@
 from rest_framework import serializers
+
+from apps.accounts.models import User
+from apps.accounts.serializers import UserDetailSerializer
 from .models import LeaveApplication, EmployeeLeaveBalance
 
 
 class LeaveRecallSerializer(serializers.ModelSerializer):
     class Meta:
         model = LeaveApplication
-        fields = ['recall_date', 'recall_reason', 'recall_status', 'is_recalled']
+        fields = ['recall_date', 'recall_reason', 'recall_status' ]
 
 
 class LeaveApplicationSerializer(serializers.ModelSerializer):
     relief_officer_first_name = serializers.SerializerMethodField()
     relief_officer_last_name = serializers.SerializerMethodField()
     employeeName = serializers.SerializerMethodField()
+    startDate = serializers.DateField(source='start_date')
+    endDate = serializers.DateField(source='end_date')
+    resumptionDate = serializers.DateField(source='resumption_date')
+    reliefOfficer = UserDetailSerializer(source='relief_officer')
+    reliefOfficerId = serializers.PrimaryKeyRelatedField(
+        source='relief_officer',
+        queryset=User.objects.all(),
+        write_only=True
+    )
 
     class Meta:
         model = LeaveApplication
         fields = [
             "id",
-            'start_date',
-            'end_date',
-            'resumption_date',
+            'startDate',
+            'endDate',
+            'resumptionDate',
             'employeeName',
             'type',
             'employee',
-            'relief_officer',
+            'reliefOfficer',
+            'reliefOfficerId',
             'document_path',
             'reason',
             'durations',
