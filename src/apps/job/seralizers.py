@@ -6,7 +6,6 @@ from .models import Job
 class JobSerializer(serializers.ModelSerializer):
     responsibilities = JobResponsibilitySerializer(many=True, read_only=True)
     line_management_full_name = serializers.SerializerMethodField()
-    name = serializers.CharField(required=False, allow_blank=True)
 
     class Meta:
         model = Job

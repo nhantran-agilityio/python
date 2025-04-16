@@ -141,10 +141,9 @@ class UserDetailView(APIView):
         serializer = UserDetailSerializer(user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response({
-                "message": "User updated successfully.",
-                "data": serializer.data
-            })
+            # reload updated user from DB
+            user.refresh_from_db()
+            return Response(UserDetailSerializer(user).data)
         return Response(serializer.errors, status=400)
 
 
