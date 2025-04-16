@@ -6,4 +6,4 @@ from .models import Guarantor
 class GuarantorSerializer(serializers.ModelSerializer):
     class Meta:
         model = Guarantor
-        fields = '__all__'
+        exclude = ['user']

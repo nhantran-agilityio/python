@@ -9,7 +9,7 @@ class EducationAdmin(admin.ModelAdmin):
         "course",
         "location",
         "start_date",
-        "end_time",
+        "end_date",
         "description",
     )
 

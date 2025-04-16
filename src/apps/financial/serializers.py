@@ -6,4 +6,4 @@ from .models import Financial
 class FinancialSerializer(serializers.ModelSerializer):
     class Meta:
         model = Financial
-        fields = '__all__'
+        exclude = ['user']
