@@ -11,6 +11,7 @@ from io import BytesIO
 from django.http import HttpResponse
 from apps.document.models import Document
 from apps.document.seralizers import DocumentUploadSerializer
+from utils.conversions import camel_to_snake
 
 
 class MultipleDocumentUploadView(APIView):
@@ -65,7 +66,8 @@ class MultipleDocumentUploadView(APIView):
         for key, file in documents.items():
             # Extract the document type from the key (e.g., "documents[offer_letter]" -> "offer_letter")
             if key.startswith("documents[") and key.endswith("]"):
-                doc_type = key[len("documents["):-1]
+                doc_type_camel = key[len("documents["):-1]
+                doc_type = camel_to_snake(doc_type_camel)
             else:
                 return Response(
                     {"error": f"Invalid key format: {key}"},

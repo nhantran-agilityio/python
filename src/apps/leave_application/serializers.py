@@ -18,8 +18,7 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
     startDate = serializers.DateField(source='start_date')
     endDate = serializers.DateField(source='end_date')
     resumptionDate = serializers.DateField(source='resumption_date')
-    reliefOfficer = UserDetailSerializer(source='relief_officer')
-    reliefOfficerId = serializers.PrimaryKeyRelatedField(
+    reliefOfficer = serializers.PrimaryKeyRelatedField(
         source='relief_officer',
         queryset=User.objects.all(),
         write_only=True
@@ -36,7 +35,6 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
             'type',
             'employee',
             'reliefOfficer',
-            'reliefOfficerId',
             'document_path',
             'reason',
             'durations',
