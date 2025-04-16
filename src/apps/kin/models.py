@@ -9,3 +9,6 @@ class Kin(models.Model):
     phone = models.CharField(max_length=20)
     relationship = models.CharField(max_length=50)
     residential_address = models.TextField()
+
+    def __str__(self):
+        return self.name
