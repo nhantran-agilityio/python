@@ -8,7 +8,7 @@ from .models import LeaveApplication, EmployeeLeaveBalance
 class LeaveRecallSerializer(serializers.ModelSerializer):
     class Meta:
         model = LeaveApplication
-        fields = ['recall_date', 'recall_reason', 'recall_status' ]
+        fields = ['recall_date', 'recall_reason', 'recall_status', 'is_recalled' ]
 
 
 class LeaveApplicationSerializer(serializers.ModelSerializer):

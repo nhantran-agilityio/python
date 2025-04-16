@@ -1,4 +1,3 @@
-import os
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
@@ -14,37 +13,32 @@ from apps.document.seralizers import DocumentUploadSerializer
 from utils.conversions import camel_to_snake
 
 
-class MultipleDocumentUploadView(APIView):
-    parser_classes = [MultiPartParser, FormParser]
+class DocumentBaseView(APIView):
     permission_classes = [IsAuthenticated]
+
+    def validate_document_type(self, doc_type_camel):
+        doc_type = camel_to_snake(doc_type_camel)
+        if doc_type not in dict(Document.DOCUMENT_TYPES):
+            return None, Response(
+                {"error": f"Invalid document type: {doc_type}"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return doc_type, None
+
+
+class MultipleDocumentUploadView(DocumentBaseView):
+    parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         operation_description="Upload multiple documents with their types",
         manual_parameters=[
             openapi.Parameter(
-                name="documents[offer_letter]",
+                name=f"documents[{doc_type}]",
                 in_=openapi.IN_FORM,
                 type=openapi.TYPE_FILE,
-                description="Offer Letter document"
-            ),
-            openapi.Parameter(
-                name="documents[birth_certificate]",
-                in_=openapi.IN_FORM,
-                type=openapi.TYPE_FILE,
-                description="Birth Certificate document"
-            ),
-            openapi.Parameter(
-                name="documents[guarantor_form]",
-                in_=openapi.IN_FORM,
-                type=openapi.TYPE_FILE,
-                description="Guarantor Form document"
-            ),
-            openapi.Parameter(
-                name="documents[degree_certificate]",
-                in_=openapi.IN_FORM,
-                type=openapi.TYPE_FILE,
-                description="Degree Certificate document"
-            ),
+                description=f"{doc_type.replace('_', ' ').title()} document"
+            )
+            for doc_type in dict(Document.DOCUMENT_TYPES).keys()
         ],
         responses={
             201: "Files uploaded successfully!",
@@ -52,9 +46,6 @@ class MultipleDocumentUploadView(APIView):
         }
     )
     def post(self, request, *args, **kwargs):
-        """
-        Handle bulk document upload where each document is associated with a type.
-        """
         documents = request.FILES
         if not documents:
             return Response(
@@ -64,24 +55,17 @@ class MultipleDocumentUploadView(APIView):
 
         uploaded_files = []
         for key, file in documents.items():
-            # Extract the document type from the key (e.g., "documents[offer_letter]" -> "offer_letter")
             if key.startswith("documents[") and key.endswith("]"):
                 doc_type_camel = key[len("documents["):-1]
-                doc_type = camel_to_snake(doc_type_camel)
+                doc_type, error_response = self.validate_document_type(doc_type_camel)
+                if error_response:
+                    return error_response
             else:
                 return Response(
                     {"error": f"Invalid key format: {key}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Validate the document type
-            if doc_type not in dict(Document.DOCUMENT_TYPES):
-                return Response(
-                    {"error": f"Invalid document type: {doc_type}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            # Save the document
             document = Document.objects.create(
                 user=request.user,
                 document_file=file,
@@ -90,19 +74,70 @@ class MultipleDocumentUploadView(APIView):
             uploaded_files.append(DocumentUploadSerializer(document).data)
 
         return Response(
-            {"message": "Files uploaded successfully!", "documents": uploaded_files},
+            {
+                "message": "Files uploaded successfully!",
+                "documents": uploaded_files,
+            },
             status=status.HTTP_201_CREATED
         )
 
+    @swagger_auto_schema(
+        operation_description="Update a specific document by type",
+        manual_parameters=[
+            openapi.Parameter(
+                name="documentType",
+                in_=openapi.IN_FORM,
+                type=openapi.TYPE_STRING,
+                description="Type of the document to update"
+            ),
+            openapi.Parameter(
+                name="documentFile",
+                in_=openapi.IN_FORM,
+                type=openapi.TYPE_FILE,
+                description="New document file"
+            ),
+        ],
+        responses={
+            200: "Document updated successfully!",
+            400: "Bad Request",
+            404: "Document not found"
+        }
+    )
+    def patch(self, request, *args, **kwargs):
+        doc_type_camel = request.data.get("documentType")
+        file = request.FILES.get("documentFile")
 
-class DownloadAllDocumentsView(APIView):
-    permission_classes = [IsAuthenticated]
+        if not doc_type_camel or not file:
+            return Response(
+                {"error": "Both documentType and documentFile are required."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
+        doc_type, error_response = self.validate_document_type(doc_type_camel)
+        if error_response:
+            return error_response
+
+        try:
+            document = Document.objects.get(user=request.user, document_type=doc_type)
+            document.document_file = file
+            document.save()
+        except Document.DoesNotExist:
+            return Response(
+                {"error": "Document not found for this type."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        return Response(
+            {
+                "message": "Document updated successfully!",
+                "document": DocumentUploadSerializer(document).data
+            },
+            status=status.HTTP_200_OK
+        )
+
+
+class DownloadAllDocumentsView(DocumentBaseView):
     def get(self, request, *args, **kwargs):
-        """
-        Download all documents uploaded by the authenticated user as a zip file.
-        Returns a message if no documents are available.
-        """
         documents = Document.objects.filter(user=request.user)
 
         if not documents.exists():
@@ -116,9 +151,9 @@ class DownloadAllDocumentsView(APIView):
 
         with zipfile.ZipFile(zip_buffer, "w") as zip_file:
             for document in documents:
-                file_path = document.document_file.path
-                if os.path.exists(file_path):
-                    zip_file.write(file_path, os.path.basename(file_path))
+                file_name = document.document_file.name.split("/")[-1]
+                file_content = document.document_file.open().read()
+                zip_file.writestr(file_name, file_content)
 
         zip_buffer.seek(0)
 
@@ -127,15 +162,12 @@ class DownloadAllDocumentsView(APIView):
         return response
 
 
-class GetDocumentsAPIView(APIView):
-    """
-    API to retrieve documents based on user role.
-    Admins get all documents; regular users get only their own.
-    """
-    permission_classes = [IsAuthenticated]
-
+class GetDocumentsAPIView(DocumentBaseView):
     @swagger_auto_schema(
-        operation_description="Retrieve documents. Admins get all; users get only their own.",
+        operation_description=(
+            "Retrieve documents. Admins get all; "
+            "users get only their own."
+        ),
         responses={
             200: openapi.Response(
                 description="Documents retrieved successfully.",
@@ -147,13 +179,11 @@ class GetDocumentsAPIView(APIView):
         }
     )
     def get(self, request, *args, **kwargs):
-        """
-        Retrieve documents depending on the user role.
-        """
-        if request.user.role == "admin":
-            documents = Document.objects.all()
-        else:
-            documents = Document.objects.filter(user=request.user)
+        documents = (
+            Document.objects.all()
+            if request.user.role == "admin"
+            else Document.objects.filter(user=request.user)
+        )
 
         serializer = DocumentUploadSerializer(documents, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
