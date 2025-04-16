@@ -2,11 +2,8 @@ from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 
-from apps.contact.models import Contact
 from apps.contact.serializers import ContactSerializer
-from apps.job.models import Job
 from apps.job.seralizers import JobSerializer
-from apps.kin.models import Kin
 from apps.kin.serializers import KinSerializer
 
 
@@ -51,13 +48,22 @@ class UserDetailSerializer(serializers.ModelSerializer):
     contact = ContactSerializer(required=False)
     kin = KinSerializer(required=False)
     kin_id = serializers.UUIDField(write_only=True, required=False)
+    jobCategory = serializers.CharField(source="job_category", required=False)
+    lineManagement = serializers.PrimaryKeyRelatedField(
+        source="line_management", queryset=User.objects.all(), allow_null=True, required=False
+    )
+    residentialAddress = serializers.CharField(
+        source="residential_address", required=False
+    )
+    cityOfResidence = serializers.CharField(source="city_of_residence", required=False)
+    residentialAddress = serializers.CharField(source="residential_address", required=False)
 
     class Meta:
         model = User
         fields = [
             'id', 'first_name', 'last_name',
-            'avatar',
-            'job', 'job_id', 'contact', 'phone',
+            'avatar', 'residentialAddress', 'cityOfResidence',
+            'job', 'job_id', 'contact', 'phone', 'jobCategory', 'lineManagement',
             'is_receive_newsletters', 'email', 'contact_id', 'kin', 'kin_id'
         ]
 
