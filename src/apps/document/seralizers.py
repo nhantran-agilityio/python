@@ -4,12 +4,13 @@ from .models import Document
 
 
 class DocumentUploadSerializer(serializers.Serializer):
-    documentType = serializers.ChoiceField(choices=Document.DOCUMENT_TYPES)
+    document_file = serializers.FileField()
+    document_type = serializers.ChoiceField(choices=Document.DOCUMENT_TYPES)
     documentFile = serializers.FileField(source='document_file')
 
     class Meta:
         model = Document
-        fields = ['id', 'user', 'documentType', 'documentFile']
+        fields = ['id', 'user', 'document_type', 'documentFile']
 
     def get_documentType(self, obj):
         return underscore_to_camel(obj.document_type)

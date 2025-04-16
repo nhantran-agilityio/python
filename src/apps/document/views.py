@@ -82,55 +82,63 @@ class MultipleDocumentUploadView(DocumentBaseView):
         )
 
     @swagger_auto_schema(
-        operation_description="Update a specific document by type",
+        operation_description="Update upload multiple documents with their types",
         manual_parameters=[
             openapi.Parameter(
-                name="documentType",
-                in_=openapi.IN_FORM,
-                type=openapi.TYPE_STRING,
-                description="Type of the document to update"
-            ),
-            openapi.Parameter(
-                name="documentFile",
+                name=f"documents[{doc_type}]",
                 in_=openapi.IN_FORM,
                 type=openapi.TYPE_FILE,
-                description="New document file"
-            ),
+                description=f"{doc_type.replace('_', ' ').title()} document"
+            )
+            for doc_type in dict(Document.DOCUMENT_TYPES).keys()
         ],
         responses={
-            200: "Document updated successfully!",
-            400: "Bad Request",
-            404: "Document not found"
+            201: "Files uploaded successfully!",
+            400: "Bad Request"
         }
     )
     def patch(self, request, *args, **kwargs):
-        doc_type_camel = request.data.get("documentType")
-        file = request.FILES.get("documentFile")
-
-        if not doc_type_camel or not file:
+        documents = request.FILES
+        if not documents:
             return Response(
-                {"error": "Both documentType and documentFile are required."},
+                {"error": "No documents provided."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        doc_type, error_response = self.validate_document_type(doc_type_camel)
-        if error_response:
-            return error_response
+        updated_files = []
+        for key, file in documents.items():
+            # Extract the document type from key like "documents[offerLetter]"
+            if key.startswith("documents[") and key.endswith("]"):
+                doc_type_camel = key[len("documents["):-1]
+                doc_type = camel_to_snake(doc_type_camel)
+            else:
+                return Response(
+                    {"error": f"Invalid key format: {key}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
 
-        try:
-            document = Document.objects.get(user=request.user, document_type=doc_type)
-            document.document_file = file
-            document.save()
-        except Document.DoesNotExist:
-            return Response(
-                {"error": "Document not found for this type."},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            # Validate document type
+            if doc_type not in dict(Document.DOCUMENT_TYPES):
+                return Response(
+                    {"error": f"Invalid document type: {doc_type}"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            try:
+                document = Document.objects.get(user=request.user, document_type=doc_type)
+                document.document_file = file
+                document.save()
+                updated_files.append(DocumentUploadSerializer(document).data)
+            except Document.DoesNotExist:
+                return Response(
+                    {"error": f"Document not found for type: {doc_type}"},
+                    status=status.HTTP_404_NOT_FOUND
+                )
 
         return Response(
             {
-                "message": "Document updated successfully!",
-                "document": DocumentUploadSerializer(document).data
+                "message": "Documents updated successfully!",
+                "documents": updated_files
             },
             status=status.HTTP_200_OK
         )
