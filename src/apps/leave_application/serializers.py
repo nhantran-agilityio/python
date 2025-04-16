@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from apps.accounts.models import User
-from apps.accounts.serializers import UserDetailSerializer
 from .models import LeaveApplication, EmployeeLeaveBalance
 
 
