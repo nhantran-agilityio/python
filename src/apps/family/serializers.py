@@ -6,4 +6,4 @@ from .models import Family
 class FamilySerializer(serializers.ModelSerializer):
     class Meta:
         model = Family
-        fields = '__all__'
+        exclude = ['user']
