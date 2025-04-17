@@ -10,13 +10,14 @@ from django.contrib.auth.tokens import default_token_generator
 from django.utils.encoding import force_bytes, force_str
 from django.template.loader import render_to_string
 from drf_yasg import openapi
-from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from rest_framework.parsers import MultiPartParser, FormParser
 from django.core.mail import EmailMessage
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
 from urllib.parse import urlencode
+
+from utils.conversions import convert_request_data_keys_to_snake_and_flat_nested
 from .serializers import LoginSerializer
 from dotenv import load_dotenv
 from .models import User
@@ -124,7 +125,7 @@ class LoginView(generics.GenericAPIView):
 
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser] # Required for file uploads
+    parser_classes = [MultiPartParser, FormParser] # Required for file uploads
 
     def get(self, request):
         user = User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
@@ -132,18 +133,45 @@ class UserDetailView(APIView):
         return Response(serializer.data)
 
     @swagger_auto_schema(
-        operation_description="Update information of the authenticated user",
-        request_body=UserDetailSerializer,
-        responses={200: UserDetailSerializer},
+        operation_description="Update current user's profile (supports camelCase, nested job/contact/kin, avatar upload)",
+        manual_parameters=[
+            openapi.Parameter('firstName', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter('lastName', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter('phone', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter('avatar', openapi.IN_FORM, type=openapi.TYPE_FILE),
+            openapi.Parameter(
+                'job',
+                openapi.IN_FORM,
+                type=openapi.TYPE_STRING,
+                description='Stringified JSON. Example: {"department": "IT", "title": "Engineer"}'
+            ),
+            openapi.Parameter(
+                'contact',
+                openapi.IN_FORM,
+                type=openapi.TYPE_STRING,
+                description='Stringified JSON. Example: {"phone": "0909", "email": "abc@xyz.com"}'
+            ),
+            openapi.Parameter(
+                'kin',
+                openapi.IN_FORM,
+                type=openapi.TYPE_STRING,
+                description='Stringified JSON. Example: {"fullName": "Bob", "relationship": "Brother"}'
+            ),
+        ],
+        responses={200: UserDetailSerializer}
     )
     def patch(self, request):
-        user = request.user
-        serializer = UserDetailSerializer(user, data=request.data, partial=True)
+        # Convert camelCase & parse nested JSON fields
+
+        # Ensure the user instance is fetched with related fields for nested updates
+        convert_request_data_keys_to_snake_and_flat_nested(request, json_fields=["job", "contact", "kin"])
+
+        user = User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
+        serializer = UserDetailSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            # reload updated user from DB
-            user.refresh_from_db()
-            return Response(UserDetailSerializer(user).data)
+            request.user.refresh_from_db()
+            return Response(UserDetailSerializer(request.user).data)
         return Response(serializer.errors, status=400)
 
 
