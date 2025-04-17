@@ -1,52 +1,54 @@
-import os
 from django.test import TestCase
-from django.utils import timezone
-from django.urls import reverse
-
-from apps.accounts.models import User, user_avatar_upload
+from apps.accounts.models import User, Role
+import uuid
 
 
 class UserModelTest(TestCase):
     def setUp(self):
-        self.url = reverse('register')
+        # Create a test user
         self.user = User.objects.create(
-            email='testuser@example.com',
-            username='testuser',
-            first_name='Test',
-            last_name='User',
-            job_title='Developer',
-            job_category='IT',
-            department='Engineering',
-            phone='1234567890',
-            role='Admin',
+            id=uuid.uuid4(),
+            email="testuser@example.com",
+            username="testuser",
+            first_name="Test",
+            last_name="User",
+            phone="1234567890",
+            role=Role.ADMIN,
             is_receive_newsletters=True,
-            created_at=timezone.now(),
-            updated_at=timezone.now()
         )
 
     def test_user_creation(self):
-        self.assertEqual(self.user.email, 'testuser@example.com')
-        self.assertEqual(self.user.username, 'testuser')
-        self.assertEqual(self.user.first_name, 'Test')
-        self.assertEqual(self.user.last_name, 'User')
-        self.assertEqual(self.user.job_title, 'Developer')
-        self.assertEqual(self.user.job_category, 'IT')
-        self.assertEqual(self.user.department, 'Engineering')
-        self.assertEqual(self.user.phone, '1234567890')
-        self.assertEqual(self.user.role, 'Admin')
+        """Test that a user is created successfully."""
+        self.assertEqual(self.user.email, "testuser@example.com")
+        self.assertEqual(self.user.username, "testuser")
+        self.assertEqual(self.user.first_name, "Test")
+        self.assertEqual(self.user.last_name, "User")
+        self.assertEqual(self.user.phone, "1234567890")
+        self.assertEqual(self.user.role, Role.ADMIN)
         self.assertTrue(self.user.is_receive_newsletters)
-        self.assertIsNotNone(self.user.created_at)
-        self.assertIsNotNone(self.user.updated_at)
 
-    def test_user_str(self):
-        self.assertEqual(str(self.user), 'testuser@example.com')
+    def test_user_string_representation(self):
+        """Test the string representation of the user."""
+        self.assertEqual(str(self.user), "testuser@example.com")
 
-    def test_user_avatar_upload(self):
-        filename = "avatar.jpg"
-        expected_path = f'avatars/{self.user.id}.jpg'
-        self.assertEqual(user_avatar_upload(self.user, filename), expected_path)
+    def test_user_default_role(self):
+        """Test that the default role is None if not provided."""
+        user_without_role = User.objects.create(
+            id=uuid.uuid4(),
+            email="noroleuser@example.com",
+            username="noroleuser",
+            first_name="No",
+            last_name="Role",
+            phone="0987654321",
+        )
+        self.assertIsNone(user_without_role.role)
 
-    def test_user_avatar_upload_with_different_extension(self):
-        filename = 'avatar.jpg'
-        expected_path = os.path.join('avatars/', f'{self.user.id}.jpg')
-        self.assertEqual(user_avatar_upload(self.user, filename), expected_path)
+    def test_user_required_fields(self):
+        """Test that required fields are validated."""
+        with self.assertRaises(Exception):
+            User.objects.create(
+                email=None,  # Email is required
+                username="invaliduser",
+                first_name="Invalid",
+                last_name="User",
+            )
