@@ -48,30 +48,21 @@ class UserDetailSerializer(serializers.ModelSerializer):
     contact = ContactSerializer(required=False)
     kin = KinSerializer(required=False)
     kin_id = serializers.UUIDField(write_only=True, required=False)
-    jobCategory = serializers.CharField(source="job_category", required=False)
-    lineManagement = serializers.PrimaryKeyRelatedField(
-        source="line_management", queryset=User.objects.all(), allow_null=True, required=False
-    )
-    residentialAddress = serializers.CharField(
-        source="residential_address", required=False
-    )
-    cityOfResidence = serializers.CharField(source="city_of_residence", required=False)
-    residentialAddress = serializers.CharField(source="residential_address", required=False)
 
     class Meta:
         model = User
         fields = [
             'id', 'first_name', 'last_name',
-            'avatar', 'residentialAddress', 'cityOfResidence',
-            'job', 'job_id', 'contact', 'phone', 'jobCategory', 'lineManagement',
+            'avatar', 'job_id',
+            'job', 'contact', 'phone',
             'is_receive_newsletters', 'email', 'contact_id', 'kin', 'kin_id'
         ]
 
     def update_or_create_nested(self, instance, nested_data, related_name, serializer_class):
         if nested_data:
-            nested_instance = getattr(instance, related_name)
+            nested_instance = getattr(instance, related_name, None)
             if nested_instance:
-                serializer = serializer_class(nested_instance, data=nested_data)
+                serializer = serializer_class(nested_instance, data=nested_data, partial=True)
             else:
                 serializer = serializer_class(data=nested_data)
             serializer.is_valid(raise_exception=True)
