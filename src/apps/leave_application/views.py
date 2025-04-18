@@ -11,7 +11,6 @@ from rest_framework import status
 from reportlab.pdfgen import canvas
 import csv
 from rest_framework.parsers import MultiPartParser, FormParser
-from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from reportlab.lib.pagesizes import letter
 import pandas as pd
 from drf_yasg.utils import swagger_auto_schema
@@ -95,7 +94,7 @@ class LeaveApplicationPagination(pagination.PageNumberPagination):
 
 class LeaveApplicationListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -161,11 +160,11 @@ class LeaveApplicationListAPIView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
-        operation_description="Create a new leave application with an optional document upload.",
+        operation_description="Create a new leave application with file upload.",
         request_body=LeaveApplicationSerializer,
         responses={
-            201: "Leave application ion created successfully.",
-            400: "Bad Request"
+            status.HTTP_201_CREATED: LeaveApplicationSerializer,
+            status.HTTP_400_BAD_REQUEST: 'Validation Error',
         }
     )
     def post(self, request, *args, **kwargs):
@@ -181,7 +180,7 @@ class LeaveApplicationListAPIView(APIView):
 
 class LeaveApplicationDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser]
 
     """
     API to retrieve the details of a specific leave application.
