@@ -82,7 +82,7 @@ class MultipleDocumentUploadView(DocumentBaseView):
         )
 
     @swagger_auto_schema(
-        operation_description="Update upload multiple documents with their types",
+        operation_description="Update existing documents or upload new ones",
         manual_parameters=[
             openapi.Parameter(
                 name=f"documents[{doc_type}]",
@@ -93,8 +93,9 @@ class MultipleDocumentUploadView(DocumentBaseView):
             for doc_type in dict(Document.DOCUMENT_TYPES).keys()
         ],
         responses={
-            201: "Files uploaded successfully!",
-            400: "Bad Request"
+            200: "Documents updated successfully!",
+            400: "Bad Request",
+            404: "Document not found for update",
         }
     )
     def patch(self, request, *args, **kwargs):
@@ -107,43 +108,32 @@ class MultipleDocumentUploadView(DocumentBaseView):
 
         updated_files = []
         for key, file in documents.items():
-            # Extract the document type from key like "documents[offerLetter]"
             if key.startswith("documents[") and key.endswith("]"):
                 doc_type_camel = key[len("documents["):-1]
-                doc_type = camel_to_snake(doc_type_camel)
+                doc_type, error_response = self.validate_document_type(doc_type_camel)
+                if error_response:
+                    return error_response
             else:
                 return Response(
                     {"error": f"Invalid key format: {key}"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
 
-            # Validate document type
-            if doc_type not in dict(Document.DOCUMENT_TYPES):
-                return Response(
-                    {"error": f"Invalid document type: {doc_type}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
-
-            try:
-                document = Document.objects.get(user=request.user, document_type=doc_type)
-                document.document_file = file
-                document.save()
-                updated_files.append(DocumentUploadSerializer(document).data)
-            except Document.DoesNotExist:
-                return Response(
-                    {"error": f"Document not found for type: {doc_type}"},
-                    status=status.HTTP_404_NOT_FOUND
-                )
+            # Update or create the document
+            document, created = Document.objects.update_or_create(
+                user=request.user,
+                document_type=doc_type,
+                defaults={"document_file": file}
+            )
+            updated_files.append(DocumentUploadSerializer(document).data)
 
         return Response(
             {
                 "message": "Documents updated successfully!",
-                "documents": updated_files
+                "documents": updated_files,
             },
             status=status.HTTP_200_OK
         )
-
-
 class DownloadAllDocumentsView(DocumentBaseView):
     def get(self, request, *args, **kwargs):
         documents = Document.objects.filter(user=request.user)

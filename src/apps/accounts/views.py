@@ -166,7 +166,7 @@ class UserDetailView(APIView):
         # Ensure the user instance is fetched with related fields for nested updates
         convert_request_data_keys_to_snake_and_flat_nested(request, json_fields=["job", "contact", "kin"])
 
-        user = User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
+        User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
         serializer = UserDetailSerializer(request.user, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

@@ -30,8 +30,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
-        blank=True,
-        null=True
+        default='employee'
     )
     is_receive_newsletters = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
