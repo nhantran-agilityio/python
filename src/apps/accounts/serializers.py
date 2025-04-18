@@ -43,31 +43,38 @@ class LoginSerializer(serializers.Serializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     job = JobSerializer(required=False)
-    job_id = serializers.UUIDField(write_only=True, required=False)
-    contact_id = serializers.UUIDField(write_only=True, required=False)
     contact = ContactSerializer(required=False)
     kin = KinSerializer(required=False)
-    kin_id = serializers.UUIDField(write_only=True, required=False)
 
     class Meta:
         model = User
         fields = [
             'id', 'first_name', 'last_name',
-            'avatar', 'job_id',
+            'avatar', 'role',
             'job', 'contact', 'phone',
-            'is_receive_newsletters', 'email', 'contact_id', 'kin', 'kin_id'
+            'is_receive_newsletters', 'email', 'kin'
         ]
 
     def update_or_create_nested(self, instance, nested_data, related_name, serializer_class):
-        if nested_data:
-            nested_instance = getattr(instance, related_name, None)
-            if nested_instance:
-                serializer = serializer_class(nested_instance, data=nested_data, partial=True)
-            else:
+        if not nested_data:
+            return
+
+        nested_instance = getattr(instance, related_name, None)
+
+        if 'id' in nested_data:
+            try:
+                obj = serializer_class.Meta.model.objects.get(id=nested_data['id'])
+                serializer = serializer_class(obj, data=nested_data, partial=True)
+            except serializer_class.Meta.model.DoesNotExist:
                 serializer = serializer_class(data=nested_data)
-            serializer.is_valid(raise_exception=True)
-            saved = serializer.save()
-            setattr(instance, related_name, saved)
+        elif nested_instance:
+            serializer = serializer_class(nested_instance, data=nested_data, partial=True)
+        else:
+            serializer = serializer_class(data=nested_data)
+
+        serializer.is_valid(raise_exception=True)
+        saved = serializer.save()
+        setattr(instance, related_name, saved)
 
     def update(self, instance, validated_data):
         job_data = validated_data.pop('job', None)
