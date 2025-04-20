@@ -29,6 +29,8 @@ from apps.leave_application.serializers import (
 
 from rest_framework.permissions import BasePermission
 
+from utils.conversions import camel_to_snake
+
 
 class IsEmployee(BasePermission):
     """
@@ -168,10 +170,18 @@ class LeaveApplicationListAPIView(APIView):
         }
     )
     def post(self, request, *args, **kwargs):
+
+        # Convert camelCase keys to snake_case
+        data = {}
+        for key, value in request.data.items():
+            snake_key = camel_to_snake(key)
+            data[snake_key] = value
+
+        serializer = LeaveApplicationSerializer(data=data)
         """
         Create a new leave application with file upload.
         """
-        serializer = LeaveApplicationSerializer(data=request.data)
+        serializer = LeaveApplicationSerializer(data=data)
         if serializer.is_valid():
             serializer.save(employee=request.user)  # Automatically set the employee
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -213,12 +223,18 @@ class LeaveApplicationDetailAPIView(APIView):
         }
     )
     def patch(self, request, pk, *args, **kwargs):
+        # Convert camelCase keys to snake_case
+        data = {}
+        for key, value in request.data.items():
+            snake_key = camel_to_snake(key)
+            data[snake_key] = value
+
         """
         Partially update a leave application.
         """
         leave_application = get_object_or_404(LeaveApplication, pk=pk)
         serializer = LeaveApplicationSerializer(
-            leave_application, data=request.data, partial=True
+            leave_application, data=data, partial=True
         )
         if serializer.is_valid():
             serializer.save()
