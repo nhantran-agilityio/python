@@ -30,6 +30,8 @@ urlpatterns = [
     path('api/accounts/', include('apps.accounts.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/jobs/', include('apps.job.urls')),
+    path('api/job-responsibilities/', include('apps.job_responsibility.urls')),
+    path('api/contacts/', include('apps.contact.urls')),
     path('api/documents/', include('apps.document.urls')),
     path('accounts/', include('allauth.urls')),
     path('api/leave-applications/', include('apps.leave_application.urls')),
@@ -54,6 +56,6 @@ urlpatterns = [
          name='schema-json'),
 ]
 
-# if settings.DEBUG:
-#     import debug_toolbar
-#     urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]

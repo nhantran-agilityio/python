@@ -1,6 +1,5 @@
 from rest_framework import serializers
 
-from apps.accounts.models import User
 from .models import LeaveApplication, EmployeeLeaveBalance
 
 
@@ -19,26 +18,18 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
     relief_officer_first_name = serializers.SerializerMethodField()
     relief_officer_last_name = serializers.SerializerMethodField()
     employeeName = serializers.SerializerMethodField()
-    startDate = serializers.DateField(source='start_date')
-    endDate = serializers.DateField(source='end_date')
-    resumptionDate = serializers.DateField(source='resumption_date')
-    reliefOfficer = serializers.PrimaryKeyRelatedField(
-        source='relief_officer',
-        queryset=User.objects.all(),
-        write_only=True
-    )
 
     class Meta:
         model = LeaveApplication
         fields = [
             "id",
-            'startDate',
-            'endDate',
-            'resumptionDate',
+            'start_date',
+            'end_date',
+            'resumption_date',
             'employeeName',
             'type',
             'employee',
-            'reliefOfficer',
+            'relief_officer',
             'document_path',
             'reason',
             'durations',
@@ -52,7 +43,6 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
             'days_remaining',
             'created_at',
             'updated_at',
-
         ]
 
     def get_relief_officer_first_name(self, obj):

@@ -11,7 +11,6 @@ from rest_framework import status
 from reportlab.pdfgen import canvas
 import csv
 from rest_framework.parsers import MultiPartParser, FormParser
-from djangorestframework_camel_case.parser import CamelCaseJSONParser
 from reportlab.lib.pagesizes import letter
 import pandas as pd
 from drf_yasg.utils import swagger_auto_schema
@@ -29,6 +28,8 @@ from apps.leave_application.serializers import (
 
 
 from rest_framework.permissions import BasePermission
+
+from utils.conversions import camel_to_snake
 
 
 class IsEmployee(BasePermission):
@@ -95,7 +96,7 @@ class LeaveApplicationPagination(pagination.PageNumberPagination):
 
 class LeaveApplicationListAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser]
 
     @swagger_auto_schema(
         manual_parameters=[
@@ -161,18 +162,26 @@ class LeaveApplicationListAPIView(APIView):
         return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
-        operation_description="Create a new leave application with an optional document upload.",
+        operation_description="Create a new leave application with file upload.",
         request_body=LeaveApplicationSerializer,
         responses={
-            201: "Leave application ion created successfully.",
-            400: "Bad Request"
+            status.HTTP_201_CREATED: LeaveApplicationSerializer,
+            status.HTTP_400_BAD_REQUEST: 'Validation Error',
         }
     )
     def post(self, request, *args, **kwargs):
+
+        # Convert camelCase keys to snake_case
+        data = {}
+        for key, value in request.data.items():
+            snake_key = camel_to_snake(key)
+            data[snake_key] = value
+
+        serializer = LeaveApplicationSerializer(data=data)
         """
         Create a new leave application with file upload.
         """
-        serializer = LeaveApplicationSerializer(data=request.data)
+        serializer = LeaveApplicationSerializer(data=data)
         if serializer.is_valid():
             serializer.save(employee=request.user)  # Automatically set the employee
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -181,7 +190,7 @@ class LeaveApplicationListAPIView(APIView):
 
 class LeaveApplicationDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [CamelCaseJSONParser, MultiPartParser, FormParser]
+    parser_classes = [MultiPartParser, FormParser]
 
     """
     API to retrieve the details of a specific leave application.
@@ -214,12 +223,18 @@ class LeaveApplicationDetailAPIView(APIView):
         }
     )
     def patch(self, request, pk, *args, **kwargs):
+        # Convert camelCase keys to snake_case
+        data = {}
+        for key, value in request.data.items():
+            snake_key = camel_to_snake(key)
+            data[snake_key] = value
+
         """
         Partially update a leave application.
         """
         leave_application = get_object_or_404(LeaveApplication, pk=pk)
         serializer = LeaveApplicationSerializer(
-            leave_application, data=request.data, partial=True
+            leave_application, data=data, partial=True
         )
         if serializer.is_valid():
             serializer.save()

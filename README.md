@@ -20,7 +20,6 @@ A comprehensive human resource management system built with Rest Django and Djan
 - **Leave Application Management**: Manage leave applications with features to create, edit, delete, approve, decline, recall, and process recall requests.
 - **Document Management**: Organize and manage employee-related documents efficiently.
 - **Report Generation**: Generate detailed reports, including leave history and employee statistics, for better insights.
-- **Email Notifications**: Automate email alerts for key events such as approvals, rejections, and reminders.
 - **Background Tasks**: Leverage Celery for asynchronous task execution, including sending notifications and generating reports.
 - **RESTful APIs**: Provide robust API endpoints for seamless integration with external systems.
 - **Admin Interface**: Offer a user-friendly admin dashboard for managing resources and performing CRUD operations.
