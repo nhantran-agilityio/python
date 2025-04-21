@@ -75,6 +75,7 @@ class UserDetailSerializer(serializers.ModelSerializer):
         serializer.is_valid(raise_exception=True)
         saved = serializer.save()
         setattr(instance, related_name, saved)
+        instance.save()
 
     def update(self, instance, validated_data):
         job_data = validated_data.pop('job', None)

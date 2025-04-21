@@ -43,20 +43,20 @@ class User(AbstractUser):
     job = models.ForeignKey(
         Job,
         related_name='users',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )
     contact = models.ForeignKey(
         Contact,
         related_name='users',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True, blank=True
     )
     kin = models.ForeignKey(
         Kin,
         related_name='users',
-        on_delete=models.CASCADE,
+        on_delete=models.SET_NULL,
         null=True,
         blank=True
     )

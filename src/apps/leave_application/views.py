@@ -1,4 +1,4 @@
-from rest_framework import generics, pagination
+from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
@@ -27,71 +27,9 @@ from apps.leave_application.serializers import (
 )
 
 
-from rest_framework.permissions import BasePermission
-
 from utils.conversions import camel_to_snake
-
-
-class IsEmployee(BasePermission):
-    """
-    Custom permission to allow only admins or employees to access the view.
-    """
-
-    def has_permission(self, request, view):
-        # Allow access if the user is authenticated and has the required role
-        return (
-            request.user.is_authenticated and
-            request.user.role in ['candidate', 'employee']
-        )
-
-
-class IsAdmin(BasePermission):
-    """
-    Custom permission to allow only admins to access the view.
-    """
-
-    def has_permission(self, request, view):
-        # Allow access if the user is authenticated and is an admin
-        return request.user.is_authenticated and request.user.role == 'admin'
-
-
-class LeaveApplicationPagination(pagination.PageNumberPagination):
-    page_size_query_param = 'limit'
-    max_page_size = 50
-    page_size = 10
-
-    def paginate_queryset(self, queryset, request, view=None):
-        """
-        Override paginate_queryset to handle invalid page numbers.
-        """
-        try:
-            return super().paginate_queryset(queryset, request, view)
-        except pagination.NotFound:
-            # Return an empty list if the page does not exist
-            self.page = None
-            return []
-
-    def get_paginated_response(self, data):
-        """
-        Return a paginated response with an empty array if the page is invalid.
-        """
-        if self.page is None:
-            return Response({
-                'count': 0,
-                'next': None,
-                'previous': None,
-                'results': []
-            })
-        else:
-            return Response({
-                "metaData": {
-                    "limit": self.page.paginator.per_page,
-                    "page": self.page.number,
-                    "totalCount": self.page.paginator.count
-                },
-                "results": data
-            })
-        return super().get_paginated_response(data)
+from utils.custom_permissions import IsAdmin, IsEmployee
+from utils.pagination import LeaveApplicationPagination
 
 
 class LeaveApplicationListAPIView(APIView):
