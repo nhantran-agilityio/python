@@ -62,7 +62,7 @@ INSTALLED_APPS = [
     'apps.job_responsibility',
     'apps.leave_application',
     'allauth',
-    'apps.notifications',
+    'apps.notification',
     'allauth.account',
     'django_filters',
     'allauth.socialaccount',

@@ -9,7 +9,6 @@
 [![Swagger](https://img.shields.io/badge/swagger-blue.svg)](https://swagger.io/)
 [![Django Debug Toolbar](https://img.shields.io/badge/django%20debug%20toolbar-black.svg)](https://django-debug-toolbar.readthedocs.io/en/latest/)
 ![PostgreSQL](https://img.shields.io/badge/postgrestSQL-brightgreen.svg)
-[![Pytest](https://img.shields.io/badge/pytest-red.svg)](https://pypi.org/project/pytest/)
 
 ## Overview
 A comprehensive human resource management system built with Rest Django and Django frames. This application helps organizations manage employees effectively by providing features such as employee profile management, leave application,...
