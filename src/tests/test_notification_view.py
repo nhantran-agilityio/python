@@ -3,7 +3,7 @@ from django.urls import reverse
 from rest_framework.test import APIClient
 from rest_framework import status
 from django.contrib.auth import get_user_model
-from apps.notifications.models import Notification
+from apps.notification.models import Notification
 
 User = get_user_model()
 

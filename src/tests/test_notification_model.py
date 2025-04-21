@@ -1,6 +1,6 @@
 from django.test import TestCase
 from django.contrib.auth import get_user_model
-from apps.notifications.models import Notification
+from apps.notification.models import Notification
 import uuid
 
 User = get_user_model()
