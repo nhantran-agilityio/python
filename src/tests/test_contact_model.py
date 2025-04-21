@@ -6,14 +6,14 @@ class ContactModelTest(TestCase):
     def setUp(self):
         # Create a test contact
         self.contact = Contact.objects.create(
-            phone_num_2="123456789",
+            phone_num2="123456789",
             city_of_residence="New York",
             residential_address="123 Main Street"
         )
 
     def test_contact_creation(self):
         """Test that a contact is created successfully."""
-        self.assertEqual(self.contact.phone_num_2, "123456789")
+        self.assertEqual(self.contact.phone_num2, "123456789")
         self.assertEqual(self.contact.city_of_residence, "New York")
         self.assertEqual(self.contact.residential_address, "123 Main Street")
 
@@ -25,7 +25,7 @@ class ContactModelTest(TestCase):
     def test_contact_required_fields(self):
         with self.assertRaises(Exception):  # Test for missing residential_address
             Contact.objects.create(
-                phone_num_2="123456789",
+                phone_num2="123456789",
                 city_of_residence="New York",
                 residential_address=None  # Missing required field
             )

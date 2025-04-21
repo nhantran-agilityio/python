@@ -4,7 +4,7 @@ from .models import Contact
 
 class ContactAdmin(admin.ModelAdmin):
     list_display = (
-        "phone_num_2",
+        "phone_num2",
         "city_of_residence",
         "residential_address",
     )

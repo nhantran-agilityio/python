@@ -14,7 +14,7 @@ class ContactDetailAPITestCase(APITestCase):
 
         self.client.login(username="testuser", password="testpass")
         self.contact = Contact.objects.create(
-            phone_num_2="0123456789",
+            phone_num2="0123456789",
             city_of_residence="Test City",
             residential_address="Test Address"
         )
@@ -47,17 +47,17 @@ class ContactDetailAPITestCase(APITestCase):
     def test_patch_contact_success(self):
         url = "/api/contacts/"
         data = {
-            "phone_num_2": "0987654321"
+            "phone_num2": "0987654321"
         }
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['phone_num_2'], "0987654321")
+        self.assertEqual(response.data['phone_num2'], "0987654321")
 
     def test_patch_contact_not_found(self):
         self.client.force_authenticate(user=self.user_without_contact)
         url = "/api/contacts/"
         data = {
-            "phone_num_2": "0123456789"
+            "phone_num2": "0123456789"
         }
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -66,7 +66,7 @@ class ContactDetailAPITestCase(APITestCase):
         self.client.force_authenticate(user=self.user_without_contact)
         url = "/api/contacts/"
         data = {
-            "phone_num_2": "0123456789",
+            "phone_num2": "0123456789",
             "city_of_residence": "Hanoi",
             "residential_address": "123 Street Name"
         }
@@ -78,7 +78,7 @@ def test_post_contact_invalid_data(self):
     self.client.force_authenticate(user=self.user_without_contact)
     url = "/api/contacts/"
     data = {
-        "phone_num_2": "0123456789",
+        "phone_num2": "0123456789",
     }
     response = self.client.post(url, data, format='json')
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -91,7 +91,7 @@ def test_post_contact_when_already_exists(self):
     url = "/api/contacts/"
 
     data = {
-        "phone_num_2": "0987654321",
+        "phone_num2": "0987654321",
         "city_of_residence": "HCMC",
         "residential_address": "456 New Address"
     }
