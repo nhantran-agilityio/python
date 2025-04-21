@@ -1,5 +1,6 @@
 [run]
 branch = True
+source = apps
 
 [report]
 omit =
@@ -12,3 +13,6 @@ omit =
     */apps.py
     */serializers.py
     */urls.py
+    */signals.py
+    */tests
+    */tasks.py

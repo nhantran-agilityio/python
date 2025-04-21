@@ -256,6 +256,7 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
 }
 
+DEBUG=os.getenv('DEBUG')
 
 # Add the email settings
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'

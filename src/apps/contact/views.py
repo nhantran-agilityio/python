@@ -3,23 +3,23 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from drf_yasg import openapi
 from rest_framework import status
-from django.shortcuts import get_object_or_404
 from drf_yasg.utils import swagger_auto_schema
-from apps.accounts.models import User
-from .models import Contact
 from .serializers import ContactSerializer
 
 
 class ContactDetailAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, user_id):
-        user = get_object_or_404(User, id=user_id)
-        contact = get_object_or_404(Contact, user=user)
+    def get(self, request):
+        contact = getattr(request.user, 'contact', None)
+        if not contact:
+            return Response(
+                {"detail": "Contact not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
         serializer = ContactSerializer(contact)
-        return Response(
-            serializer.data
-        )
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Update contact details partially.",
@@ -29,8 +29,13 @@ class ContactDetailAPIView(APIView):
             400: "Invalid data provided."
         }
     )
-    def patch(self, request, pk):
-        contact = get_object_or_404(Contact, pk=pk)
+    def patch(self, request):
+        contact = getattr(request.user, 'contact', None)
+        if not contact:
+            return Response(
+                {"detail": "Contact not found."},
+                status=status.HTTP_404_NOT_FOUND
+            )
         serializer = ContactSerializer(contact, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -47,8 +52,15 @@ class ContactDetailAPIView(APIView):
         ]
     )
     def post(self, request):
+        if request.user.contact:
+            return Response(
+                {"detail": "Contact already exists."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = ContactSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(user=request.user)
+            contact = serializer.save()
+            request.user.contact = contact
+            request.user.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

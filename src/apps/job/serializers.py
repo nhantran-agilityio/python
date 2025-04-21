@@ -1,5 +1,6 @@
 from rest_framework import serializers
-from apps.job_responsibility.seralizers import JobResponsibilitySerializer
+
+from apps.job_responsibility.serializers import JobResponsibilitySerializer
 from .models import Job
 
 

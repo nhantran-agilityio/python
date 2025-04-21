@@ -9,7 +9,7 @@ import zipfile
 from io import BytesIO
 from django.http import HttpResponse
 from apps.document.models import Document
-from apps.document.seralizers import DocumentUploadSerializer
+from apps.document.serializers import DocumentUploadSerializer
 from utils.conversions import camel_to_snake
 
 
@@ -134,6 +134,8 @@ class MultipleDocumentUploadView(DocumentBaseView):
             },
             status=status.HTTP_200_OK
         )
+
+
 class DownloadAllDocumentsView(DocumentBaseView):
     def get(self, request, *args, **kwargs):
         documents = Document.objects.filter(user=request.user)
