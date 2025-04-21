@@ -5,9 +5,10 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from drf_yasg import openapi
-import zipfile
-from io import BytesIO
 from django.http import HttpResponse
+from io import BytesIO
+import zipfile
+
 from apps.document.models import Document
 from apps.document.serializers import DocumentUploadSerializer
 from utils.conversions import camel_to_snake
@@ -25,6 +26,20 @@ class DocumentBaseView(APIView):
             )
         return doc_type, None
 
+    def extract_documents(self, request):
+        documents = request.FILES
+        if not documents:
+            return None, Response(
+                {"error": "No documents provided."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        return documents, None
+
+    def parse_document_key(self, key):
+        if key.startswith("documents[") and key.endswith("]"):
+            return key[len("documents["):-1]
+        return None
+
 
 class MultipleDocumentUploadView(DocumentBaseView):
     parser_classes = [MultiPartParser, FormParser]
@@ -40,31 +55,23 @@ class MultipleDocumentUploadView(DocumentBaseView):
             )
             for doc_type in dict(Document.DOCUMENT_TYPES).keys()
         ],
-        responses={
-            201: "Files uploaded successfully!",
-            400: "Bad Request"
-        }
+        responses={201: "Files uploaded successfully!", 400: "Bad Request"}
     )
     def post(self, request, *args, **kwargs):
-        documents = request.FILES
-        if not documents:
-            return Response(
-                {"error": "No documents provided."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        documents, error_response = self.extract_documents(request)
+        if error_response:
+            return error_response
 
         uploaded_files = []
+
         for key, file in documents.items():
-            if key.startswith("documents[") and key.endswith("]"):
-                doc_type_camel = key[len("documents["):-1]
-                doc_type, error_response = self.validate_document_type(doc_type_camel)
-                if error_response:
-                    return error_response
-            else:
-                return Response(
-                    {"error": f"Invalid key format: {key}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+            doc_type_camel = self.parse_document_key(key)
+            if not doc_type_camel:
+                return Response({"error": f"Invalid key format: {key}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            doc_type, error_response = self.validate_document_type(doc_type_camel)
+            if error_response:
+                return error_response
 
             document = Document.objects.create(
                 user=request.user,
@@ -74,10 +81,7 @@ class MultipleDocumentUploadView(DocumentBaseView):
             uploaded_files.append(DocumentUploadSerializer(document).data)
 
         return Response(
-            {
-                "message": "Files uploaded successfully!",
-                "documents": uploaded_files,
-            },
+            {"message": "Files uploaded successfully!", "documents": uploaded_files},
             status=status.HTTP_201_CREATED
         )
 
@@ -92,35 +96,25 @@ class MultipleDocumentUploadView(DocumentBaseView):
             )
             for doc_type in dict(Document.DOCUMENT_TYPES).keys()
         ],
-        responses={
-            200: "Documents updated successfully!",
-            400: "Bad Request",
-            404: "Document not found for update",
-        }
+        responses={200: "Documents updated successfully!", 400: "Bad Request", 404: "Document not found"}
     )
     def patch(self, request, *args, **kwargs):
-        documents = request.FILES
-        if not documents:
-            return Response(
-                {"error": "No documents provided."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        documents, error_response = self.extract_documents(request)
+        if error_response:
+            return error_response
 
         updated_files = []
-        for key, file in documents.items():
-            if key.startswith("documents[") and key.endswith("]"):
-                doc_type_camel = key[len("documents["):-1]
-                doc_type, error_response = self.validate_document_type(doc_type_camel)
-                if error_response:
-                    return error_response
-            else:
-                return Response(
-                    {"error": f"Invalid key format: {key}"},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
 
-            # Update or create the document
-            document, created = Document.objects.update_or_create(
+        for key, file in documents.items():
+            doc_type_camel = self.parse_document_key(key)
+            if not doc_type_camel:
+                return Response({"error": f"Invalid key format: {key}"}, status=status.HTTP_400_BAD_REQUEST)
+
+            doc_type, error_response = self.validate_document_type(doc_type_camel)
+            if error_response:
+                return error_response
+
+            document, _ = Document.objects.update_or_create(
                 user=request.user,
                 document_type=doc_type,
                 defaults={"document_file": file}
@@ -128,10 +122,7 @@ class MultipleDocumentUploadView(DocumentBaseView):
             updated_files.append(DocumentUploadSerializer(document).data)
 
         return Response(
-            {
-                "message": "Documents updated successfully!",
-                "documents": updated_files,
-            },
+            {"message": "Documents updated successfully!", "documents": updated_files},
             status=status.HTTP_200_OK
         )
 
@@ -141,10 +132,7 @@ class DownloadAllDocumentsView(DocumentBaseView):
         documents = Document.objects.filter(user=request.user)
 
         if not documents.exists():
-            return Response(
-                {"message": "No documents found to download."},
-                status=status.HTTP_200_OK
-            )
+            return Response({"message": "No documents found to download."}, status=status.HTTP_200_OK)
 
         zip_filename = f"{request.user.username}_documents.zip"
         zip_buffer = BytesIO()
@@ -156,7 +144,6 @@ class DownloadAllDocumentsView(DocumentBaseView):
                 zip_file.writestr(file_name, file_content)
 
         zip_buffer.seek(0)
-
         response = HttpResponse(zip_buffer, content_type="application/zip")
         response["Content-Disposition"] = f'attachment; filename="{zip_filename}"'
         return response
@@ -164,10 +151,7 @@ class DownloadAllDocumentsView(DocumentBaseView):
 
 class GetDocumentsAPIView(DocumentBaseView):
     @swagger_auto_schema(
-        operation_description=(
-            "Retrieve documents. Admins get all; "
-            "users get only their own."
-        ),
+        operation_description="Retrieve documents. Admins get all; users get only their own.",
         responses={
             200: openapi.Response(
                 description="Documents retrieved successfully.",
