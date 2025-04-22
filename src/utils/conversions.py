@@ -8,6 +8,17 @@ def camel_to_snake(name):
     return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
 
+def parse_request_data(data):
+    return {camel_to_snake(k): v for k, v in data.items()}
+
+
+def validate_and_respond(serializer_class, instance=None, data=None, partial=False, context=None):
+    serializer = serializer_class(instance, data=data, partial=partial, context=context)
+    if serializer.is_valid():
+        return serializer, None
+    return None, serializer.errors
+
+
 def flatten_bracket_keys_to_nested(data: dict) -> dict:
     """
     Convert flat keys like 'job[department]' → nested dict: {'job': {'department': ...}}
