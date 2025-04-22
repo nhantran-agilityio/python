@@ -41,7 +41,7 @@ class LeaveApplicationListAPIView(APIView):
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('employee_name', openapi.IN_QUERY,
+            openapi.Parameter('employeeName', openapi.IN_QUERY,
                               description="Filter by employee name",
                               type=openapi.TYPE_STRING),
             openapi.Parameter('type', openapi.IN_QUERY,
@@ -77,12 +77,12 @@ class LeaveApplicationListAPIView(APIView):
         else:
             queryset = LeaveApplication.objects.filter(employee=user)
 
-        first_name = request.query_params.get("first_name")
+        employee_name = request.query_params.get("employeeName")
         leave_types = request.query_params.get("type")
         is_recall = request.query_params.get("isRecall", "false").lower() == "true"
 
-        if first_name:
-            search_name = first_name.replace(" ", "").lower()
+        if employee_name:
+            search_name = employee_name.replace(" ", "").lower()
             queryset = queryset.annotate(
                 full_name_normalized=Lower(
                     Replace(

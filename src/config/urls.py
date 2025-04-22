@@ -57,6 +57,6 @@ urlpatterns = [
          name='schema-json'),
 ]
 
-if settings.DEBUG:
-    import debug_toolbar
-    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+# if settings.DEBUG:
+#     import debug_toolbar
+#     urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
