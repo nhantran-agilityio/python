@@ -1,5 +1,8 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Value
+from django.db.models.functions import Concat, Lower, Replace
+
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from rest_framework.views import APIView
@@ -38,8 +41,8 @@ class LeaveApplicationListAPIView(APIView):
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('first_name', openapi.IN_QUERY,
-                              description="Filter by employee first name",
+            openapi.Parameter('employee_name', openapi.IN_QUERY,
+                              description="Filter by employee name",
                               type=openapi.TYPE_STRING),
             openapi.Parameter('type', openapi.IN_QUERY,
                               description=(
@@ -79,9 +82,15 @@ class LeaveApplicationListAPIView(APIView):
         is_recall = request.query_params.get("isRecall", "false").lower() == "true"
 
         if first_name:
-            queryset = queryset.filter(
-                employee__first_name__icontains=first_name
-            )
+            search_name = first_name.replace(" ", "").lower()
+            queryset = queryset.annotate(
+                full_name_normalized=Lower(
+                    Replace(
+                        Concat('employee__first_name', Value(''), 'employee__last_name'),
+                        Value(" "), Value("")
+                    )
+                )
+            ).filter(full_name_normalized__icontains=search_name)
 
         if leave_types:
             leave_type_list = leave_types.split(',')
