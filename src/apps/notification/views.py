@@ -2,6 +2,8 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
+
+from constants.base import ROLE_ADMIN
 from .models import Notification
 from .serializers import NotificationSerializer
 
@@ -14,10 +16,7 @@ class NotificationViewSet(viewsets.ViewSet):
         responses={200: NotificationSerializer(many=True)}
     )
     def list(self, request):
-        """
-        GET /notifications/
-        """
-        if request.user.role == "admin":
+        if request.user.role == ROLE_ADMIN:
             notifications = Notification.objects.filter(is_read=False)
         else:
             notifications = Notification.objects.filter(user=request.user, is_read=False)
@@ -30,9 +29,6 @@ class NotificationViewSet(viewsets.ViewSet):
         responses={201: NotificationSerializer, 400: "Invalid data"}
     )
     def create(self, request):
-        """
-        POST /notifications/
-        """
         data = request.data.copy()
         data["user"] = request.user.id
         serializer = NotificationSerializer(data=data)
@@ -46,9 +42,6 @@ class NotificationViewSet(viewsets.ViewSet):
         responses={200: NotificationSerializer}
     )
     def retrieve(self, request, pk=None):
-        """
-        GET /notifications/{id}/
-        """
         notification = self.get_notification(pk, request.user)
         if not notification:
             return Response({}, status=status.HTTP_200_OK)
@@ -61,9 +54,6 @@ class NotificationViewSet(viewsets.ViewSet):
         responses={200: NotificationSerializer, 400: "Invalid data"}
     )
     def partial_update(self, request, pk=None):
-        """
-        PATCH /notifications/{id}/
-        """
         notification = self.get_notification(pk, request.user)
         if not notification:
             return Response({}, status=status.HTTP_200_OK)
@@ -78,9 +68,6 @@ class NotificationViewSet(viewsets.ViewSet):
         responses={204: "Deleted successfully", 404: "Not found"}
     )
     def destroy(self, request, pk=None):
-        """
-        DELETE /notifications/{id}/
-        """
         notification = self.get_notification(pk, request.user)
         if not notification:
             return Response({}, status=status.HTTP_200_OK)
@@ -92,6 +79,6 @@ class NotificationViewSet(viewsets.ViewSet):
         Helper to get notification by id and user.
         Admins can access all notifications.
         """
-        if user.role == "admin":
+        if user.role == ROLE_ADMIN:
             return Notification.objects.filter(pk=pk).first()
         return Notification.objects.filter(pk=pk, user=user).first()

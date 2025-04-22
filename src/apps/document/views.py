@@ -1,6 +1,8 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.exceptions import ValidationError
+from rest_framework.exceptions import NotFound
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
@@ -11,6 +13,7 @@ import zipfile
 
 from apps.document.models import Document
 from apps.document.serializers import DocumentUploadSerializer
+from constants.base import ROLE_ADMIN
 from utils.conversions import camel_to_snake
 
 
@@ -20,19 +23,13 @@ class DocumentBaseView(APIView):
     def validate_document_type(self, doc_type_camel):
         doc_type = camel_to_snake(doc_type_camel)
         if doc_type not in dict(Document.DOCUMENT_TYPES):
-            return None, Response(
-                {"error": f"Invalid document type: {doc_type}"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise ValidationError({"error": f"Invalid document type: {doc_type}"})
         return doc_type, None
 
     def extract_documents(self, request):
         documents = request.FILES
         if not documents:
-            return None, Response(
-                {"error": "No documents provided."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise ValidationError({"error": "No documents provided."})
         return documents, None
 
     def parse_document_key(self, key):
@@ -60,18 +57,18 @@ class MultipleDocumentUploadView(DocumentBaseView):
     def post(self, request, *args, **kwargs):
         documents, error_response = self.extract_documents(request)
         if error_response:
-            return error_response
+            raise ValidationError(detail=error_response.data)
 
         uploaded_files = []
 
         for key, file in documents.items():
             doc_type_camel = self.parse_document_key(key)
             if not doc_type_camel:
-                return Response({"error": f"Invalid key format: {key}"}, status=status.HTTP_400_BAD_REQUEST)
+                raise ValidationError(detail={"error": f"Invalid key format: {key}"})
 
             doc_type, error_response = self.validate_document_type(doc_type_camel)
             if error_response:
-                return error_response
+                raise ValidationError(detail=error_response.data)
 
             document = Document.objects.create(
                 user=request.user,
@@ -108,7 +105,7 @@ class MultipleDocumentUploadView(DocumentBaseView):
         for key, file in documents.items():
             doc_type_camel = self.parse_document_key(key)
             if not doc_type_camel:
-                return Response({"error": f"Invalid key format: {key}"}, status=status.HTTP_400_BAD_REQUEST)
+                raise ValidationError(detail={"error": f"Invalid key format: {key}"})
 
             doc_type, error_response = self.validate_document_type(doc_type_camel)
             if error_response:
@@ -132,7 +129,7 @@ class DownloadAllDocumentsView(DocumentBaseView):
         documents = Document.objects.filter(user=request.user)
 
         if not documents.exists():
-            return Response({"message": "No documents found to download."}, status=status.HTTP_200_OK)
+            raise NotFound("No documents found to download.")
 
         zip_filename = f"{request.user.username}_documents.zip"
         zip_buffer = BytesIO()
@@ -165,7 +162,7 @@ class GetDocumentsAPIView(DocumentBaseView):
     def get(self, request, *args, **kwargs):
         documents = (
             Document.objects.all()
-            if request.user.role == "admin"
+            if request.user.role == ROLE_ADMIN
             else Document.objects.filter(user=request.user)
         )
 

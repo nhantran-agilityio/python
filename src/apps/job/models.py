@@ -1,10 +1,7 @@
 from django.db import models
 import uuid
 
-
-class JobCategory(models.TextChoices):
-    FULL_TIME = "Full Time", "Full Time"
-    PART_TIME = "Part Time", "Part Time"
+from constants.enums import JobCategory
 
 
 class Job(models.Model):
