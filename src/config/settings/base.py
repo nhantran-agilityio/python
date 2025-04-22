@@ -258,7 +258,7 @@ else:
     SECURE_HSTS_PRELOAD = True
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-
+FE_DOMAIN = os.getenv("FE_DOMAIN")
 # Celery settings
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BROKER_URL = 'redis://localhost:6379/0'
