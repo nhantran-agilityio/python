@@ -7,6 +7,6 @@ urlpatterns = [
     path('upload/', MultipleDocumentUploadView.as_view(),
          name='upload-documents'),
 
-    path("download-all/", DownloadAllDocumentsView.as_view(),
+    path("download/", DownloadAllDocumentsView.as_view(),
          name="download-all"),
 ]

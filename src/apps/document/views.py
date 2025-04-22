@@ -13,7 +13,8 @@ import zipfile
 
 from apps.document.models import Document
 from apps.document.serializers import DocumentUploadSerializer
-from constants.base import ROLE_ADMIN
+from constants.enums import DocumentType
+from utils.base import is_admin
 from utils.conversions import camel_to_snake
 
 
@@ -22,7 +23,7 @@ class DocumentBaseView(APIView):
 
     def validate_document_type(self, doc_type_camel):
         doc_type = camel_to_snake(doc_type_camel)
-        if doc_type not in dict(Document.DOCUMENT_TYPES):
+        if not DocumentType.has_value(doc_type):
             raise ValidationError({"error": f"Invalid document type: {doc_type}"})
         return doc_type, None
 
@@ -50,7 +51,7 @@ class MultipleDocumentUploadView(DocumentBaseView):
                 type=openapi.TYPE_FILE,
                 description=f"{doc_type.replace('_', ' ').title()} document"
             )
-            for doc_type in dict(Document.DOCUMENT_TYPES).keys()
+            for doc_type in DocumentType.values
         ],
         responses={201: "Files uploaded successfully!", 400: "Bad Request"}
     )
@@ -91,7 +92,7 @@ class MultipleDocumentUploadView(DocumentBaseView):
                 type=openapi.TYPE_FILE,
                 description=f"{doc_type.replace('_', ' ').title()} document"
             )
-            for doc_type in dict(Document.DOCUMENT_TYPES).keys()
+            for doc_type in DocumentType.values
         ],
         responses={200: "Documents updated successfully!", 400: "Bad Request", 404: "Document not found"}
     )
@@ -162,7 +163,7 @@ class GetDocumentsAPIView(DocumentBaseView):
     def get(self, request, *args, **kwargs):
         documents = (
             Document.objects.all()
-            if request.user.role == ROLE_ADMIN
+            if is_admin(request)
             else Document.objects.filter(user=request.user)
         )
 
