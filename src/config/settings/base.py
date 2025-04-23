@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 import os
 from pathlib import Path
-import dj_database_url
 import sentry_sdk
 from sentry_sdk.integrations.django import DjangoIntegration
 from datetime import timedelta
@@ -119,10 +118,6 @@ MIDDLEWARE = [
 
 SITE_ID = 1
 
-if os.getenv('DEBUG') == 'True':
-    INSTALLED_APPS += ['debug_toolbar']
-    MIDDLEWARE += ['debug_toolbar.middleware.DebugToolbarMiddleware']
-
 ROOT_URLCONF = 'config.urls'
 
 TEMPLATES = [
@@ -146,30 +141,6 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 DATABASE_URL = os.getenv('DATABASE_URL')
-
-if os.getenv('DEBUG') == 'True':
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR / 'db.sqlite3',
-        }
-    }
-else:
-    if DATABASE_URL:
-        DATABASES = {
-            'default': dj_database_url.config(default=DATABASE_URL)
-        }
-    else:
-        DATABASES = {
-            'default': {
-                'ENGINE': 'django.db.backends.postgresql',
-                'NAME': os.getenv('POSTGRES_DB'),
-                'USER': os.getenv('POSTGRES_USER'),
-                'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
-                'HOST': os.getenv('POSTGRES_HOST'),
-                'PORT': os.getenv('POSTGRES_PORT'),
-            }
-        }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -256,8 +227,6 @@ SIMPLE_JWT = {
     "ALGORITHM": "HS256",
 }
 
-DEBUG=os.getenv('DEBUG')
-
 # Add the email settings
 ACCOUNT_EMAIL_VERIFICATION = 'mandatory'
 ACCOUNT_EMAIL_REQUIRED = True
@@ -289,7 +258,7 @@ else:
     SECURE_HSTS_PRELOAD = True
 
 ADMIN_EMAIL = os.getenv("ADMIN_EMAIL")
-
+FE_DOMAIN = os.getenv("FE_DOMAIN")
 # Celery settings
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BROKER_URL = 'redis://localhost:6379/0'

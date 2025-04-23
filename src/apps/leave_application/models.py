@@ -1,23 +1,16 @@
 import uuid
 from django.db import models
 from apps.accounts.models import User
+from constants.enums import LeaveStatus, LeaveType
 
 
 class LeaveApplication(models.Model):
-    LEAVE_TYPES = [
-        ("Annual", "Annual"),
-        ("Sick", "Sick"),
-        ("Casual", "Casual"),
-        ("Maternity", "Maternity"),
-    ]
-    STATUS_CHOICES = [
-        ("Pending", "Pending"),
-        ("Approved", "Approved"),
-        ("Rejected", "Rejected"),
-    ]
-
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    type = models.CharField(max_length=20, choices=LEAVE_TYPES)
+    type = models.CharField(
+        max_length=20,
+        choices=LeaveType.choices,
+        default=LeaveType.ANNUAL
+    )
     employee = models.ForeignKey(User, on_delete=models.CASCADE,
                                  related_name="leave_applications")
     start_date = models.DateField()
@@ -28,12 +21,18 @@ class LeaveApplication(models.Model):
     document_path = models.FileField(upload_to='documents/', blank=True, null=True)
     relief_officer = models.ForeignKey(User, on_delete=models.SET_NULL,
                                        null=True, related_name="relief_officer")
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES,
-                              default="Pending")
+    status = models.CharField(
+        max_length=20,
+        choices=LeaveStatus.choices,
+        default=LeaveStatus.PENDING
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    recall_status = models.CharField(max_length=10, choices=STATUS_CHOICES,
-                                     default="Pending")
+    recall_status = models.CharField(
+        max_length=20,
+        choices=LeaveStatus.choices,
+        default=LeaveStatus.PENDING
+    )
     recall_reason = models.TextField(blank=True, null=True)
     recall_date = models.DateField(blank=True, null=True)
     is_recalled = models.BooleanField(default=False)

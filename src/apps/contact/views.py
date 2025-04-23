@@ -1,5 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import ValidationError
 from rest_framework import permissions
 from drf_yasg import openapi
 from rest_framework import status
@@ -13,10 +15,7 @@ class ContactDetailAPIView(APIView):
     def get(self, request):
         contact = getattr(request.user, 'contact', None)
         if not contact:
-            return Response(
-                {"detail": "Contact not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            raise NotFound(detail="Contact not found.")
 
         serializer = ContactSerializer(contact)
         return Response(serializer.data)
@@ -32,10 +31,8 @@ class ContactDetailAPIView(APIView):
     def patch(self, request):
         contact = getattr(request.user, 'contact', None)
         if not contact:
-            return Response(
-                {"detail": "Contact not found."},
-                status=status.HTTP_404_NOT_FOUND
-            )
+            raise NotFound(detail="Contact not found.")
+
         serializer = ContactSerializer(contact, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -53,10 +50,8 @@ class ContactDetailAPIView(APIView):
     )
     def post(self, request):
         if request.user.contact:
-            return Response(
-                {"detail": "Contact already exists."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            raise ValidationError({"detail": "Contact already exists."})
+
         serializer = ContactSerializer(data=request.data)
         if serializer.is_valid():
             contact = serializer.save()

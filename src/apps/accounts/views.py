@@ -1,7 +1,6 @@
-import os
-from urllib.request import Request
-from rest_framework import status, generics, permissions
+from rest_framework import status, generics
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -17,17 +16,15 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
 from urllib.parse import urlencode
 
+from config.settings.base import FE_DOMAIN
 from utils.conversions import convert_request_data_keys_to_snake_and_flat_nested
 from .serializers import LoginSerializer
-from dotenv import load_dotenv
 from .models import User
 from .serializers import (
     RegisterSerializer,
     UserDetailSerializer,
     UserListSerializer,
 )
-
-load_dotenv()
 
 
 class RegisterView(APIView):
@@ -50,7 +47,7 @@ class RegisterView(APIView):
             user.is_active = False
             user.save()
             mail_subject = 'Activate your account.'
-            frontend_url = os.getenv("FE_DOMAIN")
+            frontend_url = FE_DOMAIN
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
             params = {
@@ -94,41 +91,53 @@ def activate_account(request, uidb64, token):
 
 class LoginView(generics.GenericAPIView):
     serializer_class = LoginSerializer
-    permission_classes = [permissions.AllowAny]
+    permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            email = serializer.validated_data['email']
-            password = serializer.validated_data['password']
-            user = authenticate(request, username=email, password=password)
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
-            if user:
-                # Generate JWT tokens
-                refresh = RefreshToken.for_user(user)
-                return Response({
-                    "refresh": str(refresh),
-                    "access": str(refresh.access_token),
-                    "user": {
-                        "id": user.id,
-                        "email": user.email,
-                        "role": user.role,
-                        "username": user.get_full_name(),
-                    }
-                }, status=status.HTTP_200_OK)
-            else:
-                return Response({"error": "Invalid credentials"},
-                                status=status.HTTP_401_UNAUTHORIZED)
+        user = self._authenticate_user(serializer.validated_data)
+        if not user:
+            raise AuthenticationFailed("Invalid credentials")
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        tokens = self._generate_tokens(user)
+        return Response({
+            **tokens,
+            "user": self._get_user_data(user)
+        }, status=status.HTTP_200_OK)
+
+    def _authenticate_user(self, validated_data):
+        return authenticate(
+            request=self.request,
+            username=validated_data["email"],
+            password=validated_data["password"]
+        )
+
+    def _generate_tokens(self, user):
+        refresh = RefreshToken.for_user(user)
+        return {
+            "refresh": str(refresh),
+            "access": str(refresh.access_token)
+        }
+
+    def _get_user_data(self, user):
+        return {
+            "id": user.id,
+            "email": user.email,
+            "role": user.role,
+            "username": user.get_full_name()
+        }
 
 
 class UserDetailView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = [MultiPartParser, FormParser] # Required for file uploads
+    # Required for file uploads
+    parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
-        user = User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
+        user = User.objects.select_related('job').prefetch_related(
+            'job__responsibilities').get(id=request.user.id)
         serializer = UserDetailSerializer(user)
         return Response(serializer.data)
 
@@ -162,12 +171,22 @@ class UserDetailView(APIView):
     )
     def patch(self, request):
         # Convert camelCase & parse nested JSON fields
+        # Ensure the user instance is fetched with related fields for nested
+        # updates
+        convert_request_data_keys_to_snake_and_flat_nested(request,
+                                                           json_fields=[
+                                                               "job",
+                                                               "contact",
+                                                               "kin"
+                                                               ]
+                                                           )
 
-        # Ensure the user instance is fetched with related fields for nested updates
-        convert_request_data_keys_to_snake_and_flat_nested(request, json_fields=["job", "contact", "kin"])
-
-        User.objects.select_related('job').prefetch_related('job__responsibilities').get(id=request.user.id)
-        serializer = UserDetailSerializer(request.user, data=request.data, partial=True)
+        User.objects.select_related('job').prefetch_related(
+             'job__responsibilities').get(id=request.user.id)
+        serializer = UserDetailSerializer(
+            request.user,
+            data=request.data,
+            partial=True)
         if serializer.is_valid():
             serializer.save()
             request.user.refresh_from_db()
@@ -176,6 +195,7 @@ class UserDetailView(APIView):
 
 
 class UserListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
     pagination_class = None
     queryset = User.objects.all()
     serializer_class = UserListSerializer

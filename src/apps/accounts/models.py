@@ -7,13 +7,6 @@ from apps.job.models import Job
 from apps.kin.models import Kin
 
 
-def user_avatar_upload(instance, filename):
-    """
-    Generate a dynamic file path for user avatars.
-    """
-    return f'avatars/{instance.id}/{filename}'
-
-
 class Role(models.TextChoices):
     ADMIN = "admin", "Admin"
     CANDIDATE = "candidate", "Candidate"
@@ -36,7 +29,7 @@ class User(AbstractUser):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     avatar = models.ImageField(
-        upload_to=user_avatar_upload,
+        upload_to='avatars/',
         null=True,
         blank=True
     )

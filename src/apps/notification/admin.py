@@ -4,10 +4,7 @@ from .models import Notification
 
 class NotificationAdmin(admin.ModelAdmin):
     list_display = (
-       'user',
-        'message',
-        'is_read',
-        'created_at',
+       'user', 'message', 'is_read', 'created_at',
     )
 
 

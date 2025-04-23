@@ -1,11 +1,7 @@
-from django.urls import path
-from .views import JobResponsibilityListCreateView, JobResponsibilityDetailView
+from rest_framework.routers import DefaultRouter
+from .views import JobResponsibilityViewSet
 
-urlpatterns = [
-    path('job-responsibilities/',
-         JobResponsibilityListCreateView.as_view(),
-         name='job-responsibility-list-create'),
-    path('job-responsibilities/<int:pk>/',
-         JobResponsibilityDetailView.as_view(),
-         name='job-responsibility-detail'),
-]
+router = DefaultRouter()
+router.register('', JobResponsibilityViewSet, basename='jobs')
+
+urlpatterns = router.urls

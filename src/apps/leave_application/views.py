@@ -1,5 +1,8 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
+from django.db.models import Value
+from django.db.models.functions import Concat, Lower, Replace
+
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from rest_framework.views import APIView
@@ -27,19 +30,25 @@ from apps.leave_application.serializers import (
 )
 
 
-from utils.conversions import camel_to_snake
+from constants.base import ROLE_ADMIN
+from utils.conversions import parse_request_data, validate_and_respond
 from utils.custom_permissions import IsAdmin, IsEmployee
-from utils.pagination import LeaveApplicationPagination
+from utils.pagination import CustomPagination
 
 
 class LeaveApplicationListAPIView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
+    def get_leave_applications_for_user(user):
+        if user.role == ROLE_ADMIN:
+            return LeaveApplication.objects.select_related('employee').all()
+        return LeaveApplication.objects.select_related('employee').filter(employee=user)
+
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('first_name', openapi.IN_QUERY,
-                              description="Filter by employee first name",
+            openapi.Parameter('employeeName', openapi.IN_QUERY,
+                              description="Filter by employee name",
                               type=openapi.TYPE_STRING),
             openapi.Parameter('type', openapi.IN_QUERY,
                               description=(
@@ -65,23 +74,27 @@ class LeaveApplicationListAPIView(APIView):
     )
     def get(self, request, *args, **kwargs):
         user = request.user
-        queryset = LeaveApplication.objects.all()
         today = date.today()
 
+        queryset = LeaveApplication.objects.select_related("employee").all()
         # Base queryset: Admin gets all, user gets only own records
-        if user.role == 'admin':
-            queryset = LeaveApplication.objects.all()
-        else:
-            queryset = LeaveApplication.objects.filter(employee=user)
+        if user.role != ROLE_ADMIN:
+            queryset = queryset.filter(employee=user)
 
-        first_name = request.query_params.get("first_name")
+        employee_name = request.query_params.get("employeeName")
         leave_types = request.query_params.get("type")
         is_recall = request.query_params.get("isRecall", "false").lower() == "true"
 
-        if first_name:
-            queryset = queryset.filter(
-                employee__first_name__icontains=first_name
-            )
+        if employee_name:
+            search_name = employee_name.replace(" ", "").lower()
+            queryset = queryset.annotate(
+                full_name_normalized=Lower(
+                    Replace(
+                        Concat('employee__first_name', Value(''), 'employee__last_name'),
+                        Value(" "), Value("")
+                    )
+                )
+            ).filter(full_name_normalized__icontains=search_name)
 
         if leave_types:
             leave_type_list = leave_types.split(',')
@@ -94,7 +107,7 @@ class LeaveApplicationListAPIView(APIView):
                 status="Approved"
             )
 
-        paginator = LeaveApplicationPagination()
+        paginator = CustomPagination()
         paginated_queryset = paginator.paginate_queryset(queryset, request)
         serializer = LeaveApplicationSerializer(paginated_queryset, many=True)
         return paginator.get_paginated_response(serializer.data)
@@ -108,27 +121,26 @@ class LeaveApplicationListAPIView(APIView):
         }
     )
     def post(self, request, *args, **kwargs):
-
         # Convert camelCase keys to snake_case
-        data = {}
-        for key, value in request.data.items():
-            snake_key = camel_to_snake(key)
-            data[snake_key] = value
+        data = parse_request_data(request.data)
 
-        serializer = LeaveApplicationSerializer(data=data)
-        """
-        Create a new leave application with file upload.
-        """
-        serializer = LeaveApplicationSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save(employee=request.user)  # Automatically set the employee
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer, errors = validate_and_respond(
+            LeaveApplicationSerializer, data=data, context={'request': request}
+        )
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save(employee=request.user)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class LeaveApplicationDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
+
+    def get_object(self, pk):
+        return get_object_or_404(LeaveApplication, pk=pk)
+
 
     """
     API to retrieve the details of a specific leave application.
@@ -144,12 +156,9 @@ class LeaveApplicationDetailAPIView(APIView):
         }
     )
     def get(self, request, pk, *args, **kwargs):
-        """
-        Retrieve the details of a specific leave application.
-        """
-        leave_application = get_object_or_404(LeaveApplication, pk=pk)
-        serializer = LeaveApplicationSerializer(leave_application)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        instance = self.get_object(pk)
+        serializer = LeaveApplicationSerializer(instance)
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Update an existing leave application",
@@ -162,22 +171,18 @@ class LeaveApplicationDetailAPIView(APIView):
     )
     def patch(self, request, pk, *args, **kwargs):
         # Convert camelCase keys to snake_case
-        data = {}
-        for key, value in request.data.items():
-            snake_key = camel_to_snake(key)
-            data[snake_key] = value
+        data = parse_request_data(request.data)
 
-        """
-        Partially update a leave application.
-        """
-        leave_application = get_object_or_404(LeaveApplication, pk=pk)
-        serializer = LeaveApplicationSerializer(
-            leave_application, data=data, partial=True
+        instance = self.get_object(pk)
+        serializer, errors = validate_and_respond(
+            LeaveApplicationSerializer, instance, data=data, partial=True
         )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        if errors:
+            return Response(errors, status=status.HTTP_400_BAD_REQUEST)
+
+        serializer.save()
+        return Response(serializer.data)
+
 
     @swagger_auto_schema(
         operation_description="Delete a leave application by its ID.",
@@ -187,15 +192,10 @@ class LeaveApplicationDetailAPIView(APIView):
         }
     )
     def delete(self, request, pk, *args, **kwargs):
-        """
-        Delete a leave application.
-        """
-        leave_application = get_object_or_404(LeaveApplication, pk=pk)
-        leave_application.delete()
-        return Response(
-            {"message": "Leave application deleted successfully."},
-            status=status.HTTP_204_NO_CONTENT
-        )
+        instance = self.get_object(pk)
+        instance.delete()
+        return Response({"message": "Leave application deleted successfully."},
+                        status=status.HTTP_204_NO_CONTENT)
 
 
 class LeaveApplicationDetailView(generics.RetrieveAPIView):

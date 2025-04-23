@@ -1,17 +1,13 @@
 import uuid
 from django.db import models
-
 from apps.accounts.models import User
-
-
-class EducationType(models.TextChoices):
-    ACADEMIC = "Academic", "Academic Records"
-    PROFESSIONAL = "Professional", "Professional Qualifications"
+from constants.enums import EducationType
 
 
 class Education(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='educations')
+    user = models.ForeignKey(User, on_delete=models.CASCADE,
+                             related_name='educations')
     name = models.CharField(max_length=100)
     department = models.CharField(max_length=100)
     course = models.CharField(max_length=100)
@@ -19,4 +15,6 @@ class Education(models.Model):
     start_date = models.DateField()
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField()
-    type = models.CharField(max_length=20, choices=EducationType.choices, default=EducationType.ACADEMIC,)
+    type = models.CharField(max_length=20,
+                            choices=EducationType.choices,
+                            default=EducationType.ACADEMIC)
