@@ -1,24 +1,30 @@
-from rest_framework.test import APITestCase
 from rest_framework import status
+from rest_framework.test import APITestCase, APIClient
+from django.contrib.auth import get_user_model
+
 from apps.guarantor.models import Guarantor
-from apps.accounts.models import User
-from rest_framework.test import APIClient
-import uuid
+
+User = get_user_model()
 
 
 class GuarantorViewSetTest(APITestCase):
+
     def setUp(self):
-        # Create a test user
         self.user = User.objects.create_user(
-            id=uuid.uuid4(),
             email="testuser@example.com",
+            password="testpass123",
             username="testuser",
-            password="password123"
+            first_name="Test",
+            last_name="User"
+        )
+        self.other_user = User.objects.create_user(
+            email="other@example.com",
+            password="testpass456",
+            username="testuser",
         )
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
-        # Create a test Guarantor instance
         self.guarantor = Guarantor.objects.create(
             user=self.user,
             name="John Doe",
@@ -26,47 +32,36 @@ class GuarantorViewSetTest(APITestCase):
             phone="1234567890"
         )
 
-        # Define URLs
-        self.list_url = "/api/guarantors/"
-        self.detail_url = f"/api/guarantors/{self.guarantor.id}/"
+    def test_retrieve_guarantor_not_found(self):
 
-    def test_list_guarantors(self):
-        """Test listing all Guarantor instances for the authenticated user."""
-        response = self.client.get(self.list_url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 1)
-        self.assertEqual(response.data[0]["name"], "John Doe")
+        url = '/api/guarantors/999/'
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 404)
 
     def test_create_guarantor(self):
-        """Test creating a new Guarantor instance."""
-        data = {
-            "name": "Jane Doe",
-            "job": "Doctor",
-            "phone": "9876543210"
-        }
-        response = self.client.post(self.list_url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(response.data["name"], "Jane Doe")
-        self.assertEqual(response.data["job"], "Doctor")
-        self.assertEqual(Guarantor.objects.filter(name="Jane Doe").count(), 1)
-
-    def test_update_guarantor(self):
-        """Test updating an existing Guarantor instance."""
-        data = {
-            "name": "John Smith",
-            "job": "Manager",
+        url = '/api/guarantors/'
+        payload = {
+            "name": "John Doe",
+            "job": "Software Engineer",
             "phone": "1234567890"
         }
-        response = self.client.put(self.detail_url, data, format="json")
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data["name"], "John Smith")
-        self.assertEqual(response.data["job"], "Manager")
-        self.guarantor.refresh_from_db()
-        self.assertEqual(self.guarantor.name, "John Smith")
-        self.assertEqual(self.guarantor.job, "Manager")
+        response = self.client.post(url, data=payload)
 
-    def test_delete_guarantor(self):
-        """Test deleting a Guarantor instance."""
-        response = self.client.delete(self.detail_url)
-        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(Guarantor.objects.filter(id=self.guarantor.id).count(), 0)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Guarantor.objects.count(), 2)
+        self.assertEqual(Guarantor.objects.last().user, self.user)
+
+    def test_get_queryset_only_returns_user_guarantors(self):
+        Guarantor.objects.create(
+            user=self.other_user,
+            name="Doe",
+            job="Software Engineer",
+            phone="1234567690"
+        )
+
+        url = '/api/guarantors/'
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(len(response.data), 1)

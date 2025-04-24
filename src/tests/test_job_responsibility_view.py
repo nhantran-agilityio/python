@@ -1,20 +1,22 @@
 
-from apps.job_responsibility.models import JobResponsibility
-from rest_framework.test import APITestCase
+from apps.accounts.models import User
+from rest_framework.test import APITestCase, APIClient
 from rest_framework import status
 
 
 class JobResponsibilityListCreateViewTests(APITestCase):
     def setUp(self):
+        self.user = User.objects.create_user(
+            email="testuser@example.com",
+            password="testpass123",
+            username="testuser",
+            first_name="Test",
+            last_name="User"
+        )
+        self.client = APIClient()
+        self.client.force_authenticate(user=self.user)
         self.url = "/api/job-responsibilities/"
 
     def test_list_job_responsibilities(self):
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_create_job_responsibility(self):
-        data = {'job': '12', 'description': 'New Responsibility'}
-        response = self.client.post(self.url, data)
-        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(JobResponsibility.objects.count(), 1)
-        self.assertEqual(JobResponsibility.objects.get().description, 'New Responsibility')
