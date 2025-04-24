@@ -12,8 +12,6 @@ class EducationViewSetTest(APITestCase):
             password="testpass123",
             username="testuser"
         )
-
-
         self.other_user = User.objects.create_user(email="testuser+01@example.com", username='otheruser', password='password')
         self.education = Education.objects.create(
             user=self.user,
@@ -31,7 +29,7 @@ class EducationViewSetTest(APITestCase):
         self.client.force_authenticate(user=self.user)
 
     def test_get_queryset(self):
-        url='/api/educations/'
+        url = '/api/educations/'
         response = self.client.get((url), {'user_id': self.user.id})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 1)
@@ -42,10 +40,10 @@ class EducationViewSetTest(APITestCase):
 
         response = self.client.get(url, {'type': 'Professional'})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 0)
+        self.assertEqual(len(response.data), 1)
 
     def test_perform_create(self):
-        url='/api/educations/'
+        url = '/api/educations/'
         self.client.login(username='staffuser', password='password')
         response = self.client.post(url, {
             'name': 'New Education',

@@ -1,21 +1,13 @@
 from rest_framework import generics
 from rest_framework.permissions import IsAuthenticated
-from django.db.models import Value
-from django.db.models.functions import Concat, Lower, Replace
-
+from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from datetime import date
-from django.http import HttpResponse
-from io import BytesIO
 from rest_framework import status
-from reportlab.pdfgen import canvas
-import csv
 from rest_framework.parsers import MultiPartParser, FormParser
-from reportlab.lib.pagesizes import letter
-import pandas as pd
 from drf_yasg.utils import swagger_auto_schema
 from apps.leave_application.models import (
     LeaveApplication,
@@ -28,11 +20,10 @@ from apps.leave_application.serializers import (
     RecallApplicationStatusUpdateSerializer,
     LeaveRecallSerializer
 )
-
-
-from constants.base import ROLE_ADMIN
 from utils.conversions import parse_request_data, validate_and_respond
 from utils.custom_permissions import IsAdmin, IsEmployee
+from utils.export import export_as_csv, export_as_excel, export_as_pdf
+from utils.filter import filter_leave_applications
 from utils.pagination import CustomPagination
 
 
@@ -40,76 +31,37 @@ class LeaveApplicationListAPIView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = [MultiPartParser, FormParser]
 
-    def get_leave_applications_for_user(user):
-        if user.role == ROLE_ADMIN:
-            return LeaveApplication.objects.select_related('employee').all()
-        return LeaveApplication.objects.select_related('employee').filter(employee=user)
+    def get_queryset(self, request):
+        user = request.user
+        queryset = LeaveApplication.objects.select_related("employee")
+
+        if IsEmployee():
+            queryset = queryset.filter(employee=user)
+
+        return queryset
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('employeeName', openapi.IN_QUERY,
-                              description="Filter by employee name",
-                              type=openapi.TYPE_STRING),
-            openapi.Parameter('type', openapi.IN_QUERY,
-                              description=(
-                                  "Filter by type (comma-separated values, "
-                                  "e.g., Annual,Sick)"
-                              ),
-                              type=openapi.TYPE_ARRAY,
-                              items=openapi.Items(type=openapi.TYPE_STRING)
-                              ),
-            openapi.Parameter('isRecall', openapi.IN_QUERY,
-                              description=(
-                                  "Filter current active leaves "
-                                  "(start_date <= today <= end_date)"
-                              ),
-                              type=openapi.TYPE_BOOLEAN),
-            openapi.Parameter('limit', openapi.IN_QUERY,
-                              description="Number of results per page",
-                              type=openapi.TYPE_INTEGER),
-            openapi.Parameter('page', openapi.IN_QUERY,
-                              description="Page number",
-                              type=openapi.TYPE_INTEGER),
+            openapi.Parameter("employeeName", openapi.IN_QUERY, description="Filter by employee name", type=openapi.TYPE_STRING),
+            openapi.Parameter("type", openapi.IN_QUERY, description="Filter by leave type (comma-separated)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+            openapi.Parameter("isRecall", openapi.IN_QUERY, description="Filter active recalls", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter("limit", openapi.IN_QUERY, description="Page size", type=openapi.TYPE_INTEGER),
+            openapi.Parameter("page", openapi.IN_QUERY, description="Page number", type=openapi.TYPE_INTEGER),
         ]
     )
     def get(self, request, *args, **kwargs):
-        user = request.user
-        today = date.today()
-
-        queryset = LeaveApplication.objects.select_related("employee").all()
-        # Base queryset: Admin gets all, user gets only own records
-        if user.role != ROLE_ADMIN:
-            queryset = queryset.filter(employee=user)
-
+        queryset = self.get_queryset(request)
         employee_name = request.query_params.get("employeeName")
         leave_types = request.query_params.get("type")
         is_recall = request.query_params.get("isRecall", "false").lower() == "true"
-
-        if employee_name:
-            search_name = employee_name.replace(" ", "").lower()
-            queryset = queryset.annotate(
-                full_name_normalized=Lower(
-                    Replace(
-                        Concat('employee__first_name', Value(''), 'employee__last_name'),
-                        Value(" "), Value("")
-                    )
-                )
-            ).filter(full_name_normalized__icontains=search_name)
-
-        if leave_types:
-            leave_type_list = leave_types.split(',')
-            queryset = queryset.filter(type__in=leave_type_list)
-
-        if is_recall:
-            queryset = queryset.filter(
-                start_date__lte=today,
-                end_date__gte=today,
-                status="Approved"
-            )
+        filtered_qs = filter_leave_applications(
+            queryset, employee_name, leave_types, is_recall
+        )
 
         paginator = CustomPagination()
-        paginated_queryset = paginator.paginate_queryset(queryset, request)
-        serializer = LeaveApplicationSerializer(paginated_queryset, many=True)
+        paginated_qs = paginator.paginate_queryset(filtered_qs, request)
+        serializer = LeaveApplicationSerializer(paginated_qs, many=True)
+
         return paginator.get_paginated_response(serializer.data)
 
     @swagger_auto_schema(
@@ -117,16 +69,18 @@ class LeaveApplicationListAPIView(APIView):
         request_body=LeaveApplicationSerializer,
         responses={
             status.HTTP_201_CREATED: LeaveApplicationSerializer,
-            status.HTTP_400_BAD_REQUEST: 'Validation Error',
+            status.HTTP_400_BAD_REQUEST: "Validation Error"
         }
     )
     def post(self, request, *args, **kwargs):
-        # Convert camelCase keys to snake_case
         data = parse_request_data(request.data)
 
         serializer, errors = validate_and_respond(
-            LeaveApplicationSerializer, data=data, context={'request': request}
+            LeaveApplicationSerializer,
+            data=data,
+            context={"request": request}
         )
+
         if errors:
             return Response(errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -140,7 +94,6 @@ class LeaveApplicationDetailAPIView(APIView):
 
     def get_object(self, pk):
         return get_object_or_404(LeaveApplication, pk=pk)
-
 
     """
     API to retrieve the details of a specific leave application.
@@ -183,7 +136,6 @@ class LeaveApplicationDetailAPIView(APIView):
         serializer.save()
         return Response(serializer.data)
 
-
     @swagger_auto_schema(
         operation_description="Delete a leave application by its ID.",
         responses={
@@ -221,110 +173,6 @@ class RecallApplicationStatusUpdateView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, IsEmployee]
 
 
-class LeaveApplicationDownloadView(APIView):
-    def get(self, request, file_format, *args, **kwargs):
-        """
-        Download leave applications (filtered by role) as PDF, CSV, or Excel.
-        """
-        user = request.user
-        if user.role == 'admin':
-            # Admin can view all leave applications
-            leave_applications = LeaveApplication.objects.select_related('employee').all()
-        else:
-            leave_applications = LeaveApplication.objects.select_related('employee').filter(employee=user)
-        # Convert data to a list of dicts
-        data = [
-            {
-                'employee': leave.employee.first_name,
-                # Access the related employee's name
-                'type': leave.type,
-                'start_date': leave.start_date,
-                'end_date': leave.end_date,
-                'durations': leave.durations,
-                'resumption_date': leave.resumption_date,
-                'reason': leave.reason,
-                'status': leave.status,
-            }
-            for leave in leave_applications
-        ]
-
-        if file_format == 'pdf':
-            # Generate PDF
-            response = HttpResponse(content_type='application/pdf')
-            response['Content-Disposition'] = (
-                'attachment; filename="leave_applications.pdf"'
-            )
-            p = canvas.Canvas(response, pagesize=letter)
-            p.drawString(100, 750, "Leave Applications")
-            y_position = 730
-            for application in data:
-                p.drawString(
-                    100, y_position,
-                    f"Employee: {application['employee']} | "
-                    f"Type: {application['type']} | "
-                    f"start_date: {application['start_date']} | "
-                    f"end_date: {application['end_date']} | "
-                    f"reason: {application['reason']} | "
-                    f"resumption_date: {application['resumption_date']} | "
-                    f"durations: {application['durations']} | "
-                    f"Status: {application['status']}"
-                )
-                y_position -= 20
-            p.showPage()
-            p.save()
-            return response
-
-        elif file_format == 'csv':
-            # Generate CSV
-            response = HttpResponse(content_type='text/csv')
-            response['Content-Disposition'] = (
-                'attachment; filename="leave_applications.csv"'
-            )
-            fieldnames = ['employee', 'type', 'start_date', 'end_date',
-                          'durations', 'resumption_date', 'reason', 'status']
-            writer = csv.DictWriter(response, fieldnames=fieldnames)
-            writer.writeheader()
-            for application in data:
-                writer.writerow({
-                    'employee': application['employee'],
-                    'type': application['type'],
-                    'start_date': application['start_date'],
-                    'end_date': application['end_date'],
-                    'durations': application['durations'],
-                    'resumption_date': application['resumption_date'],
-                    'reason': application['reason'],
-                    'status': application['status'],
-                })
-            return response
-
-        elif file_format == 'excel':
-            # Generate Excel
-            response = HttpResponse(
-                content_type=(
-                    'application/vnd.openxmlformats-officedocument.'
-                    'spreadsheetml.sheet'
-                )
-            )
-            response['Content-Disposition'] = (
-                'attachment; filename="leave_applications.xlsx"'
-            )
-
-            # Create Excel file using pandas and BytesIO
-            fieldnames = ['employee', 'type', 'start_date', 'end_date',
-                          'durations', 'resumption_date', 'reason', 'status']
-            df = pd.DataFrame(data, columns=fieldnames)
-            with BytesIO() as buffer:  # Use BytesIO for binary data
-                with pd.ExcelWriter(
-                    buffer, engine='openpyxl'
-                ) as writer:
-                    df.to_excel(
-                        writer, index=False, sheet_name='Leave Applications'
-                    )
-                buffer.seek(0)
-                response.write(buffer.getvalue())
-            return response
-
-
 class RecallLeaveApplicationView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -345,3 +193,36 @@ class RecallLeaveApplicationView(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class LeaveApplicationDownloadView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, file_format):
+        user = request.user
+        queryset = LeaveApplication.objects.select_related('employee')
+        if IsEmployee():
+            queryset = queryset.filter(employee=user)
+
+        data = [{
+            'employee': leave.employee.first_name,
+            'type': leave.type,
+            'start_date': leave.start_date,
+            'end_date': leave.end_date,
+            'durations': leave.durations,
+            'resumption_date': leave.resumption_date,
+            'reason': leave.reason,
+            'status': leave.status,
+        } for leave in queryset]
+
+        if not data:
+            raise NotFound("No leave applications found")
+
+        if file_format == 'pdf':
+            return export_as_pdf(data)
+        elif file_format == 'csv':
+            return export_as_csv(data)
+        elif file_format == 'excel':
+            return export_as_excel(data)
+
+        raise ValidationError("Invalid format. Allowed values are: pdf, csv, excel.")

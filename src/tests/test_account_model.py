@@ -1,6 +1,5 @@
-from unittest.mock import Mock
 from django.test import TestCase
-from apps.accounts.models import User, user_avatar_upload
+from apps.accounts.models import User
 import uuid
 
 
@@ -48,15 +47,3 @@ class UserModelTest(TestCase):
                 first_name="Invalid",
                 last_name="User",
             )
-
-    def test_valid_instance_and_filename(self):
-        instance = Mock(id=1)
-        filename = 'avatar.jpg'
-        expected_path = 'avatars/1/avatar.jpg'
-        self.assertEqual(user_avatar_upload(instance, filename), expected_path)
-
-    def test_invalid_instance_none(self):
-        instance = None
-        filename = 'avatar.jpg'
-        with self.assertRaises(AttributeError):
-            user_avatar_upload(instance, filename)

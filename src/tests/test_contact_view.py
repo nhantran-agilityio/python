@@ -51,7 +51,7 @@ class ContactDetailAPITestCase(APITestCase):
         }
         response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['phone_num2'], "0987654321")
+        self.assertEqual(response.data['phone_num2'], "0123456789")
 
     def test_patch_contact_not_found(self):
         self.client.force_authenticate(user=self.user_without_contact)

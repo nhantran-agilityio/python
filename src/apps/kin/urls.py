@@ -1,7 +1,6 @@
-from rest_framework.routers import DefaultRouter
-from .views import KinViewSet
+from django.urls import path
+from .views import KinDetailAPIView
 
-router = DefaultRouter()
-router.register('', KinViewSet, basename='kins')
-
-urlpatterns = router.urls
+urlpatterns = [
+    path('', KinDetailAPIView.as_view(), name='kin-detail'),
+]

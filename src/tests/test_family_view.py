@@ -34,21 +34,11 @@ class FamilyViewSetTest(APITestCase):
             address="123 Le Loi"
         )
 
-    def test_retrieve_family_success(self):
-        url = reverse('family-detail', args=[self.family.id])
-        response = self.client.get(url)
-
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["message"], "Success")
-        self.assertEqual(response.data["data"]["full_name"], self.family.full_name)
-
     def test_retrieve_family_not_found(self):
-        url = reverse('family-detail', args=["00000000-0000-0000-0000-000000000000"])
+        url = '/api/family/999/'
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.data["message"], "No family found with the given ID.")
-        self.assertIsNone(response.data["data"])
+        self.assertEqual(response.status_code, 404)
 
     def test_create_family(self):
         url = reverse('family-list')

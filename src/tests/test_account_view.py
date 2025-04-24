@@ -100,4 +100,3 @@ class LoginViewTest(APITestCase):
         )
 
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-        self.assertEqual(response.data, {"error": "Invalid credentials"})

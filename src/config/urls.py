@@ -36,7 +36,7 @@ urlpatterns = [
     path('api/documents/', include('apps.document.urls')),
     path('accounts/', include('allauth.urls')),
     path('api/leave-applications/', include('apps.leave_application.urls')),
-    path("api/notifications/", include("apps.notifications.urls")),
+    path("api/notifications/", include("apps.notification.urls")),
     path("api/guarantors/", include("apps.guarantor.urls")),
     path("api/educations/", include("apps.education.urls")),
     path("api/families/", include("apps.family.urls")),
@@ -57,6 +57,6 @@ urlpatterns = [
          name='schema-json'),
 ]
 
-# if settings.DEBUG:
-#     import debug_toolbar
-#     urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
+if settings.DEBUG:
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]

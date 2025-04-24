@@ -1,4 +1,3 @@
-from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.test import APITestCase, APIClient
 from unittest.mock import patch
@@ -44,8 +43,8 @@ class MultipleDocumentUploadViewTests(APITestCase):
     def test_upload_multiple_documents(self):
         url = '/api/documents/upload/'
         files = {
-            f"documents[offerLetter]": SimpleUploadedFile("offer_letter.pdf", b"file_content", content_type="application/pdf"),
-            f"documents[birthCertificate]": SimpleUploadedFile("birth_certificate.pdf", b"file_content", content_type="application/pdf"),
+            "documents[offerLetter]": SimpleUploadedFile("offer_letter.pdf", b"file_content", content_type="application/pdf"),
+            "documents[birthCertificate]": SimpleUploadedFile("birth_certificate.pdf", b"file_content", content_type="application/pdf"),
         }
 
         response = self.client.post(url, files)
@@ -58,7 +57,7 @@ class MultipleDocumentUploadViewTests(APITestCase):
 
         url = '/api/documents/upload/'
         files = {
-            f"documents[offerLetter]": SimpleUploadedFile("new_offer_letter.pdf", b"new_file_content", content_type="application/pdf"),
+            "documents[offerLetter]": SimpleUploadedFile("new_offer_letter.pdf", b"new_file_content", content_type="application/pdf"),
         }
 
         response = self.client.patch(url, files)
@@ -83,15 +82,14 @@ class DownloadAllDocumentsViewTest(APITestCase):
         )
 
         self.client.login(username="testuser", password="testpass")
-        self.url = '/api/documents/download-all/'
+        self.url = '/api/documents/download/'
 
         self.client = APIClient()
         self.client.force_authenticate(user=self.user)
 
     def test_download_no_documents(self):
         response = self.client.get(self.url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertIn("No documents found to download.", response.data["message"])
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_download_with_documents(self):
         dummy_pdf = SimpleUploadedFile("dummy.pdf", b"Fake PDF content", content_type="application/pdf")
