@@ -14,9 +14,8 @@ def parse_request_data(data):
 
 def validate_and_respond(serializer_class, instance=None, data=None, partial=False, context=None):
     serializer = serializer_class(instance, data=data, partial=partial, context=context)
-    if serializer.is_valid():
-        return serializer, None
-    return None, serializer.errors
+    serializer.is_valid(raise_exception=True)
+    return serializer, None
 
 
 def flatten_bracket_keys_to_nested(data: dict) -> dict:

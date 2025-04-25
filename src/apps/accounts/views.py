@@ -1,4 +1,5 @@
 from rest_framework import status, generics
+from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework.response import Response
@@ -15,8 +16,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
 from urllib.parse import urlencode
-
-from config.settings.base import FE_DOMAIN
+from django.conf import settings
 from utils.conversions import convert_request_data_keys_to_snake_and_flat_nested
 from .serializers import LoginSerializer
 from .models import User
@@ -42,34 +42,33 @@ class RegisterView(APIView):
     )
     def post(self, request):
         serializer = RegisterSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            user.is_active = False
-            user.save()
-            mail_subject = 'Activate your account.'
-            frontend_url = FE_DOMAIN
-            uid = urlsafe_base64_encode(force_bytes(user.pk))
-            token = default_token_generator.make_token(user)
-            params = {
-                "uidb64": uid,
-                "token": token
-            }
-            activation_link = f"{frontend_url}?{urlencode(params)}"
-            message = render_to_string('email/activation_email.txt', {
-                'user': user,
-                'domain': activation_link,
-            })
-            to_email = user.email
-            email = EmailMessage(mail_subject, message, to=[to_email])
-            email.send()
-            return Response(
-                {
-                    "message": "User registered successfully. "
-                               "Please check your email to activate your account."
-                },
-                status=status.HTTP_201_CREATED
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        user.is_active = False
+        user.save()
+        mail_subject = 'Activate your account.'
+        frontend_url = settings.FE_DOMAIN
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        token = default_token_generator.make_token(user)
+        params = {
+            "uidb64": uid,
+            "token": token
+        }
+        activation_link = f"{frontend_url}?{urlencode(params)}"
+        message = render_to_string('email/activation_email.txt', {
+            'user': user,
+            'domain': activation_link,
+        })
+        to_email = user.email
+        email = EmailMessage(mail_subject, message, to=[to_email])
+        email.send()
+        return Response(
+            {
+                "message": "User registered successfully. "
+                "Please check your email to activate your account."
+            },
+            status=status.HTTP_201_CREATED
+        )
 
 
 @api_view(['GET'])
@@ -84,9 +83,10 @@ def activate_account(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return Response({"message": "Account activated successfully."}, status=status.HTTP_200_OK)
+        return Response({"message": "Account activated successfully."},
+                        status=status.HTTP_200_OK)
     else:
-        return Response({"error": "Invalid or expired token."}, status=status.HTTP_400_BAD_REQUEST)
+        raise ValidationError({"error": "Invalid or expired token."})
 
 
 class LoginView(generics.GenericAPIView):
@@ -164,7 +164,10 @@ class UserDetailView(APIView):
                 'kin',
                 openapi.IN_FORM,
                 type=openapi.TYPE_STRING,
-                description='Stringified JSON. Example: {"fullName": "Bob", "relationship": "Brother"}'
+                description=(
+                    'Stringified JSON. Example: {"fullName": "Bob", '
+                    '"relationship": "Brother"}'
+                )
             ),
         ],
         responses={200: UserDetailSerializer}
@@ -173,16 +176,13 @@ class UserDetailView(APIView):
         # Convert camelCase & parse nested JSON fields
         # Ensure the user instance is fetched with related fields for nested
         # updates
-        convert_request_data_keys_to_snake_and_flat_nested(request,
-                                                           json_fields=[
-                                                               "job",
-                                                               "contact",
-                                                               "kin"
-                                                               ]
-                                                           )
+        convert_request_data_keys_to_snake_and_flat_nested(
+            request,
+            json_fields=["job", "contact", "kin"]
+        )
 
         User.objects.select_related('job').prefetch_related(
-             'job__responsibilities').get(id=request.user.id)
+            'job__responsibilities').get(id=request.user.id)
         serializer = UserDetailSerializer(
             request.user,
             data=request.data,

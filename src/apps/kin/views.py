@@ -35,10 +35,9 @@ class KinDetailAPIView(APIView):
             raise NotFound(detail="Kin not found.")
 
         serializer = KinSerializer(kin, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Create a new kin",
@@ -54,9 +53,8 @@ class KinDetailAPIView(APIView):
             raise ValidationError({"detail": "kin already exists."})
 
         serializer = KinSerializer(data=request.data)
-        if serializer.is_valid():
-            kin = serializer.save()
-            request.user.kin = kin
-            request.user.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        kin = serializer.save()
+        request.user.kin = kin
+        request.user.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
