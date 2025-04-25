@@ -215,6 +215,6 @@ coverage report
 
 coverage html
 
--  Coverage: ![db.png](https://i.postimg.cc/d19hFqK3/Screenshot-2025-04-25-at-09-34-23.png)
+-  Coverage: ![coverage.png](https://i.postimg.cc/d19hFqK3/Screenshot-2025-04-25-at-09-34-23.png)
 
 ```
