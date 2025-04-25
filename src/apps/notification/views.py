@@ -32,10 +32,9 @@ class NotificationViewSet(viewsets.ViewSet):
         data = request.data.copy()
         data["user"] = request.user.id
         serializer = NotificationSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @swagger_auto_schema(
         operation_description="Retrieve a specific notification by ID. Returns empty if not found or unauthorized.",
@@ -58,10 +57,9 @@ class NotificationViewSet(viewsets.ViewSet):
         if not notification:
             return Response({}, status=status.HTTP_200_OK)
         serializer = NotificationSerializer(notification, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data)
 
     @swagger_auto_schema(
         operation_description="Delete a notification by ID.",
