@@ -28,7 +28,6 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
             'resumption_date',
             'employeeName',
             'type',
-            'employee',
             'relief_officer',
             'document_path',
             'reason',
@@ -59,6 +58,10 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
         if obj.employee:
             return f"{obj.employee.first_name} {obj.employee.last_name}"
         return None
+
+    def create(self, validated_data):
+        validated_data['employee'] = self.context['request'].user
+        return super().create(validated_data)
 
 
 class EmployeeLeaveBalanceSerializer(serializers.ModelSerializer):

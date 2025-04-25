@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DEBUG = False
-DATABASE_URL = os.getenv('DATABASE_URL')
+DATABASE_URL = os.environ.get('DATABASE_URL')
 
 if DATABASE_URL:
     DATABASES = {

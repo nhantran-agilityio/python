@@ -5,3 +5,4 @@ sentry-sdk==2.22.0
 gunicorn
 whitenoise
 psycopg2-binary
+dj-database-url==2.3.0

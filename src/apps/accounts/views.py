@@ -1,3 +1,4 @@
+from django.conf import settings
 from rest_framework import status, generics
 from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -16,7 +17,6 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
 from urllib.parse import urlencode
-from django.conf import settings
 from utils.conversions import convert_request_data_keys_to_snake_and_flat_nested
 from .serializers import LoginSerializer
 from .models import User
