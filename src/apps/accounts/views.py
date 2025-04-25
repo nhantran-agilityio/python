@@ -187,11 +187,10 @@ class UserDetailView(APIView):
             request.user,
             data=request.data,
             partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            request.user.refresh_from_db()
-            return Response(UserDetailSerializer(request.user).data)
-        return Response(serializer.errors, status=400)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        request.user.refresh_from_db()
+        return Response(UserDetailSerializer(request.user).data)
 
 
 class UserListView(generics.ListAPIView):
