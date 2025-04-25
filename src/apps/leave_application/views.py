@@ -174,7 +174,7 @@ class RecallApplicationStatusUpdateView(generics.UpdateAPIView):
 
 
 class RecallLeaveApplicationView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsAdmin]
 
     @swagger_auto_schema(
         operation_description="Update recall information of a leave application",

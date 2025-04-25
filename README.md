@@ -14,15 +14,18 @@
 A comprehensive human resource management system built with Rest Django and Django frames. This application helps organizations manage employees effectively by providing features such as employee profile management, leave application,...
 
 ## Features
-- **User Authentication and Authorization**: Implement secure login and role-based access control for various user roles.
+- **User Authentication and Authorization**:
+    - Implement secure login and role-based access control for various user roles.
+    - Send email notifications to users when they create new account to can activation that account
 - **Employee Management**: Enable creation, updating, and deletion of employee profiles with ease.
 - **Leave Application Management**: Manage leave applications with features to create, edit, delete, approve, decline, recall, and process recall requests.
+- **Notification Management**: Send notifications to employees regarding leave applications as recalls
 - **Document Management**: Organize and manage employee-related documents efficiently.
 - **Report Generation**: Generate detailed reports, including leave history and employee statistics, for better insights.
 - **Background Tasks**: Leverage Celery for asynchronous task execution, including sending notifications and generating reports.
 - **RESTful APIs**: Provide robust API endpoints for seamless integration with external systems.
 - **Admin Interface**: Offer a user-friendly admin dashboard for managing resources and performing CRUD operations.
-- **Statistics and Analytics**: Deliver dynamic insights and data visualizations to support informed decision-making.
+
 
 ## Timeline (March 12 to April 1, 2025)
 
