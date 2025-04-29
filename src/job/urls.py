@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from .views import JobViewSet
+from .api.views import JobViewSet
 
 router = DefaultRouter()
 router.register('', JobViewSet, basename='jobs')

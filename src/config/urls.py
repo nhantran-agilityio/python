@@ -26,35 +26,47 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/accounts/', include('accounts.urls')),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/jobs/', include('job.urls')),
-    path('api/job-responsibilities/', include('job_responsibility.urls')),
-    path('api/contacts/', include('contact.urls')),
-    path('api/kins/', include('kin.urls')),
-    path('api/documents/', include('document.urls')),
-    path('accounts/', include('allauth.urls')),
-    path('api/leave-applications/', include('leave_application.urls')),
-    path("api/notifications/", include("notification.urls")),
-    path("api/guarantors/", include("guarantor.urls")),
-    path("api/educations/", include("education.urls")),
-    path("api/families/", include("family.urls")),
-    path("api/financials/", include("financial.urls")),
+    path(settings.API_ROOT_ENDPOINT, include("config.api_router")),
+    path(f"{settings.API_ROOT_ENDPOINT}admin/", admin.site.urls),
+    path(f"{settings.API_ROOT_ENDPOINT}accounts/", include('accounts.urls')),
+    path(
+        f"{settings.API_ROOT_ENDPOINT}api-auth/",
+        include("rest_framework.urls"),
+    ),
+    path(f"{settings.API_ROOT_ENDPOINT}api/token/refresh/",
+         TokenRefreshView.as_view(), name='token_refresh'),
+    path(f"{settings.API_ROOT_ENDPOINT}jobs/", include('job.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}job-responsibilities/",
+         include('job_responsibility.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}kins/", include('kin.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}documents/", include('document.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}leave-applications/",
+         include('leave_application.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}guarantors/", include('guarantor.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}educations/", include('education.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}families/", include('family.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}financials/", include('financial.urls')),
+
 
     # Swagger URLs
     path(
-        'swagger/',
-        schema_view.with_ui('swagger', cache_timeout=0),
-        name='schema-swagger-ui'
+        f"{settings.API_ROOT_ENDPOINT}swagger.json",
+        schema_view.without_ui(cache_timeout=0),
+        name='schema-json',
     ),
     path(
-        'redoc/',
-        schema_view.with_ui('redoc', cache_timeout=0),
-        name='schema-redoc'
+        f"{settings.API_ROOT_ENDPOINT}swagger/",
+        schema_view.with_ui(
+            'swagger',
+            cache_timeout=0
+        ),
+        name='schema-swagger-ui',
     ),
-    path('swagger.json', schema_view.without_ui(cache_timeout=0),
-         name='schema-json'),
+    path(
+        f"{settings.API_ROOT_ENDPOINT}redoc/",
+        schema_view.with_ui('redoc', cache_timeout=0),
+        name='schema-redoc',
+    ),
 ]
 
 if settings.DEBUG:
