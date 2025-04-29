@@ -27,20 +27,20 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('api/accounts/', include('apps.accounts.urls')),
+    path('api/accounts/', include('accounts.urls')),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/jobs/', include('apps.job.urls')),
-    path('api/job-responsibilities/', include('apps.job_responsibility.urls')),
-    path('api/contacts/', include('apps.contact.urls')),
-    path('api/kins/', include('apps.kin.urls')),
-    path('api/documents/', include('apps.document.urls')),
+    path('api/jobs/', include('job.urls')),
+    path('api/job-responsibilities/', include('job_responsibility.urls')),
+    path('api/contacts/', include('contact.urls')),
+    path('api/kins/', include('kin.urls')),
+    path('api/documents/', include('document.urls')),
     path('accounts/', include('allauth.urls')),
-    path('api/leave-applications/', include('apps.leave_application.urls')),
-    path("api/notifications/", include("apps.notification.urls")),
-    path("api/guarantors/", include("apps.guarantor.urls")),
-    path("api/educations/", include("apps.education.urls")),
-    path("api/families/", include("apps.family.urls")),
-    path("api/financials/", include("apps.financial.urls")),
+    path('api/leave-applications/', include('leave_application.urls')),
+    path("api/notifications/", include("notification.urls")),
+    path("api/guarantors/", include("guarantor.urls")),
+    path("api/educations/", include("education.urls")),
+    path("api/families/", include("family.urls")),
+    path("api/financials/", include("financial.urls")),
 
     # Swagger URLs
     path(
