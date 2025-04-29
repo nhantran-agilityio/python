@@ -4,7 +4,7 @@ from rest_framework import status
 from leave_application.models import LeaveApplication
 from accounts.models import User
 from unittest.mock import Mock
-from leave_application.views import LeaveApplicationDownloadView
+from leave_application.api.views import LeaveApplicationDownloadView
 
 
 class LeaveApplicationListAPIViewTestCase(APITestCase):

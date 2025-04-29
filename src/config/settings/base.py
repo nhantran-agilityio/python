@@ -54,30 +54,22 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'fallback_secret_key')
 # Set ALLOWED_HOSTS based on environment variable or default to localhost
 ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "*").split(",")
 
-# Application definition
-INSTALLED_APPS = [
-    'django.contrib.admin',
+# APPS
+# ------------------------------------------------------------------------------
+
+DJANGO_APPS = [
     'django.contrib.auth',
-    'django.contrib.sites',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
+    'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'storages',
+    'django.contrib.admin',
+]
+THIRD_PARTY_APPS = [
     'rest_framework',
-    'accounts',
-    'job',
-    'document',
-    'contact',
-    'kin',
-    'education',
-    'family',
-    'guarantor',
-    'financial',
-    'job_responsibility',
-    'leave_application',
+    'storages',
     'allauth',
-    'notification',
     'allauth.account',
     'django_filters',
     'allauth.socialaccount',
@@ -89,6 +81,22 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'django_celery_beat',
 ]
+LOCAL_APPS = [
+    'accounts',
+    'job',
+    'document',
+    'contact',
+    'kin',
+    'education',
+    'family',
+    'guarantor',
+    'financial',
+    'job_responsibility',
+    'leave_application',
+    'notification',
+]
+# https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
@@ -209,6 +217,7 @@ REST_FRAMEWORK = {
         'rest_framework.parsers.MultiPartParser',
         'rest_framework.parsers.FormParser',
     ),
+    'DEFAULT_VERSIONING_CLASS': 'rest_framework.versioning.NamespaceVersioning'
 }
 
 
@@ -260,6 +269,8 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = os.getenv("EMAIL_HOST_USER")
 
 CORS_ALLOW_ALL_ORIGINS = True
+
+API_ROOT_ENDPOINT = os.getenv("API_ROOT_ENDPOINT", default="api/v1/")
 
 if os.getenv('DEBUG') == 'True':
     pass
