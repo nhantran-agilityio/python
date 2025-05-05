@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Financial
+from .models import BankAccount
 
 
 class FinancialAdmin(admin.ModelAdmin):
@@ -10,4 +10,4 @@ class FinancialAdmin(admin.ModelAdmin):
     )
 
 
-admin.site.register(Financial, FinancialAdmin)
+admin.site.register(BankAccount, FinancialAdmin)
