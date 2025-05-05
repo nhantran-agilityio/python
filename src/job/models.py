@@ -11,6 +11,7 @@ class Job(models.Model):
     department = models.CharField(max_length=100)
     created_at = models.DateField(auto_now_add=True)
     updated_at = models.DateField(auto_now=True)
+    responsibilities = models.JSONField(blank=True, null=True)
     job_category = models.CharField(
         max_length=20,
         choices=JobCategory.choices,

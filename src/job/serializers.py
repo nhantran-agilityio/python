@@ -1,11 +1,12 @@
 from rest_framework import serializers
 
 from job.models import Job
-from job_responsibility.serializers import JobResponsibilitySerializer
 
 
 class JobSerializer(serializers.ModelSerializer):
-    responsibilities = JobResponsibilitySerializer(many=True, read_only=True)
+    responsibilities = serializers.ListField(
+        child=serializers.CharField(), allow_empty=True
+    )
     line_management_full_name = serializers.SerializerMethodField()
     id = serializers.UUIDField(required=False)
 

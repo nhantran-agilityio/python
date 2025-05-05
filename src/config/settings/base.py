@@ -91,7 +91,6 @@ LOCAL_APPS = [
     'family',
     'guarantor',
     'bank_account',
-    'job_responsibility',
     'leave_application',
     'notification',
 ]
