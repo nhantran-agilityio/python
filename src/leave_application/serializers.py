@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from leave_application.models import EmployeeLeaveBalance, LeaveApplication
+from leave_application.models import LeaveApplication
 
 
 class LeaveRecallSerializer(serializers.ModelSerializer):
@@ -59,21 +59,3 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
         if obj.employee:
             return f"{obj.employee.first_name} {obj.employee.last_name}"
         return None
-
-
-class EmployeeLeaveBalanceSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = EmployeeLeaveBalance
-        fields = "__all__"
-
-
-class LeaveApplicationStatusUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LeaveApplication
-        fields = ['status']
-
-
-class RecallApplicationStatusUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = LeaveApplication
-        fields = ['recall_status']
