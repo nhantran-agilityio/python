@@ -3,7 +3,7 @@ from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
 
 from contact.serializers import ContactSerializer
-from job.serializers import JobSerializer
+from jobs.serializers import JobSerializer
 from kin.serializers import KinSerializer
 
 

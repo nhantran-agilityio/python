@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 import uuid
 
 from contact.models import Contact
-from job.models import Job
+from jobs.models import Job
 from kin.models import Kin
 
 

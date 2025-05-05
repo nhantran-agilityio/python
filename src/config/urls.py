@@ -34,7 +34,7 @@ urlpatterns = [
     ),
     path(f"{settings.API_ROOT_ENDPOINT}api/token/refresh/",
          TokenRefreshView.as_view(), name='token_refresh'),
-    path(f"{settings.API_ROOT_ENDPOINT}jobs/", include('job.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}jobs/", include('jobs.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}kins/", include('kin.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}documents/", include('document.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}leave-applications/",

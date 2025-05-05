@@ -1,6 +1,6 @@
 from django.test import TestCase
 from accounts.models import User
-from job.models import Job
+from jobs.models import Job
 
 
 class JobModelTest(TestCase):

@@ -6,12 +6,10 @@ from django.db import migrations, models
 
 class Migration(migrations.Migration):
 
-    initial = True
-
     dependencies = [
         ('accounts', '0001_initial'),
         ('auth', '0012_alter_user_first_name_max_length'),
-        ('job', '0001_initial'),
+        ('jobs', '0002_job_responsibilities'),
         ('kin', '0001_initial'),
     ]
 
@@ -19,7 +17,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='job',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='job.job'),
+            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='users', to='jobs.job'),
         ),
         migrations.AddField(
             model_name='user',

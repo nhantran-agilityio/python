@@ -1,8 +1,8 @@
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import viewsets
 
-from job.models import Job
-from job.serializers import JobSerializer
+from jobs.models import Job
+from jobs.serializers import JobSerializer
 
 
 class JobViewSet(viewsets.ModelViewSet):
