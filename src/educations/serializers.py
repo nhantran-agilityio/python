@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from education.models import Education
+from educations.models import Education
 
 
 class EducationSerializer(serializers.ModelSerializer):

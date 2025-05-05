@@ -1,5 +1,5 @@
 from rest_framework.routers import DefaultRouter
-from education.views import EducationViewSet
+from educations.views import EducationViewSet
 
 router = DefaultRouter()
 router.register('', EducationViewSet, basename='educations')

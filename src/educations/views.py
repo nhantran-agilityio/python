@@ -1,6 +1,6 @@
 from rest_framework import viewsets, permissions
 
-from education.models import Education
+from educations.models import Education
 from .serializers import EducationSerializer
 
 

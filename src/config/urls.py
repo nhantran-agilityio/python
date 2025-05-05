@@ -40,7 +40,7 @@ urlpatterns = [
     path(f"{settings.API_ROOT_ENDPOINT}leave-applications/",
          include('leave_application.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}guarantors/", include('guarantor.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}educations/", include('education.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}educations/", include('educations.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}families/", include('families.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}bank-accounts/", include('bank_accounts.urls')),
 
