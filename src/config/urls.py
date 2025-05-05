@@ -26,7 +26,6 @@ schema_view = get_schema_view(
 
 
 urlpatterns = [
-    path(settings.API_ROOT_ENDPOINT, include("config.api_router")),
     path(f"{settings.API_ROOT_ENDPOINT}admin/", admin.site.urls),
     path(f"{settings.API_ROOT_ENDPOINT}accounts/", include('accounts.urls')),
     path(

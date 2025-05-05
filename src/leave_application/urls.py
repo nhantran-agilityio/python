@@ -1,5 +1,5 @@
 from django.urls import path
-from leave_application.api.views import (
+from leave_application.views import (
     LeaveApplicationDetailAPIView,
     LeaveApplicationListAPIView,
     LeaveApplicationStatusUpdateView,
