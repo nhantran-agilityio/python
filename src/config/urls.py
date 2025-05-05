@@ -42,7 +42,7 @@ urlpatterns = [
     path(f"{settings.API_ROOT_ENDPOINT}guarantors/", include('guarantor.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}educations/", include('education.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}families/", include('families.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}bank-account/", include('bank_account.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}bank-accounts/", include('bank_accounts.urls')),
 
 
     # Swagger URLs
