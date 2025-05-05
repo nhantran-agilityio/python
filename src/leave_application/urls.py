@@ -1,32 +1,25 @@
-from django.urls import path
+# urls.py
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from leave_application.views import (
-    LeaveApplicationDetailAPIView,
-    LeaveApplicationListAPIView,
-    LeaveApplicationStatusUpdateView,
     LeaveApplicationDownloadView,
+    LeaveApplicationViewSet,
     RecallLeaveApplicationView,
 )
 
+router = DefaultRouter()
+router.register('', LeaveApplicationViewSet, basename='leave_application')
+
 urlpatterns = [
-    path(
-        '',
-        LeaveApplicationListAPIView.as_view(),
-        name='leave-application'
-    ),
-    path(
-        '<uuid:pk>/',
-        LeaveApplicationDetailAPIView.as_view(),
-        name='leave-application-detail'
-    ),
-    path(
-        '<uuid:pk>/status/',
-        LeaveApplicationStatusUpdateView.as_view(),
-        name='leave-application-status-update'
-    ),
+    path('', include(router.urls)),
     path(
         'download/<str:file_format>/',
         LeaveApplicationDownloadView.as_view(),
-        name='leave-application-download'
+        name='leave-application-download',
     ),
-    path('<uuid:pk>/recall/', RecallLeaveApplicationView.as_view(), name='recall-leave-application'),
+    path(
+        '<uuid:pk>/recall/',
+        RecallLeaveApplicationView.as_view(),
+        name='recall-leave-application',
+    ),
 ]

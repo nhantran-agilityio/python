@@ -2,7 +2,7 @@ from django.utils import timezone
 from django.contrib.auth import get_user_model
 from rest_framework.test import APITestCase
 from leave_application.models import LeaveApplication
-from utils.filter import filter_leave_applications
+from leave_application.api.filter import filter_leave_applications
 
 User = get_user_model()
 
