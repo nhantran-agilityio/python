@@ -11,16 +11,16 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
-from leave_application.filter import LeaveApplicationFilter
-from leave_application.models import (
+from leave_applications.filter import LeaveApplicationFilter
+from leave_applications.models import (
     LeaveApplication,
 )
-from leave_application.serializers import (
+from leave_applications.serializers import (
     LeaveApplicationSerializer,
     LeaveRecallSerializer
     )
 from utils.custom_permissions import IsAdmin, IsEmployee
-from leave_application.export import (
+from leave_applications.export import (
     export_as_csv,
     export_as_excel,
     export_as_pdf,

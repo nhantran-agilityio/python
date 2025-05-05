@@ -3,7 +3,7 @@ import django_filters
 from datetime import date
 from django.db.models.functions import Concat, Lower, Replace
 from django.db.models import Value
-from leave_application.models import LeaveApplication
+from leave_applications.models import LeaveApplication
 
 
 class LeaveApplicationFilter(django_filters.FilterSet):

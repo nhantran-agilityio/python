@@ -91,7 +91,7 @@ LOCAL_APPS = [
     'families',
     'guarantors',
     'bank_accounts',
-    'leave_application',
+    'leave_applications',
     'notifications',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps

@@ -1,7 +1,7 @@
 # urls.py
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from leave_application.views import (
+from leave_applications.views import (
     LeaveApplicationDownloadView,
     LeaveApplicationViewSet,
     RecallLeaveApplicationView,

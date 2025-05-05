@@ -38,7 +38,7 @@ urlpatterns = [
     path(f"{settings.API_ROOT_ENDPOINT}kins/", include('kins.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}documents/", include('documents.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}leave-applications/",
-         include('leave_application.urls')),
+         include('leave_applications.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}guarantors/", include('guarantors.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}educations/", include('educations.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}families/", include('families.urls')),

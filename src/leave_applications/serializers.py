@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from leave_application.models import LeaveApplication
+from leave_applications.models import LeaveApplication
 
 
 class LeaveRecallSerializer(serializers.ModelSerializer):
