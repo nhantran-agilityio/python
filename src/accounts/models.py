@@ -3,8 +3,8 @@ from django.contrib.auth.models import AbstractUser
 import uuid
 
 from contact.models import Contact
-from job.models import Job
-from kin.models import Kin
+from jobs.models import Job
+from kins.models import Kin
 
 
 class Role(models.TextChoices):

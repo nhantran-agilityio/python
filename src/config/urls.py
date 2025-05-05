@@ -34,15 +34,15 @@ urlpatterns = [
     ),
     path(f"{settings.API_ROOT_ENDPOINT}api/token/refresh/",
          TokenRefreshView.as_view(), name='token_refresh'),
-    path(f"{settings.API_ROOT_ENDPOINT}jobs/", include('job.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}kins/", include('kin.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}documents/", include('document.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}jobs/", include('jobs.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}kins/", include('kins.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}documents/", include('documents.urls')),
     path(f"{settings.API_ROOT_ENDPOINT}leave-applications/",
-         include('leave_application.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}guarantors/", include('guarantor.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}educations/", include('education.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}families/", include('family.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}bank-account/", include('bank_account.urls')),
+         include('leave_applications.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}guarantors/", include('guarantors.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}educations/", include('educations.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}families/", include('families.urls')),
+    path(f"{settings.API_ROOT_ENDPOINT}bank-accounts/", include('bank_accounts.urls')),
 
 
     # Swagger URLs

@@ -83,16 +83,16 @@ THIRD_PARTY_APPS = [
 ]
 LOCAL_APPS = [
     'accounts',
-    'job',
-    'document',
+    'jobs',
+    'documents',
     'contact',
-    'kin',
-    'education',
-    'family',
-    'guarantor',
-    'bank_account',
-    'leave_application',
-    'notification',
+    'kins',
+    'educations',
+    'families',
+    'guarantors',
+    'bank_accounts',
+    'leave_applications',
+    'notifications',
 ]
 # https://docs.djangoproject.com/en/dev/ref/settings/#installed-apps
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
