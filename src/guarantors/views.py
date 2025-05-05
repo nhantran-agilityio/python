@@ -1,7 +1,7 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 
-from guarantor.models import Guarantor
+from guarantors.models import Guarantor
 from .serializers import GuarantorSerializer
 
 

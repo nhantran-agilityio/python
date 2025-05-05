@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from guarantor.models import Guarantor
+from guarantors.models import Guarantor
 
 
 class GuarantorSerializer(serializers.ModelSerializer):

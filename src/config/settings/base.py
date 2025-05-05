@@ -89,7 +89,7 @@ LOCAL_APPS = [
     'kin',
     'educations',
     'families',
-    'guarantor',
+    'guarantors',
     'bank_accounts',
     'leave_application',
     'notification',
