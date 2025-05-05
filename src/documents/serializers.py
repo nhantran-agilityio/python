@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from constants.enums import DocumentType
-from document.models import Document
+from documents.models import Document
 
 
 class DocumentUploadSerializer(serializers.Serializer):

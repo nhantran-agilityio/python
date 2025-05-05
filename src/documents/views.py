@@ -11,9 +11,9 @@ from django.http import HttpResponse
 from io import BytesIO
 import zipfile
 
-from document.models import Document
+from documents.models import Document
 from constants.enums import DocumentType
-from document.serializers import DocumentUploadSerializer
+from documents.serializers import DocumentUploadSerializer
 from utils.base import is_admin
 from utils.conversions import camel_to_snake
 

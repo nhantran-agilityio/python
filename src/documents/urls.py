@@ -1,6 +1,6 @@
 from django.urls import path
 
-from document.views import (
+from documents.views import (
     DownloadAllDocumentsView,
     GetDocumentsAPIView,
     MultipleDocumentUploadView,
