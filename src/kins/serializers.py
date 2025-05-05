@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from kin.models import Kin
+from kins.models import Kin
 
 
 class KinSerializer(serializers.ModelSerializer):

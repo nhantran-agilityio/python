@@ -7,7 +7,7 @@ from drf_yasg import openapi
 from rest_framework import status
 from drf_yasg.utils import swagger_auto_schema
 
-from kin.serializers import KinSerializer
+from kins.serializers import KinSerializer
 
 
 class KinDetailAPIView(APIView):

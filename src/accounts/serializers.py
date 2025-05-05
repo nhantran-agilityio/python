@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 
 from contact.serializers import ContactSerializer
 from jobs.serializers import JobSerializer
-from kin.serializers import KinSerializer
+from kins.serializers import KinSerializer
 
 
 User = get_user_model()

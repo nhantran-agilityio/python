@@ -86,7 +86,7 @@ LOCAL_APPS = [
     'jobs',
     'documents',
     'contact',
-    'kin',
+    'kins',
     'educations',
     'families',
     'guarantors',

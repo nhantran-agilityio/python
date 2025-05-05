@@ -4,7 +4,7 @@ import uuid
 
 from contact.models import Contact
 from jobs.models import Job
-from kin.models import Kin
+from kins.models import Kin
 
 
 class Role(models.TextChoices):
