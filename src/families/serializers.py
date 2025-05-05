@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from family.models import Family
+from families.models import Family
 
 
 class FamilySerializer(serializers.ModelSerializer):
