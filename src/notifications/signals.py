@@ -2,7 +2,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from leave_application.models import LeaveApplication
-from notification.models import Notification
+from notifications.models import Notification
 from utils.base import is_pending_recall
 
 
