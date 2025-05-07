@@ -7,16 +7,14 @@ from rest_framework.views import APIView
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from django.contrib.auth.tokens import default_token_generator
-from django.utils.encoding import force_bytes, force_str
-from django.template.loader import render_to_string
+from django.utils.encoding import force_str
 from drf_yasg import openapi
 from rest_framework.parsers import MultiPartParser, FormParser
-from django.core.mail import EmailMessage
-from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.http import urlsafe_base64_decode
 from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
-from urllib.parse import urlencode
-from django.conf import settings
+from accounts.service import UserRegistrationService
+from core.responses import ApiResponse
 from utils.conversions import convert_request_data_keys_to_snake_and_flat_nested
 from .serializers import LoginSerializer
 from .models import User
@@ -41,33 +39,14 @@ class RegisterView(APIView):
         }
     )
     def post(self, request):
+
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        user.is_active = False
-        user.save()
-        mail_subject = 'Activate your account.'
-        frontend_url = settings.FE_DOMAIN
-        uid = urlsafe_base64_encode(force_bytes(user.pk))
-        token = default_token_generator.make_token(user)
-        params = {
-            "uidb64": uid,
-            "token": token
-        }
-        activation_link = f"{frontend_url}?{urlencode(params)}"
-        message = render_to_string('email/activation_email.txt', {
-            'user': user,
-            'domain': activation_link,
-        })
-        to_email = user.email
-        email = EmailMessage(mail_subject, message, to=[to_email])
-        email.send()
-        return Response(
-            {
-                "message": "User registered successfully. "
-                "Please check your email to activate your account."
-            },
-            status=status.HTTP_201_CREATED
+        UserRegistrationService.register_user(serializer)
+
+        return ApiResponse(
+            message="User registered successfully. Please check your email to activate your account.",
+            status_code=201
         )
 
 
