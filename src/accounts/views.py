@@ -46,7 +46,7 @@ class RegisterView(APIView):
 
         return ApiResponse(
             message="User registered successfully. Please check your email to activate your account.",
-            status_code=201
+            status_code=status.HTTP_201_CREATED
         )
 
 
@@ -62,8 +62,10 @@ def activate_account(request, uidb64, token):
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
         user.save()
-        return Response({"message": "Account activated successfully."},
-                        status=status.HTTP_200_OK)
+        return ApiResponse(
+            message="Account activated successfully.",
+            status_code=status.HTTP_200_OK
+        )
     else:
         raise ValidationError({"error": "Invalid or expired token."})
 
@@ -81,10 +83,13 @@ class LoginView(generics.GenericAPIView):
             raise AuthenticationFailed("Invalid credentials")
 
         tokens = self._generate_tokens(user)
-        return Response({
-            **tokens,
-            "user": self._get_user_data(user)
-        }, status=status.HTTP_200_OK)
+        return ApiResponse(
+            data={
+                **tokens,
+                "user": self._get_user_data(user)
+            },
+            status_code=status.HTTP_200_OK
+        )
 
     def _authenticate_user(self, validated_data):
         return authenticate(
@@ -118,7 +123,10 @@ class UserDetailView(APIView):
         user = User.objects.select_related('job').prefetch_related(
             'job__responsibilities').get(id=request.user.id)
         serializer = UserDetailSerializer(user)
-        return Response(serializer.data)
+        return ApiResponse(
+            data=serializer.data,
+            status_code=status.HTTP_200_OK
+        )
 
     @swagger_auto_schema(
         operation_description="Update current user's profile (supports camelCase, nested job/contact/kin, avatar upload)",
