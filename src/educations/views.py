@@ -1,12 +1,10 @@
-from rest_framework import viewsets, permissions
-
+from core.api_views import BaseAuthenticatedModelViewSet
 from educations.models import Education
 from .serializers import EducationSerializer
 
 
-class EducationViewSet(viewsets.ModelViewSet):
+class EducationViewSet(BaseAuthenticatedModelViewSet):
     serializer_class = EducationSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return Education.objects.filter(user=self.request.user)

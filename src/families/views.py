@@ -1,12 +1,10 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from core.api_views import BaseAuthenticatedModelViewSet
 from .models import Family
 from .serializers import FamilySerializer
 
 
-class FamilyViewSet(viewsets.ModelViewSet):
+class FamilyViewSet(BaseAuthenticatedModelViewSet):
     serializer_class = FamilySerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Family.objects.filter(user=self.request.user)
