@@ -7,10 +7,11 @@ from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
 from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
-from rest_framework.response import Response
+from django.utils.translation import gettext_lazy as _
 from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
+from constants.base import SUPPORTED_FORMATS
 from leave_applications.filter import LeaveApplicationFilter
 from leave_applications.models import (
     LeaveApplication,
@@ -19,12 +20,9 @@ from leave_applications.serializers import (
     LeaveApplicationSerializer,
     LeaveRecallSerializer
     )
+from leave_applications.services import export_leave_applications
 from utils.custom_permissions import IsAdmin, IsEmployee
-from leave_applications.export import (
-    export_as_csv,
-    export_as_excel,
-    export_as_pdf,
-)
+from core.responses import ApiResponse
 
 
 class LeaveApplicationViewSet(viewsets.ModelViewSet):
@@ -65,7 +63,11 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
                 return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return ApiResponse(
+            data=serializer.data,
+            message="Leave applications retrieved successfully",
+            status_code=status.HTTP_200_OK
+        )
 
 
 class RecallLeaveApplicationView(APIView):
@@ -86,40 +88,32 @@ class RecallLeaveApplicationView(APIView):
         serializer = LeaveRecallSerializer(leave_application, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return ApiResponse(
+            data=serializer.data,
+            message="Leave application recall updated successfully",
+            status_code=status.HTTP_200_OK
+        )
 
 
 class LeaveApplicationDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, file_format):
+        if file_format not in SUPPORTED_FORMATS:
+            raise ValidationError(
+                _(
+                    f"Invalid format '{file_format}'. Allowed values are: "
+                    f"{', '.join(SUPPORTED_FORMATS)}."
+                )
+            )
+
         user = request.user
         queryset = LeaveApplication.objects.select_related('employee')
-        if IsEmployee():
+
+        if IsEmployee().has_permission(request, self):
             queryset = queryset.filter(employee=user)
 
-        data = [{
-            'employee': leave.employee.first_name,
-            'type': leave.type,
-            'start_date': leave.start_date,
-            'end_date': leave.end_date,
-            'durations': leave.durations,
-            'resumption_date': leave.resumption_date,
-            'reason': leave.reason,
-            'status': leave.status,
-        } for leave in queryset]
+        if not queryset.exists():
+            raise NotFound(_("No leave applications found."))
 
-        if not data:
-            raise NotFound("No leave applications found")
-
-        if file_format == 'pdf':
-            return export_as_pdf(data)
-        elif file_format == 'csv':
-            return export_as_csv(data)
-        elif file_format == 'excel':
-            return export_as_excel(data)
-
-        raise ValidationError("Invalid format. Allowed values are: pdf, csv, excel.")
-
-
-apps = [LeaveApplicationViewSet]
+        return export_leave_applications(queryset, file_format)
