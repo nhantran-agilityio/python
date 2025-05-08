@@ -20,7 +20,7 @@ from leave_applications.serializers import (
     LeaveApplicationSerializer,
     LeaveRecallSerializer
     )
-from leave_applications.services import export_leave_applications
+from leave_applications.services import LeaveApplicationExporter
 from utils.custom_permissions import IsAdmin, IsEmployee
 from core.responses import ApiResponse
 
@@ -116,4 +116,5 @@ class LeaveApplicationDownloadView(APIView):
         if not queryset.exists():
             raise NotFound(_("No leave applications found."))
 
-        return export_leave_applications(queryset, file_format)
+        exporter = LeaveApplicationExporter(queryset)
+        return exporter.export(file_format)
