@@ -1,13 +1,10 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-
+from core.api_views import BaseAuthenticatedModelViewSet
 from guarantors.models import Guarantor
 from .serializers import GuarantorSerializer
 
 
-class GuarantorViewSet(viewsets.ModelViewSet):
+class GuarantorViewSet(BaseAuthenticatedModelViewSet):
     serializer_class = GuarantorSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Guarantor.objects.filter(user=self.request.user)
