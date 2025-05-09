@@ -134,18 +134,15 @@ class UserDetailView(APIView):
             openapi.Parameter('firstName', openapi.IN_FORM, type=openapi.TYPE_STRING),
             openapi.Parameter('lastName', openapi.IN_FORM, type=openapi.TYPE_STRING),
             openapi.Parameter('phone', openapi.IN_FORM, type=openapi.TYPE_STRING),
-            openapi.Parameter('avatar', openapi.IN_FORM, type=openapi.TYPE_FILE),
+            openapi.Parameter('avatar', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter('residentialAddress', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter('cityOfResidence', openapi.IN_FORM, type=openapi.TYPE_STRING),
+            openapi.Parameter('phoneNum2', openapi.IN_FORM, type=openapi.TYPE_STRING),
             openapi.Parameter(
                 'job',
                 openapi.IN_FORM,
                 type=openapi.TYPE_STRING,
                 description='Stringified JSON. Example: {"department": "IT", "title": "Engineer"}'
-            ),
-            openapi.Parameter(
-                'contact',
-                openapi.IN_FORM,
-                type=openapi.TYPE_STRING,
-                description='Stringified JSON. Example: {"phone": "0909", "email": "abc@xyz.com"}'
             ),
             openapi.Parameter(
                 'kin',

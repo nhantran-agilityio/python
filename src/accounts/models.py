@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 import uuid
 
-from contact.models import Contact
 from jobs.models import Job
 from kins.models import Kin
 
@@ -20,6 +19,9 @@ class User(AbstractUser):
     first_name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     phone = models.CharField(max_length=20)
+    phone_num2 = models.CharField(max_length=20, null=True, blank=True)
+    city_of_residence = models.CharField(max_length=100, null=True, blank=True)
+    residential_address = models.TextField(max_length=100, null=True, blank=True)
     role = models.CharField(
         max_length=20,
         choices=Role.choices,
@@ -39,12 +41,6 @@ class User(AbstractUser):
         on_delete=models.SET_NULL,
         null=True,
         blank=True
-    )
-    contact = models.ForeignKey(
-        Contact,
-        related_name='users',
-        on_delete=models.SET_NULL,
-        null=True, blank=True
     )
     kin = models.ForeignKey(
         Kin,
