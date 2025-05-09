@@ -32,6 +32,21 @@ class MultipleDocumentUploadView(APIView):
         responses={201: "Files uploaded successfully!", 400: "Bad Request"}
     )
     def post(self, request):
+        """
+        Upload multiple documents with their types.
+
+        This API endpoint accepts multiple files, each of which will be associated
+        with a document type. The document types are given as parameters to the API
+        call, and the files are given as their respective values. The API call
+        returns a JSON object where the keys are the document types, and the values
+        are the document IDs.
+
+        The API call requires the user to be authenticated. If the user is not
+        authenticated, the API call will return a 401 Unauthorized response.
+
+        :param request: The request object
+        :return: A JSON object containing the document IDs, keyed by document type
+        """
         uploaded_files = DocumentService.upload_documents(request.user, request.FILES)
         return ApiResponse(
             message="Files uploaded successfully!",
@@ -52,6 +67,21 @@ class MultipleDocumentUploadView(APIView):
         responses={200: "Documents updated successfully!", 400: "Bad Request"}
     )
     def patch(self, request):
+        """
+        Update existing documents or upload new ones.
+
+        This API endpoint accepts multiple files, each of which will either update
+        an existing document or create a new one. The document types are given as
+        parameters to the API call, and the files are given as their respective
+        values. The API call returns a JSON object where the keys are the document
+        types, and the values are the document IDs.
+
+        The API call requires the user to be authenticated. If the user is not
+        authenticated, the API call will return a 401 Unauthorized response.
+
+        :param request: The request object
+        :return: A JSON object containing the document IDs, keyed by document type
+        """
         updated_files = DocumentService.update_documents(request.user, request.FILES)
         return ApiResponse(
             message="Documents updated successfully!",
@@ -64,6 +94,20 @@ class DownloadAllDocumentsView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
+        """
+        Download all documents associated with the requesting user.
+
+        This API endpoint downloads all documents associated with the requesting
+        user. The documents are packaged in a zip file and returned as the
+        response body. The response headers include `Content-Disposition` with
+        a filename that includes the username of the requesting user.
+
+        The API call requires the user to be authenticated. If the user is not
+        authenticated, the API call will return a 401 Unauthorized response.
+
+        :param request: The request object
+        :return: A zip file containing the documents associated with the user.
+        """
         documents = Document.objects.filter(
             user=request.user
         ).only("document_file")
@@ -97,6 +141,21 @@ class GetDocumentsAPIView(APIView):
         }
     )
     def get(self, request):
+        """
+        Retrieve documents. Admins get all; users get only their own.
+
+        This API endpoint returns an array of documents associated with the
+        requesting user. If the user is an admin, the API endpoint returns all
+        documents. If the user is not an admin, the API endpoint returns only
+        the documents associated with the requesting user.
+
+        The API call requires the user to be authenticated. If the user is not
+        authenticated, the API call will return a 401 Unauthorized response.
+
+        :param request: The request object
+        :return: An array of documents associated with the user.
+        """
+
         documents = (
             Document.objects.all()
             if is_admin(request)

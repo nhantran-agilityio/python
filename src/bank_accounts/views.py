@@ -9,6 +9,10 @@ class BankAccountViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
+        """
+        Return the queryset of BankAccount objects associated with the current user.
+        """
+
         return BankAccount.objects.filter(user=self.request.user)
 
     def perform_create(self, serializer):

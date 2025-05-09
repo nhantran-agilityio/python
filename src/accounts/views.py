@@ -40,6 +40,18 @@ class RegisterView(APIView):
     )
     def post(self, request):
 
+        """
+        Register a new user.
+
+        This endpoint takes a User object as input and saves it in the database.
+        The password is hashed and the user's email is set to unverified.
+        The user is then sent a verification email to the email address provided.
+
+        :param request: The request object
+        :type request: Request
+        :return: The response object
+        :type: Response
+        """
         serializer = RegisterSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         UserRegistrationService.register_user(serializer)
@@ -53,6 +65,23 @@ class RegisterView(APIView):
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def activate_account(request, uidb64, token):
+    """
+    Activate a user account.
+
+    This endpoint receives a base64-encoded user ID and a token, decodes the user ID,
+    and checks the validity of the token. If valid, the user's account is activated.
+
+    :param request: The request object
+    :type request: django.http.HttpRequest
+    :param uidb64: Base64 encoded user ID
+    :type uidb64: str
+    :param token: Token to verify the user's identity
+    :type token: str
+    :return: ApiResponse indicating success or failure of account activation
+    :type: core.responses.ApiResponse
+    :raises ValidationError: If the token is invalid or expired
+    """
+
     try:
         uid = force_str(urlsafe_base64_decode(uidb64))
         user = User.objects.get(pk=uid)
@@ -75,6 +104,18 @@ class LoginView(generics.GenericAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        """
+        Login a user.
+
+        This endpoint takes a User object as input and verifies the username and password.
+        If valid, a refresh and access token are generated and returned.
+
+        :param request: The request object
+        :type request: Request
+        :raises AuthenticationFailed: If the credentials are invalid
+        :return: ApiResponse containing the refresh and access token, as well as the user data
+        :type: core.responses.ApiResponse
+        """
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -92,6 +133,15 @@ class LoginView(generics.GenericAPIView):
         )
 
     def _authenticate_user(self, validated_data):
+        """
+        Authenticates a user based on the given validated data.
+
+        :param validated_data: Data that has been validated by a serializer
+        :type validated_data: dict
+        :return: The authenticated user
+        :type: django.contrib.auth.models.User
+        :raises AuthenticationFailed: If the credentials are invalid
+        """
         return authenticate(
             request=self.request,
             username=validated_data["email"],
@@ -99,6 +149,14 @@ class LoginView(generics.GenericAPIView):
         )
 
     def _generate_tokens(self, user):
+        """
+        Generates a refresh and access token for the given user.
+
+        :param user: The user to generate the tokens for
+        :type user: django.contrib.auth.models.User
+        :return: A dictionary containing the refresh and access token
+        :type: dict
+        """
         refresh = RefreshToken.for_user(user)
         return {
             "refresh": str(refresh),
@@ -106,6 +164,16 @@ class LoginView(generics.GenericAPIView):
         }
 
     def _get_user_data(self, user):
+        """
+        Returns a dictionary containing user data.
+
+        The returned dictionary contains the user's ID, email, role, and username.
+
+        :param user: The user to generate the data for
+        :type user: django.contrib.auth.models.User
+        :return: A dictionary containing the user's data
+        :type: dict
+        """
         return {
             "id": user.id,
             "email": user.email,
@@ -120,6 +188,14 @@ class UserDetailView(APIView):
     parser_classes = [MultiPartParser, FormParser]
 
     def get(self, request):
+        """
+        Retrieves the current user's profile.
+
+        :param request: The request object
+        :type request: django.http.HttpRequest
+        :return: ApiResponse containing the user's data
+        :type: core.responses.ApiResponse
+        """
         user = User.objects.select_related('job').prefetch_related(
             'job__responsibilities').get(id=request.user.id)
         serializer = UserDetailSerializer(user)
@@ -160,6 +236,22 @@ class UserDetailView(APIView):
         # Convert camelCase & parse nested JSON fields
         # Ensure the user instance is fetched with related fields for nested
         # updates
+        """
+        Partially updates the current user's profile.
+
+        This method supports updates to the user's basic information as well as nested
+        structures for job and kin details. The request data can be in camelCase, and
+        nested JSON fields for 'job', 'contact', and 'kin' are parsed and converted to
+        the appropriate format. The user profile is updated based on the provided data,
+        and a refreshed user object is returned upon successful update.
+
+        :param request: The HTTP request object containing user data
+        :type request: django.http.HttpRequest
+        :return: Response containing the updated user data
+        :rtype: rest_framework.response.Response
+        :raises ValidationError: If the provided data is invalid
+        """
+
         convert_request_data_keys_to_snake_and_flat_nested(
             request,
             json_fields=["job", "contact", "kin"]

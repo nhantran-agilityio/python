@@ -36,9 +36,17 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
     search_fields = ['employee__first_name', 'employee__last_name', 'type']
 
     def perform_create(self, serializer):
+        """
+        Saves the leave application to the database, with the current user as the employee
+        """
         serializer.save(employee=self.request.user)
 
     def get_queryset(self):
+        """
+        Returns a queryset of all leave applications.
+        If the user is an employee, only show leave applications created by the current user.
+        If the user is an admin, show all leave applications.
+        """
         user = self.request.user
         queryset = LeaveApplication.objects.select_related("employee")
         if IsEmployee():
@@ -54,6 +62,18 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
         ]
     )
     def list(self, request, *args, **kwargs):
+        """
+        Retrieve a list of all leave applications.
+
+        Parameters:
+        - type: str (optional) - Filter by leave type
+        - status: str (optional) - Filter by status
+        - employeeName: str (optional) - Filter by employee full name
+        - isRecall: bool (optional) - Filter active recalls
+
+        Returns:
+        - ApiResponse: A paginated list of leave applications
+        """
         queryset = self.filter_queryset(self.get_queryset())
 
         if self.paginator is not None:
@@ -83,6 +103,25 @@ class RecallLeaveApplicationView(APIView):
         }
     )
     def patch(self, request, pk):
+        """
+        Partially updates the recall information of a specific leave application.
+
+        Retrieves the leave application by primary key (pk) and updates its recall
+        information using data provided in the request body. The update is partial,
+        meaning only the fields included in the request will be updated.
+
+        Parameters:
+        - request (Request): The HTTP request object containing the update data.
+        - pk (str): The primary key of the leave application to update.
+
+        Returns:
+        - ApiResponse: Contains the updated leave application data and a success message.
+
+        Raises:
+        - ValidationError: If the provided data is invalid.
+        - NotFound: If the leave application with the given pk does not exist.
+        """
+
         leave_application = get_object_or_404(LeaveApplication, pk=pk)
 
         serializer = LeaveRecallSerializer(leave_application, data=request.data, partial=True)
@@ -99,6 +138,27 @@ class LeaveApplicationDownloadView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, file_format):
+        """
+        Retrieves leave applications and exports them in the specified format.
+
+        This method gets the leave applications for the authenticated user and exports
+        them in the format specified by `file_format`. If the user is an employee, only
+        their leave applications are included. If no leave applications are found, a
+        `NotFound` exception is raised. Only formats listed in `SUPPORTED_FORMATS` are
+        allowed; otherwise, a `ValidationError` is raised.
+
+        Parameters:
+        - request (Request): The HTTP request object containing user information.
+        - file_format (str): The format in which to export the leave applications.
+
+        Returns:
+        - HttpResponse: The exported leave applications in the desired format.
+
+        Raises:
+        - ValidationError: If the `file_format` is not supported.
+        - NotFound: If no leave applications are found for the user.
+        """
+
         if file_format not in SUPPORTED_FORMATS:
             raise ValidationError(
                 _(
