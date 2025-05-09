@@ -57,7 +57,22 @@ src/
 │   └── views.py
 │   └── templates
 │   │   └── activation_email.txt
-├── contact
+├── guarantors
+│   ├── migrations
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── jobs
+│   ├── migrations
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── kins
 │   ├── migrations
 │   ├── tests
 │   ├── admin.py
@@ -66,24 +81,7 @@ src/
 │   ├── serializers.py
 │   ├── urls.py
 │   └── views.py
-├── guarantor
-│   ├── migrations
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── serializers.py
-│   ├── urls.py
-│   └── views.py
-├── job
-│   └── django.log
-├── job_responsibility
-│   ├── migrations
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── urls.py
-│   └── views.py
-├── kin
+├── leave_applications
 │   ├── migrations
 │   ├── tests
 │   ├── admin.py
@@ -92,16 +90,7 @@ src/
 │   ├── serializers.py
 │   ├── urls.py
 │   └── views.py
-├── leave_application
-│   ├── migrations
-│   ├── tests
-│   ├── admin.py
-│   ├── apps.py
-│   ├── models.py
-│   ├── serializers.py
-│   ├── urls.py
-│   └── views.py
-├── notification
+├── notifications
 │   ├── migrations
 │   ├── tests
 │   ├── admin.py
@@ -111,6 +100,8 @@ src/
 │   ├── urls.py
 │   └── views.py
 │   └── signals.py
+├── constants
+├── core
 ├── config
 │   └── settings
 │       ├── base.py
@@ -180,19 +171,20 @@ cp .env.sample .env
 5. Run migrations:
 
 ```bash
-python manage.py migrate
+uv run ./src/manage.py makemigrations
+uv run ./src/manage.py migrate
 ```
 
 6. Create superuser:
 
 ```bash
-python manage.py createsuperuser
+uv run ./src/manage.py createsuperuser
 ```
 
 7. Run the server:
 
 ```bash
-python manage.py runserver 8000
+uv run ./src/manage.py runserver 8000
 ```
 
 8. Access the application:
