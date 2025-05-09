@@ -3,8 +3,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
+from core.utilities import is_admin
 from notifications.models import Notification
-from utils.base import is_admin
 
 from .serializers import NotificationSerializer
 

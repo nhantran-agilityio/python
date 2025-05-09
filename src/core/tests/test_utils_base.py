@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock
 from constants.base import ROLE_ADMIN
 from constants.enums import LeaveStatus
-from utils.base import is_pending_recall, is_admin
+from core.utilities import is_admin, is_pending_recall
 
 
 class TestIsPendingRecall(unittest.TestCase):

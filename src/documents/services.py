@@ -4,7 +4,7 @@ import zipfile
 from documents.models import Document
 from documents.serializers import DocumentUploadSerializer
 from constants.enums import DocumentType
-from utils.conversions import camel_to_snake
+from core.conversions import camel_to_snake
 
 
 class DocumentService:

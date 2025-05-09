@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from utils.conversions import (
+from core.conversions import (
     camel_to_snake,
     parse_request_data,
     validate_and_respond,

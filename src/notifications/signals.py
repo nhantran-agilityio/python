@@ -1,9 +1,9 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
+from core.utilities import is_pending_recall
 from leave_applications.models import LeaveApplication
 from notifications.models import Notification
-from utils.base import is_pending_recall
 
 
 @receiver(post_save, sender=LeaveApplication)

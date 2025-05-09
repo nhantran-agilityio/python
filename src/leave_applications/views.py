@@ -21,7 +21,7 @@ from leave_applications.serializers import (
     LeaveRecallSerializer
     )
 from leave_applications.services import LeaveApplicationExporter
-from utils.custom_permissions import IsAdmin, IsEmployee
+from core.custom_permissions import IsAdmin, IsEmployee
 from core.responses import ApiResponse
 
 
@@ -74,7 +74,9 @@ class RecallLeaveApplicationView(APIView):
     permission_classes = [IsAuthenticated, IsAdmin]
 
     @swagger_auto_schema(
-        operation_description="Update recall information of a leave application",
+        operation_description=(
+            "Update recall information of a leave application"
+        ),
         request_body=LeaveRecallSerializer,
         responses={
             200: "Recall info updated successfully",

@@ -15,7 +15,7 @@ from rest_framework.decorators import api_view, permission_classes
 from django.contrib.auth import authenticate
 from accounts.service import UserRegistrationService
 from core.responses import ApiResponse
-from utils.conversions import convert_request_data_keys_to_snake_and_flat_nested
+from core.conversions import convert_request_data_keys_to_snake_and_flat_nested
 from .serializers import LoginSerializer
 from .models import User
 from .serializers import (

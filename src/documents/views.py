@@ -9,10 +9,10 @@ from django.http import HttpResponse
 from rest_framework.exceptions import NotFound
 from constants.enums import DocumentType
 from core.responses import ApiResponse
+from core.utilities import is_admin
 from documents.models import Document
 from documents.serializers import DocumentUploadSerializer
 from documents.services import DocumentService, ZipService
-from utils.base import is_admin
 
 
 class MultipleDocumentUploadView(APIView):
