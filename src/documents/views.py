@@ -12,7 +12,6 @@ from core.responses import ApiResponse
 from documents.models import Document
 from documents.serializers import DocumentUploadSerializer
 from documents.services import DocumentService, ZipService
-from utils.base import is_admin
 
 
 class MultipleDocumentUploadView(APIView):
@@ -99,7 +98,7 @@ class GetDocumentsAPIView(APIView):
     def get(self, request):
         documents = (
             Document.objects.all()
-            if is_admin(request)
+            if request.user.is_admin
             else Document.objects.filter(user=request.user)
         )
         serializer = DocumentUploadSerializer(documents, many=True)

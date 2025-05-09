@@ -1,6 +1,6 @@
 from django.test import TestCase
 from accounts.models import User
-from utils.custom_permissions import IsAdmin, IsEmployee
+from core.custom_permissions import IsAdmin, IsEmployee
 
 
 class TestIsEmployeePermission(TestCase):

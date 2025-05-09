@@ -4,7 +4,6 @@ from rest_framework.response import Response
 from drf_yasg.utils import swagger_auto_schema
 
 from notifications.models import Notification
-from utils.base import is_admin
 
 from .serializers import NotificationSerializer
 
@@ -18,7 +17,7 @@ class NotificationViewSet(viewsets.ViewSet):
         responses={200: NotificationSerializer(many=True)}
     )
     def list(self, request):
-        if is_admin(request):
+        if request.user.is_admin:
             notifications = Notification.objects.filter(is_read=False)
         else:
             notifications = Notification.objects.filter(user=request.user, is_read=False)
@@ -79,7 +78,7 @@ class NotificationViewSet(viewsets.ViewSet):
         Helper to get notification by id and user.
         Admins can access all notifications.
         """
-        if is_admin(request):
+        if request.user.is_admin:
             return Notification.objects.filter(pk=pk).first()
         return Notification.objects.filter(pk=pk, user=request.user).first()
 

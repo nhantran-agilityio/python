@@ -1,7 +1,7 @@
 from django.test import TestCase
 from rest_framework.request import Request
 from rest_framework.test import APIRequestFactory
-from utils.pagination import CustomPagination
+from core.pagination import CustomPagination
 
 
 class CustomPaginationTestCase(TestCase):
