@@ -1,16 +1,18 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-
-from core.utilities import is_pending_recall
 from leave_applications.models import LeaveApplication
 from notifications.models import Notification
 
 
 @receiver(post_save, sender=LeaveApplication)
 def send_leave_recall_notification(sender, instance, created, **kwargs):
-    if is_pending_recall(instance):
+    if instance.is_pending_recall:
         relief_officer = instance.relief_officer
-        full_name = f"{relief_officer.first_name} {relief_officer.last_name}" if relief_officer else "an unknown officer"
+        full_name = (
+            f"{relief_officer.first_name} {relief_officer.last_name}"
+            if relief_officer
+            else "an unknown officer"
+        )
 
         Notification.objects.create(
             user=instance.employee,

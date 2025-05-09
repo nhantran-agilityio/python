@@ -52,5 +52,15 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
 
+    @property
+    def is_admin(self):
+        """
+        Checks if the user is an admin.
+
+        Returns:
+            bool: True if the user is an admin, False otherwise.
+        """
+        return self.role == Role.ADMIN
+
     def __str__(self):
         return self.email

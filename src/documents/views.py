@@ -9,7 +9,6 @@ from django.http import HttpResponse
 from rest_framework.exceptions import NotFound
 from constants.enums import DocumentType
 from core.responses import ApiResponse
-from core.utilities import is_admin
 from documents.models import Document
 from documents.serializers import DocumentUploadSerializer
 from documents.services import DocumentService, ZipService
@@ -99,7 +98,7 @@ class GetDocumentsAPIView(APIView):
     def get(self, request):
         documents = (
             Document.objects.all()
-            if is_admin(request)
+            if request.user.is_admin
             else Document.objects.filter(user=request.user)
         )
         serializer = DocumentUploadSerializer(documents, many=True)

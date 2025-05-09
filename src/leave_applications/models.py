@@ -41,6 +41,10 @@ class LeaveApplication(models.Model):
     recalled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='recalls_made')
     recall_deadline = models.DateField(null=True, blank=True)
 
+    @property
+    def is_pending_recall(self):
+        return self.recall_status == LeaveStatus.PENDING
+
 
 class EmployeeLeaveBalance(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)

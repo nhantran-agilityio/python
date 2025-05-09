@@ -1,8 +1,9 @@
 from django.test import TestCase
-from accounts.models import User
-from leave_application.models import LeaveApplication
-from notification.models import Notification
-from utils.base import is_pending_recall
+from leave_applications.models import LeaveApplication
+from notifications.models import Notification
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 class TestSendLeaveRecallNotification(TestCase):
@@ -23,7 +24,7 @@ class TestSendLeaveRecallNotification(TestCase):
             resumption_date="2022-01-05",
             is_recalled=True,
         )
-        self.assertTrue(is_pending_recall(leave))
+        self.assertTrue(leave.is_pending_recall)
         self.assertEqual(Notification.objects.count(), 1)
 
     def test_notification_not_sent_when_leave_is_not_recalled(self):
@@ -39,7 +40,7 @@ class TestSendLeaveRecallNotification(TestCase):
             resumption_date="2022-01-05",
             is_recalled=False,
         )
-        self.assertFalse(is_pending_recall(leave))
+        self.assertFalse(leave.is_pending_recall)
         self.assertEqual(Notification.objects.count(), 0)
 
     def test_notification_sent_with_correct_message_when_relief_officer_is_present(self):
@@ -75,17 +76,5 @@ class TestSendLeaveRecallNotification(TestCase):
         self.assertEqual(notification.message, f"Your {leave.type} leave has been recalled by an unknown officer. Please return before {leave.end_date}.")
 
     def test_notification_sent_to_correct_user(self):
-        LeaveApplication.objects.create(
-            employee=self.employee,
-            relief_officer=self.relief_officer,
-            type="Annual",
-            reason="Sick leave",
-            start_date="2022-01-01",
-            end_date="2022-01-05",
-            durations=5,
-            recall_status="Pending",
-            resumption_date="2022-01-05",
-            is_recalled=True,
-        )
         notification = Notification.objects.first()
         self.assertEqual(notification.user, self.employee)
