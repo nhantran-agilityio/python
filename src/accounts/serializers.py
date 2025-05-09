@@ -1,8 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.hashers import make_password
 from django.contrib.auth import get_user_model
-
-from contact.serializers import ContactSerializer
 from jobs.serializers import JobSerializer
 from kins.serializers import KinSerializer
 
@@ -43,7 +41,6 @@ class LoginSerializer(serializers.Serializer):
 
 class UserDetailSerializer(serializers.ModelSerializer):
     job = JobSerializer(required=False)
-    contact = ContactSerializer(required=False)
     kin = KinSerializer(required=False)
 
     class Meta:
@@ -51,7 +48,8 @@ class UserDetailSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'first_name', 'last_name',
             'avatar', 'role',
-            'job', 'contact', 'phone',
+            'job', 'phone', 'phone_num2',
+            'city_of_residence', 'residential_address',
             'is_receive_newsletters', 'email', 'kin'
         ]
 
@@ -79,11 +77,9 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         job_data = validated_data.pop('job', None)
-        contact_data = validated_data.pop('contact', None)
         kin_data = validated_data.pop('kin', None)
 
         self.update_or_create_nested(instance, job_data, 'job', JobSerializer)
-        self.update_or_create_nested(instance, contact_data, 'contact', ContactSerializer)
         self.update_or_create_nested(instance, kin_data, 'kin', KinSerializer)
 
         return super().update(instance, validated_data)
