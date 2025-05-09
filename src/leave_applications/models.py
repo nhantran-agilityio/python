@@ -1,11 +1,10 @@
-import uuid
 from django.db import models
 from accounts.models import User
 from constants.enums import LeaveStatus, LeaveType
+from core.models import AbstractBaseModel
 
 
-class LeaveApplication(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class LeaveApplication(AbstractBaseModel):
     type = models.CharField(
         max_length=20,
         choices=LeaveType.choices,
@@ -44,11 +43,3 @@ class LeaveApplication(models.Model):
     @property
     def is_pending_recall(self):
         return self.recall_status == LeaveStatus.PENDING
-
-
-class EmployeeLeaveBalance(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE,
-                             related_name="leave_balances")
-    leave_type = models.CharField(max_length=50)
-    total_days = models.IntegerField()

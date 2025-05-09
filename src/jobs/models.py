@@ -1,16 +1,12 @@
 from django.db import models
-import uuid
-
 from constants.enums import JobCategory
+from core.models import AbstractBaseModel
 
 
-class Job(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Job(AbstractBaseModel):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True, null=True)
     department = models.CharField(max_length=100)
-    created_at = models.DateField(auto_now_add=True)
-    updated_at = models.DateField(auto_now=True)
     responsibilities = models.JSONField(blank=True, null=True)
     job_category = models.CharField(
         max_length=20,

@@ -1,11 +1,10 @@
 from django.db import models
-import uuid
 from accounts.models import User
 from constants.enums import DocumentType
+from core.models import AbstractBaseModel
 
 
-class Document(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Document(AbstractBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              related_name='documents')
     document_type = models.CharField(max_length=50,

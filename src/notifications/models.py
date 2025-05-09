@@ -1,8 +1,9 @@
 from django.db import models
 from accounts.models import User
+from core.models import AbstractBaseModel
 
 
-class Notification(models.Model):
+class Notification(AbstractBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              related_name="notifications")
     message = models.TextField()

@@ -1,11 +1,10 @@
-import uuid
 from django.db import models
 from accounts.models import User
 from constants.enums import EducationType
+from core.models import AbstractBaseModel
 
 
-class Education(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class Education(AbstractBaseModel):
     user = models.ForeignKey(User, on_delete=models.CASCADE,
                              related_name='educations')
     name = models.CharField(max_length=100)

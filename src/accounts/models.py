@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-import uuid
-
+from core.models import AbstractBaseModel
 from jobs.models import Job
 from kins.models import Kin
 
@@ -12,8 +11,7 @@ class Role(models.TextChoices):
     EMPLOYEE = "employee", "Employee"
 
 
-class User(AbstractUser):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+class User(AbstractBaseModel, AbstractUser):
     email = models.EmailField(unique=True)
     username = models.CharField(max_length=150, null=True, blank=True)
     first_name = models.CharField(max_length=150)
