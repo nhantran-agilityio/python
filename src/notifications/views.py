@@ -30,6 +30,21 @@ class NotificationViewSet(viewsets.ViewSet):
         responses={201: NotificationSerializer, 400: "Invalid data"}
     )
     def create(self, request):
+        """
+        Create a new notification for the authenticated user.
+
+        This endpoint allows an authenticated user to create a new notification.
+        The user's ID is automatically associated with the notification.
+        The request body must contain the notification data in a format
+        that is valid according to the NotificationSerializer.
+
+        :param request: The HTTP request object containing the notification data.
+        :type request: rest_framework.request.Request
+        :return: A Response object containing the created notification data or an error message.
+        :rtype: rest_framework.response.Response
+        :raises: ValidationError if the provided data is not valid.
+        """
+
         data = request.data.copy()
         data["user"] = request.user.id
         serializer = NotificationSerializer(data=data)
