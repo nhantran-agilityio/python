@@ -1,9 +1,9 @@
-import uuid
 from django.db import models
 
+from core.models import AbstractBaseModel
 
-class Kin(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+class Kin(AbstractBaseModel):
     name = models.CharField(max_length=100)
     job = models.CharField(max_length=100)
     phone = models.CharField(max_length=20)
