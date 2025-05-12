@@ -1,70 +1,38 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
-from django.conf import settings
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from drf_yasg import openapi
-from rest_framework_simplejwt.views import (
-    TokenRefreshView,
-)
+from rest_framework_simplejwt.views import TokenRefreshView
+from config.swagger import schema_view
+
+API_ROOT = settings.API_ROOT_ENDPOINT
 
 
-schema_view = get_schema_view(
-    openapi.Info(
-        title="Human Resource Management API",
-        default_version='v1',
-        description="API documentation for User Management System",
-        terms_of_service="https://www.yoursite.com/terms/",
-        contact=openapi.Contact(email="contact@yoursite.com"),
-        license=openapi.License(name="BSD License"),
-    ),
-    public=True,
-    authentication_classes=[JWTAuthentication],
-    permission_classes=[permissions.AllowAny],
-)
+def api_path(route: str, view, *args, **kwargs):
+    return path(f"{API_ROOT}{route}", view, *args, **kwargs)
 
 
-urlpatterns = [
-    path(f"{settings.API_ROOT_ENDPOINT}admin/", admin.site.urls),
-    path(f"{settings.API_ROOT_ENDPOINT}accounts/", include('accounts.urls')),
-    path(
-        f"{settings.API_ROOT_ENDPOINT}api-auth/",
-        include("rest_framework.urls"),
-    ),
-    path(f"{settings.API_ROOT_ENDPOINT}api/token/refresh/",
-         TokenRefreshView.as_view(), name='token_refresh'),
-    path(f"{settings.API_ROOT_ENDPOINT}jobs/", include('jobs.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}kins/", include('kins.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}documents/", include('documents.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}leave-applications/",
-         include('leave_applications.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}guarantors/", include('guarantors.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}educations/", include('educations.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}families/", include('families.urls')),
-    path(f"{settings.API_ROOT_ENDPOINT}bank-accounts/", include('bank_accounts.urls')),
-
-
-    # Swagger URLs
-    path(
-        f"{settings.API_ROOT_ENDPOINT}swagger.json",
-        schema_view.without_ui(cache_timeout=0),
-        name='schema-json',
-    ),
-    path(
-        f"{settings.API_ROOT_ENDPOINT}swagger/",
-        schema_view.with_ui(
-            'swagger',
-            cache_timeout=0
-        ),
-        name='schema-swagger-ui',
-    ),
-    path(
-        f"{settings.API_ROOT_ENDPOINT}redoc/",
-        schema_view.with_ui('redoc', cache_timeout=0),
-        name='schema-redoc',
-    ),
+apps_urls = [
+    api_path("admin/", admin.site.urls),
+    api_path("accounts/", include('accounts.urls')),
+    api_path("jobs/", include('jobs.urls')),
+    api_path("kins/", include('kins.urls')),
+    api_path("documents/", include('documents.urls')),
+    api_path("leave-applications/", include('leave_applications.urls')),
+    api_path("guarantors/", include('guarantors.urls')),
+    api_path("educations/", include('educations.urls')),
+    api_path("families/", include('families.urls')),
+    api_path("bank-accounts/", include('bank_accounts.urls')),
+    api_path("api-auth/", include('rest_framework.urls')),
+    api_path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]
+
+swagger_urls = [
+    api_path("swagger.json", schema_view.without_ui(cache_timeout=0), name="schema-json"),
+    api_path("swagger/", schema_view.with_ui('swagger', cache_timeout=0), name="schema-swagger-ui"),
+    api_path("redoc/", schema_view.with_ui('redoc', cache_timeout=0), name="schema-redoc"),
+]
+
+urlpatterns = apps_urls + swagger_urls
 
 if settings.DEBUG:
     import debug_toolbar
