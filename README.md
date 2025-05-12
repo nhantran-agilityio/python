@@ -1,93 +1,212 @@
-# Human Resource
+# Django Big Practice - Human Resource Management
+
+[![Python](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/)
+[![Django](https://img.shields.io/badge/django-5.0.7-green.svg)](https://www.djangoproject.com/)
+[![Django REST Framework](https://img.shields.io/badge/djangorestframework-3.15.2-red.svg)](https://www.django-rest-framework.org/)
+[![Sentry](https://img.shields.io/badge/sentry-0.23.4-blue.svg)](https://sentry.io/)
+[![Caching in REST Framework](https://img.shields.io/badge/caching%20in%20REST%20Framework-yellow.svg)](https://www.django-rest-framework.org/api-guide/caching/)
+[![Celery](https://img.shields.io/badge/celery-green.svg)](https://docs.celeryq.dev/en/stable/index.html)
+[![Swagger](https://img.shields.io/badge/swagger-blue.svg)](https://swagger.io/)
+[![Django Debug Toolbar](https://img.shields.io/badge/django%20debug%20toolbar-black.svg)](https://django-debug-toolbar.readthedocs.io/en/latest/)
+![PostgreSQL](https://img.shields.io/badge/postgrestSQL-brightgreen.svg)
+
+## Overview
+A comprehensive human resource management system built with Rest Django and Django frames. This application helps organizations manage employees effectively by providing features such as employee profile management, leave application,...
+
+## Features
+- **User Authentication and Authorization**:
+    - Implement secure login and role-based access control for various user roles.
+    - Send email notifications to users when they create new account to can activation that account
+- **Employee Management**: Enable creation, updating, and deletion of employee profiles with ease.
+- **Leave Application Management**: Manage leave applications with features to create, edit, delete, approve, decline, recall, and process recall requests.
+- **Notification Management**: Send notifications to employees regarding leave applications as recalls
+- **Document Management**: Organize and manage employee-related documents efficiently.
+- **Report Generation**: Generate detailed reports, including leave history and employee statistics, for better insights.
+- **Background Tasks**: Leverage Celery for asynchronous task execution, including sending notifications and generating reports.
+- **RESTful APIs**: Provide robust API endpoints for seamless integration with external systems.
+- **Admin Interface**: Offer a user-friendly admin dashboard for managing resources and performing CRUD operations.
 
 
+## Timeline (March 12 to April 1, 2025)
 
-## Getting started
+- **Total Duration**: 14 days
+- **Update Required**: 8 days
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Database Model
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+-   DB diagram: ![db.png](https://i.postimg.cc/ZRhFnVqx/Screenshot-2025-04-10-at-10-28-22.png)
 
-## Add your files
+## Deploy link
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+-  [Admin interface](https://human-resource.up.railway.app/admin/)
+-  [Swagger](https://human-resource.up.railway.app/swagger/)
+
+
+## Code Structure
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.asoft-python.com/nhan.tran/human-resource.git
-git branch -M main
-git push -uf origin main
+src/
+├── accounts
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+│   └── templates
+│   │   └── activation_email.txt
+├── guarantors
+│   ├── migrations
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── jobs
+│   ├── migrations
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── urls.py
+│   └── views.py
+├── kins
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── leave_applications
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+├── notifications
+│   ├── migrations
+│   ├── tests
+│   ├── admin.py
+│   ├── apps.py
+│   ├── models.py
+│   ├── serializers.py
+│   ├── urls.py
+│   └── views.py
+│   └── signals.py
+├── constants
+├── core
+├── config
+│   └── settings
+│       ├── base.py
+│       ├── dev.py
+│       ├── production.py
+│       ├── test.py
+│   ├── __init__.py
+│   ├── celery.py
+│   ├── urls.py
+│   ├── asgi.py
+│   └── wsgi.py
+├── tests
+├── utils
+├── .gitignore
+├── .editorconfig
+├── .coveragerc
+├── README.md
+├── .env.sample
+├── manage.py
+├── .flake8
+├── .env.sample
+├── .pre-commit-config.yaml
 ```
 
-## Integrate with your tools
+## How to Run
 
-- [ ] [Set up project integrations](https://gitlab.asoft-python.com/nhan.tran/human-resource/-/settings/integrations)
+### Prerequisites
 
-## Collaborate with your team
+- Python 3.12 or higher
+- pip (Python package manager)
+- Git
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+### Clone the repository
 
-## Test and Deploy
+```bash
+git@gitlab.asoft-python.com:nhan.tran/human-resource.git
+cd human-resource
+git checkout dev
+```
 
-Use the built-in continuous integration in GitLab.
+### Run with virtualenv in local environment
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+1. Create a virtual environment:
 
-***
+```bash
+python3 -m venv env
+```
 
-# Editing this README
+2. Activate the virtual environment:
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+```bash
+source env/bin/activate
 
-## Suggestions for a good README
+3. Install dependencies:
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+```bash
+cd src
+pip install -r requirements/dev.txt
+```
 
-## Name
-Choose a self-explaining name for your project.
+4. Set up environment variables:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+```bash
+cp .env.sample .env
+```
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+5. Run migrations:
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+```bash
+uv run ./src/manage.py makemigrations
+uv run ./src/manage.py migrate
+```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+6. Create superuser:
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+```bash
+uv run ./src/manage.py createsuperuser
+```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+7. Run the server:
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+```bash
+uv run ./src/manage.py runserver 8000
+```
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+8. Access the application:
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+- [Swagger](http://0.0.0.0:8000/swagger/)
+- [Redoc](http://0.0.0.0:8000/redoc/)
+- [Admin](http://0.0.0.0:8000/admin/)
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+## Unit Testing
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+-   Run tests:
 
-## License
-For open source projects, say how it is licensed.
+```
+coverage run manage.py test
+```
+-   Generate coverage report:
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+```
+coverage report
+
+coverage html
+
+-  Coverage: [![coverage.png](https://i.postimg.cc/P519WkCf/coverage.png)](https://postimg.cc/bZNmPW04)
+
+```
