@@ -1,19 +1,19 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from django.forms import ValidationError
+from core.api_views import BaseAuthenticatedModelViewSet
 from .models import BankAccount
 from .serializers import BankAccountSerializer
 
 
-class BankAccountViewSet(viewsets.ModelViewSet):
+class BankAccountViewSet(BaseAuthenticatedModelViewSet):
     serializer_class = BankAccountSerializer
-    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        """
-        Return the queryset of BankAccount objects associated with the current user.
-        """
-
-        return BankAccount.objects.filter(user=self.request.user)
+        user = self.request.user
+        if not user.is_authenticated:
+            return BankAccount.objects.none()
+        return BankAccount.objects.filter(user=user)
 
     def perform_create(self, serializer):
+        if not self.request.user.is_authenticated:
+            raise ValidationError("User must be authenticated to create a BankAccount.")
         serializer.save(user=self.request.user)
