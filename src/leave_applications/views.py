@@ -26,11 +26,11 @@ from core.responses import ApiResponse
 
 
 class LeaveApplicationViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated]
     resource_name = "leave-applications"
     parser_classes = [MultiPartParser, FormParser]
     queryset = LeaveApplication.objects.all()
     serializer_class = LeaveApplicationSerializer
-    permission_classes = [IsAuthenticated]
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = LeaveApplicationFilter
     search_fields = ['employee__first_name', 'employee__last_name', 'type']
@@ -42,15 +42,16 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
         serializer.save(employee=self.request.user)
 
     def get_queryset(self):
-        """
-        Returns a queryset of all leave applications.
-        If the user is an employee, only show leave applications created by the current user.
-        If the user is an admin, show all leave applications.
-        """
         user = self.request.user
+
+        if not user.is_authenticated:
+            return LeaveApplication.objects.none()
+
         queryset = LeaveApplication.objects.select_related("employee")
-        if IsEmployee():
+
+        if IsEmployee().has_permission(self.request, self):
             queryset = queryset.filter(employee=user)
+
         return queryset
 
     @swagger_auto_schema(
