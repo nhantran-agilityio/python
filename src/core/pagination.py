@@ -1,5 +1,6 @@
 from rest_framework import pagination
 from rest_framework.response import Response
+from rest_framework import status
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -27,7 +28,9 @@ class CustomPagination(pagination.PageNumberPagination):
                 'count': 0,
                 'next': None,
                 'previous': None,
-                'results': []
+                'data': [],
+                "message": "Leave applications retrieved successfully",
+                "status_code": status.HTTP_200_OK
             })
         else:
             return Response({
@@ -36,6 +39,8 @@ class CustomPagination(pagination.PageNumberPagination):
                     "page": self.page.number,
                     "totalCount": self.page.paginator.count
                 },
-                "results": data
+                "data": data,
+                "message": "Leave applications retrieved successfully",
+                "status_code": status.HTTP_200_OK
             })
         return super().get_paginated_response(data)
