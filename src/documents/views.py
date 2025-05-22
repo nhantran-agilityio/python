@@ -8,6 +8,7 @@ from drf_yasg import openapi
 from django.http import HttpResponse
 from rest_framework.exceptions import NotFound
 from constants.enums import DocumentType
+from core.custom_permissions import IsAdminOrOwner
 from core.responses import ApiResponse
 from documents.models import Document
 from documents.serializers import DocumentUploadSerializer
@@ -125,7 +126,7 @@ class DownloadAllDocumentsView(APIView):
 
 
 class GetDocumentsAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminOrOwner]
 
     @swagger_auto_schema(
         operation_description="Retrieve documents. Admins get all; users get only their own.",
@@ -155,11 +156,8 @@ class GetDocumentsAPIView(APIView):
         :return: An array of documents associated with the user.
         """
 
-        documents = (
-            Document.objects.all()
-            if request.user.is_admin
-            else Document.objects.filter(user=request.user)
-        )
+        documents = Document.objects.for_user(self.request.user)
+
         serializer = DocumentUploadSerializer(documents, many=True)
         return ApiResponse(
             message="Documents retrieved successfully.",
