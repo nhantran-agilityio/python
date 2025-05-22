@@ -1,7 +1,7 @@
 from django.db import models
 from accounts.models import User
 from constants.enums import LeaveStatus, LeaveType
-from core.models import AbstractBaseModel
+from core.models import AbstractBaseModel, LeaveApplicationQuerySet
 
 
 class LeaveApplication(AbstractBaseModel):
@@ -39,6 +39,7 @@ class LeaveApplication(AbstractBaseModel):
     days_remaining = models.PositiveIntegerField(blank=True, null=True)
     recalled_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='recalls_made')
     recall_deadline = models.DateField(null=True, blank=True)
+    objects = LeaveApplicationQuerySet.as_manager()
 
     @property
     def is_pending_recall(self):
