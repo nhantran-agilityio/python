@@ -12,7 +12,6 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from constants.base import SUPPORTED_FORMATS
 from core.api_views import BaseAuthenticatedModelViewSet
-from core.pagination import CustomPagination
 from leave_applications.filter import LeaveApplicationFilter
 from leave_applications.models import (
     LeaveApplication,
@@ -35,7 +34,6 @@ class LeaveApplicationViewSet(BaseAuthenticatedModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = LeaveApplicationFilter
     search_fields = ['employee__first_name', 'employee__last_name', 'type']
-    pagination_class = CustomPagination
     pagination_message = "Leave applications retrieved successfully"
 
     def perform_create(self, serializer):
@@ -63,7 +61,7 @@ class LeaveApplicationViewSet(BaseAuthenticatedModelViewSet):
         If the user is not an admin, this queryset will contain only the leave
         applications associated with the requesting user.
         """
-        return LeaveApplication.objects.select_related("user").for_user(
+        return LeaveApplication.objects.select_related("user").visible_to(
             self.request.user
         )
 
