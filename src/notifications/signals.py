@@ -15,7 +15,7 @@ def send_leave_recall_notification(sender, instance, created, **kwargs):
         )
 
         Notification.objects.create(
-            user=instance.employee,
+            user=instance.user,
             recall_id=instance.id,
             message=(
                 f"Your {instance.type} leave has been recalled by "

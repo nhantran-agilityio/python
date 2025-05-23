@@ -1,7 +1,8 @@
-from django.urls import path
+from rest_framework.routers import DefaultRouter
 
-from kins.views import KinDetailAPIView
+from jobs.views import JobViewSet
 
-urlpatterns = [
-    path('', KinDetailAPIView.as_view(), name='kin-detail'),
-]
+router = DefaultRouter()
+router.register('', JobViewSet, basename='jobs')
+
+urlpatterns = router.urls

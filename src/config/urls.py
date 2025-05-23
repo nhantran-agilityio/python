@@ -22,6 +22,7 @@ apps_urls = [
     api_path("educations/", include('educations.urls')),
     api_path("families/", include('families.urls')),
     api_path("bank-accounts/", include('bank_accounts.urls')),
+    api_path("notifications/", include('notifications.urls')),
     api_path("api-auth/", include('rest_framework.urls')),
     api_path("api/token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
 ]

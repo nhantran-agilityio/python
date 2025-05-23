@@ -1,7 +1,7 @@
 from django.db import models
 from accounts.models import User
 from constants.enums import EducationType
-from core.models import AbstractBaseModel
+from core.models import AbstractBaseModel, BaseModelManager, BaseModelQuerySet
 
 
 class Education(AbstractBaseModel):
@@ -17,3 +17,4 @@ class Education(AbstractBaseModel):
     type = models.CharField(max_length=20,
                             choices=EducationType.choices,
                             default=EducationType.ACADEMIC)
+    objects = BaseModelManager.from_queryset(BaseModelQuerySet)()

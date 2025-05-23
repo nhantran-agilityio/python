@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from constants.enums import RoleChoices
 from core.models import AbstractBaseModel
 from jobs.models import Job
 from kins.models import Kin
@@ -22,8 +23,8 @@ class User(AbstractBaseModel, AbstractUser):
     residential_address = models.TextField(max_length=100, null=True, blank=True)
     role = models.CharField(
         max_length=20,
-        choices=Role.choices,
-        default='employee'
+        choices=RoleChoices.choices,
+        default=RoleChoices.EMPLOYEE.value
     )
     is_receive_newsletters = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)

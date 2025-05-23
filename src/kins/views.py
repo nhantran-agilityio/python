@@ -1,60 +1,15 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
-from rest_framework.exceptions import ValidationError
-from rest_framework import permissions
-from drf_yasg import openapi
-from rest_framework import status
-from drf_yasg.utils import swagger_auto_schema
-
+from core.api_views import BaseAuthenticatedModelViewSet
+from kins.models import Kin
 from kins.serializers import KinSerializer
+from core.custom_permissions import IsAdminOrOwner
 
 
-class KinDetailAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+class KinViewSet(BaseAuthenticatedModelViewSet):
+    serializer_class = KinSerializer
+    permission_classes = [IsAdminOrOwner]
 
-    def get(self, request):
-        kin = getattr(request.user, 'kin', None)
-        if not kin:
-            raise NotFound(detail="Kin not found.")
+    def get_queryset(self):
+        return Kin.objects.visible_to(user=self.request.user)
 
-        serializer = KinSerializer(kin)
-        return Response(serializer.data)
-
-    @swagger_auto_schema(
-        operation_description="Update kin details partially.",
-        request_body=KinSerializer,
-        responses={
-            200: KinSerializer,
-            400: "Invalid data provided."
-        }
-    )
-    def patch(self, request):
-        kin = getattr(request.user, 'kin', None)
-        if not kin:
-            raise NotFound(detail="Kin not found.")
-
-        serializer = KinSerializer(kin, data=request.data, partial=True)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data)
-
-    @swagger_auto_schema(
-        operation_description="Create a new kin",
-        request_body=KinSerializer,
-        manual_parameters=[
-            openapi.Parameter('Authorization', openapi.IN_HEADER,
-                              description="Token: Bearer <access_token>",
-                              type=openapi.TYPE_STRING),
-        ]
-    )
-    def post(self, request):
-        if request.user.kin:
-            raise ValidationError({"detail": "kin already exists."})
-
-        serializer = KinSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        kin = serializer.save()
-        request.user.kin = kin
-        request.user.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

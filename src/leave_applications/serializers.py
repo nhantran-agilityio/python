@@ -28,7 +28,7 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
             'resumption_date',
             'employeeName',
             'type',
-            'employee',
+            'user',
             'relief_officer',
             'document_path',
             'reason',
@@ -56,6 +56,6 @@ class LeaveApplicationSerializer(serializers.ModelSerializer):
         return None
 
     def get_employeeName(self, obj):
-        if obj.employee:
-            return f"{obj.employee.first_name} {obj.employee.last_name}"
+        if obj.user:
+            return f"{obj.user.first_name} {obj.user.last_name}"
         return None

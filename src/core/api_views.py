@@ -1,3 +1,4 @@
+from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet, ViewSet
 from rest_framework.permissions import IsAuthenticated
@@ -56,6 +57,34 @@ class BaseModelViewSet(ModelViewSet, CommonViewSet):
     """
     Base view set for Django model
     """
+    def finalize_response(self, request, response, *args, **kwargs):
+        """
+        Wrap non-standard responses in a consistent API format
+        """
+        response = super().finalize_response(request, response, *args, **kwargs)
+
+        if not isinstance(response, Response):
+            return ApiResponse(
+                data=None,
+                message="Internal server error: Invalid response type",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        # If already wrapped in standardized format, return as is
+        if isinstance(response.data, dict) and all(k in response.data for k in ("data", "message", "status_code")):
+            return response
+
+        wrapped_response = ApiResponse(
+            data=response.data,
+            message="Request completed",
+            status_code=response.status_code
+        )
+
+        wrapped_response.accepted_renderer = response.accepted_renderer
+        wrapped_response.accepted_media_type = response.accepted_media_type
+        wrapped_response.renderer_context = response.renderer_context
+
+        return wrapped_response
 
 
 class BaseAuthenticatedViewSet(BaseViewSet, AuthenticatedViewSet):

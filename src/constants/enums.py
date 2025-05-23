@@ -1,4 +1,34 @@
 from django.db import models
+from enum import Enum
+
+
+class BaseChoiceEnum(Enum):
+    """The base class for choices enumeration.
+
+    This enumeration is often uses with Django fields.
+    """
+
+    @classmethod
+    def values(cls) -> list[int]:
+        """Get values of enum.
+
+        Returns
+        -------
+            List[int]: List of values.
+
+        """
+        return [data.value for data in cls]
+
+    @classmethod
+    def choices(cls) -> list[tuple]:
+        """Get choices of enum.
+
+        Returns
+        -------
+            List[Tuple]: List of choice.
+
+        """
+        return [(data.value, data.name) for data in cls]
 
 
 class JobCategory(models.TextChoices):
@@ -33,3 +63,11 @@ class DocumentType(models.TextChoices):
     @classmethod
     def has_value(cls, value):
         return value in cls.values
+
+
+class RoleChoices(BaseChoiceEnum):
+    """Enumeration for role choices of users."""
+
+    ADMIN = "admin"
+    EMPLOYEE = "employee"
+    CANDIDATE = "candidate"

@@ -1,5 +1,6 @@
 from rest_framework import pagination
 from rest_framework.response import Response
+from rest_framework import status
 
 
 class CustomPagination(pagination.PageNumberPagination):
@@ -9,33 +10,36 @@ class CustomPagination(pagination.PageNumberPagination):
 
     def paginate_queryset(self, queryset, request, view=None):
         """
-        Override paginate_queryset to handle invalid page numbers.
+        Store the view so we can access it in get_paginated_response
         """
+        self.view = view  # store view to use later
         try:
             return super().paginate_queryset(queryset, request, view)
         except pagination.NotFound:
-            # Return an empty list if the page does not exist
             self.page = None
             return []
 
     def get_paginated_response(self, data):
-        """
-        Return a paginated response with an empty array if the page is invalid.
-        """
+        # Get dynamic message from the view, fallback to default
+        message = getattr(self.view, 'pagination_message', "Data retrieved successfully")
+
         if self.page is None:
             return Response({
                 'count': 0,
                 'next': None,
                 'previous': None,
-                'results': []
+                'data': [],
+                "message": message,
+                "status_code": status.HTTP_200_OK
             })
-        else:
-            return Response({
-                "metaData": {
-                    "limit": self.page.paginator.per_page,
-                    "page": self.page.number,
-                    "totalCount": self.page.paginator.count
-                },
-                "results": data
-            })
-        return super().get_paginated_response(data)
+
+        return Response({
+            "metaData": {
+                "limit": self.page.paginator.per_page,
+                "page": self.page.number,
+                "totalCount": self.page.paginator.count
+            },
+            "data": data,
+            "message": message,
+            "status_code": status.HTTP_200_OK
+        })

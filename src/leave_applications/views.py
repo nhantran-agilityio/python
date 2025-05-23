@@ -1,7 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
-from rest_framework import viewsets
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
 from drf_yasg import openapi
@@ -12,6 +11,7 @@ from rest_framework import status
 from rest_framework.parsers import MultiPartParser, FormParser
 from drf_yasg.utils import swagger_auto_schema
 from constants.base import SUPPORTED_FORMATS
+from core.api_views import BaseAuthenticatedModelViewSet
 from leave_applications.filter import LeaveApplicationFilter
 from leave_applications.models import (
     LeaveApplication,
@@ -21,12 +21,12 @@ from leave_applications.serializers import (
     LeaveRecallSerializer
     )
 from leave_applications.services import LeaveApplicationExporter
-from core.custom_permissions import IsAdmin, IsEmployee
+from core.custom_permissions import DenyAll, IsAdmin, IsAdminOrOwner, IsEmployee
 from core.responses import ApiResponse
 
 
-class LeaveApplicationViewSet(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated]
+class LeaveApplicationViewSet(BaseAuthenticatedModelViewSet):
+    permission_classes = [IsAdminOrOwner]
     resource_name = "leave-applications"
     parser_classes = [MultiPartParser, FormParser]
     queryset = LeaveApplication.objects.all()
@@ -34,6 +34,7 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
     filter_backends = [DjangoFilterBackend, SearchFilter]
     filterset_class = LeaveApplicationFilter
     search_fields = ['employee__first_name', 'employee__last_name', 'type']
+    pagination_message = "Leave applications retrieved successfully"
 
     def perform_create(self, serializer):
         """
@@ -41,25 +42,36 @@ class LeaveApplicationViewSet(viewsets.ModelViewSet):
         """
         serializer.save(employee=self.request.user)
 
+    def get_permissions(self):
+        permissions_map = {
+            'list': [IsAdminOrOwner()],
+            'retrieve': [IsEmployee()],
+            'create': [IsEmployee()],
+            'update': [IsAdminOrOwner()],
+            'partial_update': [IsAdminOrOwner()],
+            'destroy': [IsAdminOrOwner()],
+        }
+        return permissions_map.get(self.action, [DenyAll()])
+
     def get_queryset(self):
-        user = self.request.user
+        """
+        Returns a queryset of leave applications for the requesting user.
 
-        if not user.is_authenticated:
-            return LeaveApplication.objects.none()
-
-        queryset = LeaveApplication.objects.select_related("employee")
-
-        if IsEmployee().has_permission(self.request, self):
-            queryset = queryset.filter(employee=user)
-
-        return queryset
+        If the user is an admin, this queryset will contain all leave applications.
+        If the user is not an admin, this queryset will contain only the leave
+        applications associated with the requesting user.
+        """
+        return LeaveApplication.objects.select_related("user").visible_to(
+            self.request.user
+        )
 
     @swagger_auto_schema(
         manual_parameters=[
-            openapi.Parameter('type', openapi.IN_QUERY, description="Filter by leave type", type=openapi.TYPE_STRING),
-            openapi.Parameter('status', openapi.IN_QUERY, description="Filter by status", type=openapi.TYPE_STRING),
-            openapi.Parameter('employeeName', openapi.IN_QUERY, description="Filter by employee full name", type=openapi.TYPE_STRING),
-            openapi.Parameter('isRecall', openapi.IN_QUERY, description="Filter active recalls", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter("employeeName", openapi.IN_QUERY, description="Filter by employee name", type=openapi.TYPE_STRING),
+            openapi.Parameter("type", openapi.IN_QUERY, description="Filter by leave type (comma-separated)", type=openapi.TYPE_ARRAY, items=openapi.Items(type=openapi.TYPE_STRING)),
+            openapi.Parameter("isRecall", openapi.IN_QUERY, description="Filter active recalls", type=openapi.TYPE_BOOLEAN),
+            openapi.Parameter("limit", openapi.IN_QUERY, description="Page size", type=openapi.TYPE_INTEGER),
+            openapi.Parameter("page", openapi.IN_QUERY, description="Page number", type=openapi.TYPE_INTEGER),
         ]
     )
     def list(self, request, *args, **kwargs):
@@ -170,11 +182,9 @@ class LeaveApplicationDownloadView(APIView):
                 )
             )
 
-        user = request.user
-        queryset = LeaveApplication.objects.select_related('employee')
-
-        if IsEmployee().has_permission(request, self):
-            queryset = queryset.filter(employee=user)
+        queryset = LeaveApplication.objects.select_related(
+            "user"
+        ).visible_to(self.request.user)
 
         if not queryset.exists():
             raise NotFound(_("No leave applications found."))

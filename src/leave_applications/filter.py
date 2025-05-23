@@ -7,7 +7,7 @@ from leave_applications.models import LeaveApplication
 
 
 class LeaveApplicationFilter(django_filters.FilterSet):
-    full_name = django_filters.CharFilter(method='filter_by_full_name', label='Employee Full Name')
+    full_name = django_filters.CharFilter(method='filter_by_full_name', label='User Full Name')
     isRecall = django_filters.BooleanFilter(field_name='is_recalled')
 
     class Meta:
@@ -15,19 +15,19 @@ class LeaveApplicationFilter(django_filters.FilterSet):
         fields = ['type', 'status', 'isRecall']
 
     def filter_leave_applications(
-        queryset, employee_name=None, leave_types=None, is_recall=False
+        queryset, user_name=None, leave_types=None, is_recall=False
     ):
         today = date.today()
 
-        if employee_name:
-            search_name = employee_name.replace(" ", "").lower()
+        if user_name:
+            search_name = user_name.replace(" ", "").lower()
             queryset = queryset.annotate(
                 full_name_normalized=Lower(
                     Replace(
                         Concat(
-                            'employee__first_name',
+                            'user__first_name',
                             Value(''),
-                            'employee__last_name'
+                            'user__last_name'
                         ),
                         Value(" "),
                         Value("")

@@ -4,7 +4,7 @@ from .models import LeaveApplication
 
 class LeaveApplicationAdmin(admin.ModelAdmin):
     list_display = (
-        "employee",
+        "user",
         "type",
         "start_date",
         "end_date",

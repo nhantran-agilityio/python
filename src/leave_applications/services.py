@@ -8,7 +8,7 @@ from leave_applications.export import (
 class LeaveApplicationExporter:
     def __init__(self, queryset):
         self.data = [{
-            'employee': leave.employee.first_name,
+            'user': leave.user.first_name,
             'type': leave.type,
             'start_date': leave.start_date,
             'end_date': leave.end_date,
