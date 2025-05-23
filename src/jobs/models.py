@@ -1,6 +1,6 @@
 from django.db import models
 from constants.enums import JobCategory
-from core.models import AbstractBaseModel
+from core.models import AbstractBaseModel, BaseModelManager, BaseModelQuerySet
 
 
 class Job(AbstractBaseModel):
@@ -20,6 +20,7 @@ class Job(AbstractBaseModel):
         blank=True,
         related_name="managed_jobs",
     )
+    objects = BaseModelManager.from_queryset(BaseModelQuerySet)()
 
     def get_line_management(self):
         if self.line_management:

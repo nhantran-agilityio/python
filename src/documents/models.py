@@ -1,7 +1,7 @@
 from django.db import models
 from accounts.models import User
 from constants.enums import DocumentType
-from core.models import AbstractBaseModel, BaseModelQuerySet
+from core.models import AbstractBaseModel, BaseModelManager, BaseModelQuerySet
 
 
 class Document(AbstractBaseModel):
@@ -12,7 +12,7 @@ class Document(AbstractBaseModel):
                                      default=DocumentType.OFFER_LETTER)
     document_file = models.FileField(upload_to='documents/')
     uploaded_at = models.DateTimeField(auto_now_add=True)
-    objects = BaseModelQuerySet.as_manager()
+    objects = BaseModelManager.from_queryset(BaseModelQuerySet)()
 
     @property
     def file_name(self):

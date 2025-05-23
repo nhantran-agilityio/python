@@ -18,17 +18,22 @@ class AbstractBaseModel(TimeStampedModel, models.Model):
         abstract = True
 
 
+class BaseModelManager(models.Manager):
+    def visible_to(self, user):
+        return self.get_queryset().visible_to(user)
+
+
 class BaseModelQuerySet(models.QuerySet):
     user_relation_field = 'user'
 
-    def for_user(self, user):
+    def visible_to(self, user):
+        if not user.is_authenticated:
+            # Handle unauthenticated users (e.g., return an empty queryset)
+            return self.none()
+
         if user.is_admin:
             # If the user is an admin, return all objects
             # without filtering by user
             return self
         filter_kwargs = {self.user_relation_field: user}
         return self.filter(**filter_kwargs)
-
-
-class LeaveApplicationQuerySet(BaseModelQuerySet):
-    user_relation_field = 'employee'

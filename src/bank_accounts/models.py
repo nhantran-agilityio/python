@@ -1,7 +1,7 @@
 from django.db import models
 
 from accounts.models import User
-from core.models import AbstractBaseModel
+from core.models import AbstractBaseModel, BaseModelManager, BaseModelQuerySet
 
 
 class BankAccount(AbstractBaseModel):
@@ -13,3 +13,4 @@ class BankAccount(AbstractBaseModel):
     bank_name = models.CharField(max_length=100)
     account_no = models.CharField(max_length=30)
     account_name = models.CharField(max_length=100)
+    objects = BaseModelManager.from_queryset(BaseModelQuerySet)()

@@ -108,9 +108,8 @@ class DownloadAllDocumentsView(APIView):
         :param request: The request object
         :return: A zip file containing the documents associated with the user.
         """
-        documents = Document.objects.filter(
-            user=request.user
-        ).only("document_file")
+
+        documents = Document.objects.visible_to(self.request.user).only("document_file")
 
         if not documents.exists():
             raise NotFound("No documents found to download.")
@@ -156,7 +155,7 @@ class GetDocumentsAPIView(APIView):
         :return: An array of documents associated with the user.
         """
 
-        documents = Document.objects.for_user(self.request.user)
+        documents = Document.objects.visible_to(self.request.user)
 
         serializer = DocumentUploadSerializer(documents, many=True)
         return ApiResponse(

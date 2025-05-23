@@ -1,7 +1,7 @@
 from django.db import models
 
 from accounts.models import User
-from core.models import AbstractBaseModel
+from core.models import AbstractBaseModel, BaseModelManager, BaseModelQuerySet
 
 
 class Family(AbstractBaseModel):
@@ -10,3 +10,4 @@ class Family(AbstractBaseModel):
     relationship = models.CharField(max_length=50)
     phone = models.CharField(max_length=20)
     address = models.TextField()
+    objects = BaseModelManager.from_queryset(BaseModelQuerySet)()

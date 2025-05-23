@@ -63,7 +63,7 @@ class LeaveApplicationViewSet(BaseAuthenticatedModelViewSet):
         If the user is not an admin, this queryset will contain only the leave
         applications associated with the requesting user.
         """
-        return LeaveApplication.objects.select_related("employee").for_user(
+        return LeaveApplication.objects.select_related("user").for_user(
             self.request.user
         )
 
@@ -185,8 +185,8 @@ class LeaveApplicationDownloadView(APIView):
             )
 
         queryset = LeaveApplication.objects.select_related(
-            "employee"
-        ).for_user(self.request.user)
+            "user"
+        ).visible_to(self.request.user)
 
         if not queryset.exists():
             raise NotFound(_("No leave applications found."))
