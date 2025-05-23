@@ -40,7 +40,7 @@ class CustomExceptionHandler:
 
         return Response(
             {
-                "success": False,
+                "status": False,
                 "message": message,
                 "errors": errors,
             },
@@ -58,7 +58,7 @@ class CustomExceptionHandler:
 
         return Response(
             {
-                "success": False,
+                "status": False,
                 "message": "Internal server error. Please try again later.",
                 "errors": None,
             },
