@@ -27,7 +27,7 @@ class BaseModelQuerySet(models.QuerySet):
     user_relation_field = 'user'
 
     def visible_to(self, user):
-        if not user.is_authenticated:
+        if user.is_authenticated is False:
             # Handle unauthenticated users (e.g., return an empty queryset)
             return self.none()
 

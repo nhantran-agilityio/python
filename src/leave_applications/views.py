@@ -43,15 +43,15 @@ class LeaveApplicationViewSet(BaseAuthenticatedModelViewSet):
         serializer.save(employee=self.request.user)
 
     def get_permissions(self):
-        if self.action == 'list':
-            return [IsAdminOrOwner()]
-        elif self.action == 'retrieve':
-            return [IsEmployee()]
-        elif self.action in ['update', 'partial_update', 'destroy']:
-            return [IsAdminOrOwner()]
-        elif self.action == 'create':
-            return [IsEmployee()]
-        return [DenyAll()]
+        permissions_map = {
+            'list': [IsAdminOrOwner()],
+            'retrieve': [IsEmployee()],
+            'create': [IsEmployee()],
+            'update': [IsAdminOrOwner()],
+            'partial_update': [IsAdminOrOwner()],
+            'destroy': [IsAdminOrOwner()],
+        }
+        return permissions_map.get(self.action, [DenyAll()])
 
     def get_queryset(self):
         """
