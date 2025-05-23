@@ -36,6 +36,7 @@ class LeaveApplicationViewSet(BaseAuthenticatedModelViewSet):
     filterset_class = LeaveApplicationFilter
     search_fields = ['employee__first_name', 'employee__last_name', 'type']
     pagination_class = CustomPagination
+    pagination_message = "Leave applications retrieved successfully"
 
     def perform_create(self, serializer):
         """
