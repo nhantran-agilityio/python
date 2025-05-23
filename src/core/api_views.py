@@ -41,17 +41,6 @@ class CommonViewSet:
         return ApiResponse(data=None, message=message,
                            status_code=status.HTTP_501_NOT_IMPLEMENTED)
 
-    def unauthorized_request(self, field=None, message=None):
-        """
-        Return unauthorized request with message content
-        """
-        # Build up the error content.
-        return ApiResponse(
-            data=None,
-            message=message,
-            status=status.HTTP_401_UNAUTHORIZED
-        )
-
 
 class AuthenticatedViewSet:
     permission_classes = [IsAuthenticated]

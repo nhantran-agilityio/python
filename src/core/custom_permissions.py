@@ -1,5 +1,12 @@
 from rest_framework.permissions import BasePermission
 
+from constants.enums import RoleChoices
+
+
+class DenyAll(BasePermission):
+    def has_permission(self, request, view):
+        return False
+
 
 class IsEmployee(BasePermission):
     """
@@ -8,7 +15,10 @@ class IsEmployee(BasePermission):
 
     def has_permission(self, request, view):
         # Allow access if the user is authenticated and has the required role
-        return request.user.role in ['candidate', 'employee']
+        return request.user.role in [
+            RoleChoices.CANDIDATE,
+            RoleChoices.EMPLOYEE,
+        ]
 
 
 class IsAdmin(BasePermission):
@@ -30,4 +40,4 @@ class IsAdminOrOwner(BasePermission):
         return request.user.is_authenticated
 
     def has_object_permission(self, request, view, obj):
-        return request.user.role == 'admin' or obj.user == request.user
+        return request.user.is_admin or obj.user == request.user

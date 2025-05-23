@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework.exceptions import ValidationError
 from django.shortcuts import get_object_or_404
@@ -21,7 +21,7 @@ from leave_applications.serializers import (
     LeaveRecallSerializer
     )
 from leave_applications.services import LeaveApplicationExporter
-from core.custom_permissions import IsAdmin, IsAdminOrOwner, IsEmployee
+from core.custom_permissions import DenyAll, IsAdmin, IsAdminOrOwner, IsEmployee
 from core.responses import ApiResponse
 
 
@@ -44,14 +44,14 @@ class LeaveApplicationViewSet(BaseAuthenticatedModelViewSet):
 
     def get_permissions(self):
         if self.action == 'list':
-            return [IsAuthenticated(), IsAdminOrOwner()]
+            return [IsAdminOrOwner()]
         elif self.action == 'retrieve':
-            return [IsAuthenticated(), IsEmployee()]
+            return [IsEmployee()]
         elif self.action in ['update', 'partial_update', 'destroy']:
-            return [IsAuthenticated(), IsAdminOrOwner()]
+            return [IsAdminOrOwner()]
         elif self.action == 'create':
-            return [IsAuthenticated(), IsEmployee()]
-        return [AllowAny()]
+            return [IsEmployee()]
+        return [DenyAll()]
 
     def get_queryset(self):
         """
