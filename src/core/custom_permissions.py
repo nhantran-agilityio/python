@@ -16,8 +16,8 @@ class IsEmployee(BasePermission):
     def has_permission(self, request, view):
         # Allow access if the user is authenticated and has the required role
         return request.user.role in [
-            RoleChoices.CANDIDATE,
-            RoleChoices.EMPLOYEE,
+            RoleChoices.CANDIDATE.value,
+            RoleChoices.EMPLOYEE.value,
         ]
 
 
